@@ -14,7 +14,7 @@ const LoginPage = () => {
 
   return (
 
-    <Container className='flex flex-col items-center justify-center min-h-screen p-4'>
+    <Container className='flex flex-col items-center justify-center h-dvh lg:min-h-screen p-4'>
   
       <Container className='w-full max-w-md mx-auto bg-white rounded-lg shadow-lg border border-green-400 p-6'>
 
