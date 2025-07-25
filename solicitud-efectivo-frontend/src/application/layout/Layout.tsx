@@ -50,7 +50,7 @@ const Layout = () => {
       transition-all 
       duration-500 
       ease-in-out 
-      ${!isMobile && isOpen ? 'ml-64' : 'ml-0'}
+      ${!isMobile && isOpen ? 'ml-72' : 'ml-0'}
     `}>
       
       <header className="w-full"> 

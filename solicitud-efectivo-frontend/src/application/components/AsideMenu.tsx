@@ -1,5 +1,6 @@
 import Container from "../ui/Container"
 import { useEffect, useState } from "react"
+import Nav from "./Nav"
 
 type AsideMenuProps = {
     isOpen: boolean
@@ -39,7 +40,7 @@ const AsideMenu = ({ isOpen, handleTouchStart }: AsideMenuProps) => {
         top-0
         left-0
         h-screen
-        w-64
+        w-72
         bg-white
         border-r
         border-gray-200
@@ -51,10 +52,10 @@ const AsideMenu = ({ isOpen, handleTouchStart }: AsideMenuProps) => {
         z-50
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <Container className="p-4">
-          <h1 className="text-black font-semibold">
-            AsideMenu
-          </h1>
+        <Container >
+
+          <Nav/>
+        
         </Container>
       </Container>
     </>
