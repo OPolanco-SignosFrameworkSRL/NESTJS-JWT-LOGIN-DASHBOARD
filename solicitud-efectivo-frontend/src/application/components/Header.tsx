@@ -19,6 +19,10 @@ const Header = ({ handleOpen }: HeaderProps) => {
           <RxHamburgerMenu size={24} className="text-gray-700"/>
         </button>
 
+        <span className="text-sm sm:text-base lg:text-xl text-emerald-500 font-bold">
+          Sistema de Flujo de Efectivo
+        </span>
+
         <Container className="flex items-center gap-4">
 
           <span className="text-white bg-blue-500 rounded-full w-10 h-10 flex items-center justify-center font-medium">
