@@ -49,7 +49,7 @@ const AsideMenu = ({ isOpen, handleTouchStart }: AsideMenuProps) => {
         transition-transform
         duration-500
         ease-in-out
-        z-50
+        z-999
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <Container >

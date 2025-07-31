@@ -5,6 +5,8 @@ import Footer from "@/application/components/Footer"
 import AsideMenu from "../components/AsideMenu"
 import Container from "../ui/Container"
 import { useState, useEffect } from "react"
+import { useAppStore } from "../store/useAppStore"
+import ModalProfile from "../components/Home/ModalProfile"
 
 const Layout = () => {
 
@@ -35,38 +37,45 @@ const Layout = () => {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  const show = useAppStore(state => state.show)
+
   return (
 
     <>
 
-    {/* AsideMenu Start */}
+      {/* AsideMenu Start */}
 
-      <AsideMenu isOpen={isOpen} handleTouchStart={handleTouchStart} />
-      
-    {/* AsideMenu End */}
+        <AsideMenu isOpen={isOpen} handleTouchStart={handleTouchStart} />
+        
+      {/* AsideMenu End */}
 
-    {/* Content Start */}
-    <Container className={`
-      transition-all 
-      duration-500 
-      ease-in-out 
-      ${!isMobile && isOpen ? 'ml-72' : 'ml-0'}
-    `}>
-      
-      <header className="w-full sticky top-0 z-50 lg:relative"> 
-          <Header handleOpen={handleOpen}/>
-      </header>
+      {/* Content Start */}
+      <Container className={`
+        transition-all 
+        duration-500 
+        ease-in-out 
+        ${!isMobile && isOpen ? 'ml-72' : 'ml-0'}
+      `}>
+        
+        <header className="w-full sticky top-0 z-50 lg:relative"> 
+            <Header handleOpen={handleOpen}/>
+        </header>
+        
+        {show && <ModalProfile/>}
 
-      <main>
-          <Outlet/>
-      </main>
+          <main className="m-5 sm:m-10">
 
-      <footer>    
-          <Footer/>
-      </footer>
+            <Outlet/>
 
-    </Container>
-    {/* Content End */}
+          </main>
+ 
+        <footer>    
+            <Footer/>
+        </footer>
+
+      </Container>
+      {/* Content End */}
+
       
     </>
 

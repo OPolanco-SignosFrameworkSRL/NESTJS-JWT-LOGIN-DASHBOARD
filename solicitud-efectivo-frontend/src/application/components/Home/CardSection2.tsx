@@ -6,12 +6,6 @@ import { BsFillQuestionSquareFill } from "react-icons/bs";
 import { FaMoneyBill } from "react-icons/fa";
 import { FaCircleXmark } from "react-icons/fa6";
 
-
-
-
-
-
-
 const CardSection2 = () => {
 
   const cardItems = [
@@ -37,56 +31,50 @@ const CardSection2 = () => {
 
     <>
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-6 mt-10 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 xl:grid-cols-6 mt-10 gap-5">
 
-        {cardItems.map((item, index) => (
+            {cardItems.map((item, index) => (
 
-            <div className={`flex flex-col ${item.color} text-sm sm:text-base w-full shadow-xl p-5 rounded-lg`} key={index}>
+                <div className={`flex flex-col ${item.color} text-sm sm:text-base w-full shadow-xl p-5 rounded-lg`} key={index}>
 
-                <span className={`${item.textColorHeader} flex items-center`}>
+                    <span className={`${item.textColorHeader} flex items-center`}>
 
-                    <div className="flex w-full">
-                        {item.label}
-                    </div>
-                    
-
-                    {iconsItems.map((iconsItem, indexItems) => (
-                     
-                       <div>
-                            {indexItems === index && (
-                                <div className={`p-2 rounded-lg text-white shadow-md ${iconsItem.colors}`}>
-                                    {iconsItem.item}
-                                </div>
-                            )}
-                       </div>
+                        <div className="flex w-full">
+                            {item.label}
+                        </div>
                         
-                    ))}
 
-                </span>
+                        {iconsItems.map((iconsItem, indexItems) => (
+                        
+                        <div>
+                                {indexItems === index && (
+                                    <div className={`p-2 rounded-lg text-white shadow-md ${iconsItem.colors}`}>
+                                        {iconsItem.item}
+                                    </div>
+                                )}
+                        </div>
+                            
+                        ))}
 
-                <span className={`mt-5 text-3xl ${item.textColorHeader}`}>
-                    {item.count}
-                </span>
+                    </span>
 
-                <span className="mt-2 text-black text-xl">
-                    {item.money}
-                </span>
+                    <span className={`mt-5 text-3xl ${item.textColorHeader}`}>
+                        {item.count}
+                    </span>
 
-                <span className="flex flex-row items-center text-sm text-muted-foreground opacity-80 gap-1">
+                    <span className="mt-2 text-black text-xl">
+                        {item.money}
+                    </span>
 
-                    {item.footer}
-                </span>
+                    <span className="flex flex-row items-center text-sm text-muted-foreground opacity-80 gap-1">
 
-            </div>
-        ))}
-    </div>
+                        {item.footer}
+                    </span>
+
+                </div>
+            ))}
+        </div>
     
-
-
-
-
-
-
     </>
 
 

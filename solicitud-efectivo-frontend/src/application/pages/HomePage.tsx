@@ -8,7 +8,7 @@ const Home = () => {
 
   return (
 
-    <div className="m-5 sm:m-10">
+    <div>
 
       <div className="flex justify-between">
 
