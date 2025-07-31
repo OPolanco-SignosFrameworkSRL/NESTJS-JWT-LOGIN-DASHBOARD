@@ -1,11 +1,14 @@
 export declare class AppController {
-    getHello(): string;
-    test(): {
-        message: string;
-    };
-    loginTest(body: any): {
-        message: string;
-        received: any;
+    getInfo(): {
+        name: string;
+        version: string;
+        description: string;
+        status: string;
         timestamp: string;
+    };
+    getHealth(): {
+        status: string;
+        timestamp: string;
+        uptime: number;
     };
 }

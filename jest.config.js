@@ -1,11 +1,37 @@
-const { createDefaultPreset } = require("ts-jest");
-
-const tsJestTransformCfg = createDefaultPreset().transform;
-
 /** @type {import("jest").Config} **/
 module.exports = {
-  testEnvironment: "node",
+  moduleFileExtensions: ['js', 'json', 'ts'],
+  rootDir: 'src',
+  testRegex: '.*\\.spec\\.ts$',
   transform: {
-    ...tsJestTransformCfg,
+    '^.+\\.(t|j)s$': 'ts-jest',
   },
+  collectCoverageFrom: [
+    '**/*.(t|j)s',
+    '!**/*.module.ts',
+    '!**/*.entity.ts',
+    '!**/*.dto.ts',
+    '!**/*.interface.ts',
+    '!**/*.enum.ts',
+    '!**/*.constant.ts',
+    '!**/*.decorator.ts',
+    '!**/*.guard.ts',
+    '!**/*.strategy.ts',
+    '!**/*.filter.ts',
+    '!**/*.interceptor.ts',
+    '!**/*.pipe.ts',
+    '!**/main.ts',
+    '!**/index.ts',
+  ],
+  coverageDirectory: '../coverage',
+  testEnvironment: 'node',
+  moduleNameMapping: {
+    '^@/(.*)$': '<rootDir>/$1',
+    '^@/common/(.*)$': '<rootDir>/common/$1',
+    '^@/config/(.*)$': '<rootDir>/config/$1',
+    '^@/entities/(.*)$': '<rootDir>/entities/$1',
+    '^@/auth/(.*)$': '<rootDir>/auth/$1',
+    '^@/users/(.*)$': '<rootDir>/users/$1',
+  },
+  setupFilesAfterEnv: ['<rootDir>/../test/setup.ts'],
 };

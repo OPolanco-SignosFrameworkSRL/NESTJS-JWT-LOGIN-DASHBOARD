@@ -1,8 +1,10 @@
-import { UserRole } from '../entities/user.entity';
+import { UserRole } from '../../common/interfaces/user.interface';
 export declare class RegisterDto {
-    email: string;
+    cedula: string;
+    nombre: string;
+    apellido: string;
     password: string;
-    firstName?: string;
-    lastName?: string;
+    clave: string;
     role?: UserRole;
+    user_email?: string;
 }

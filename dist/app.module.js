@@ -8,16 +8,34 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
+const typeorm_1 = require("@nestjs/typeorm");
 const auth_module_1 = require("./auth/auth.module");
-const vappusuarios_module_1 = require("./vappusuarios/vappusuarios.module");
+const users_module_1 = require("./users/users.module");
 const app_controller_1 = require("./app.controller");
+const database_config_1 = require("./config/database.config");
+const app_config_1 = require("./config/app.config");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [auth_module_1.AuthModule, vappusuarios_module_1.VappusuariosModule],
+        imports: [
+            config_1.ConfigModule.forRoot({
+                isGlobal: true,
+                load: [app_config_1.appConfig],
+                envFilePath: ['.env.local', '.env'],
+            }),
+            typeorm_1.TypeOrmModule.forRootAsync({
+                imports: [config_1.ConfigModule],
+                useFactory: (configService) => (0, database_config_1.getDatabaseConfig)(configService),
+                inject: [config_1.ConfigService],
+            }),
+            auth_module_1.AuthModule,
+            users_module_1.UsersModule,
+        ],
         controllers: [app_controller_1.AppController],
         providers: [],
     })
 ], AppModule);
+//# sourceMappingURL=app.module.js.map

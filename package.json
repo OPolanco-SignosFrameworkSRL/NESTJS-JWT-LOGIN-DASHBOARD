@@ -1,14 +1,24 @@
 {
   "name": "nestjs-jwt-login-dashboard",
   "version": "1.0.0",
-  "description": "NestJS project with JWT authentication, vappusuarios GET endpoint, login screen and dashboard",
+  "description": "API para gestión de solicitudes de efectivo con autenticación JWT y TypeORM",
   "scripts": {
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:fast": "NODE_ENV=development nest start --preserveWatchOutput",
-    "build": "nest build && cp -r src/frontend dist/",
-    "postbuild": "cp -r src/frontend dist/",
-    "test": "jest"
+    "build": "nest build",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "jest --config ./test/jest-e2e.json",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "postinstall": "npm run build",
+    "prepare": "husky install"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -36,7 +46,17 @@
     "@nestjs/testing": "^10.4.20",
     "@types/bcrypt": "^5.0.0",
     "@types/jest": "^30.0.0",
+    "@types/passport-jwt": "^3.0.8",
+    "@types/passport-local": "^1.0.35",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.42.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.0",
+    "husky": "^8.0.0",
     "jest": "^30.0.5",
+    "prettier": "^3.0.0",
+    "rimraf": "^5.0.0",
     "ts-jest": "^29.4.0",
     "typescript": "^5.0.0"
   }

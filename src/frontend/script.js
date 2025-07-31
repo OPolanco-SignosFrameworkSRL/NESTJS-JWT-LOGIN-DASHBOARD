@@ -29,12 +29,12 @@ function hideDashboard() {
 }
 
 // Manejo del formulario de login
-loginForm.addEventListener('submit', async (e) => {
+loginForm.addEventListener('submit', async e => {
   e.preventDefault();
-  
+
   const cedula = document.getElementById('cedula').value.trim();
   const password = document.getElementById('password').value.trim();
-  
+
   if (!cedula || !password) {
     showMessage('Por favor complete todos los campos');
     return;
@@ -52,20 +52,26 @@ loginForm.addEventListener('submit', async (e) => {
     });
 
     if (!response.ok) {
-      throw new Error('Credenciales inválidas');
+      const errorData = await response.json();
+      throw new Error(errorData.message || 'Credenciales inválidas');
     }
 
-    const data = await response.json();
-    localStorage.setItem('token', data.access_token);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    
+    const result = await response.json();
+
+    // La API devuelve { data: { access_token, user }, statusCode, message, timestamp }
+    const { access_token, user } = result.data;
+
+    localStorage.setItem('token', access_token);
+    localStorage.setItem('user', JSON.stringify(user));
+
     showMessage('Login exitoso', 'success');
     setTimeout(() => {
       showDashboard();
-      displayUserInfo(data.user);
+      displayUserInfo(user);
       loadUserData();
     }, 1000);
-
+    console.log(result);
+    console.log(access_token);
   } catch (error) {
     showMessage(error.message || 'Error al iniciar sesión');
   } finally {
@@ -95,12 +101,15 @@ async function loadUserData() {
     const response = await fetch('http://localhost:3000/vappusuarios', {
       headers: { Authorization: 'Bearer ' + token },
     });
-    
+
     if (!response.ok) {
       throw new Error('Error al cargar datos');
     }
-    
-    const users = await response.json();
+
+    const result = await response.json();
+    // La API devuelve { data: [...], statusCode, message, timestamp }
+    const users = result.data || result;
+
     userData.innerHTML = `
       <h4>Usuarios del Sistema (${users.length})</h4>
       <div style="max-height: 300px; overflow-y: auto;">
@@ -126,7 +135,7 @@ logoutBtn.addEventListener('click', () => {
 window.addEventListener('load', () => {
   const token = localStorage.getItem('token');
   const user = localStorage.getItem('user');
-  
+
   if (token && user) {
     try {
       const userData = JSON.parse(user);
@@ -138,4 +147,4 @@ window.addEventListener('load', () => {
       localStorage.removeItem('user');
     }
   }
-}); 
+});

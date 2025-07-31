@@ -10,28 +10,32 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LoginDto = void 0;
-const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
 class LoginDto {
 }
 exports.LoginDto = LoginDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Email del usuario',
-        example: 'usuario@ejemplo.com',
-        type: String
+        description: 'Número de cédula del usuario (11 dígitos)',
+        example: '40245980129',
+        minLength: 11,
+        maxLength: 11,
     }),
-    (0, class_validator_1.IsEmail)({}, { message: 'El email debe ser válido' }),
+    (0, class_validator_1.IsString)({ message: 'La cédula debe ser una cadena de texto' }),
+    (0, class_validator_1.IsNotEmpty)({ message: 'La cédula es requerida' }),
+    (0, class_validator_1.Length)(11, 11, { message: 'La cédula debe tener exactamente 11 dígitos' }),
+    (0, class_validator_1.Matches)(/^\d{11}$/, { message: 'La cédula debe contener solo números' }),
     __metadata("design:type", String)
-], LoginDto.prototype, "email", void 0);
+], LoginDto.prototype, "cedula", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Contraseña del usuario',
-        example: '123456',
-        minLength: 6,
-        type: String
+        description: 'Contraseña del usuario (se ignora en la validación actual)',
+        example: 'password123',
+        minLength: 1,
     }),
     (0, class_validator_1.IsString)({ message: 'La contraseña debe ser una cadena de texto' }),
-    (0, class_validator_1.MinLength)(6, { message: 'La contraseña debe tener al menos 6 caracteres' }),
+    (0, class_validator_1.IsNotEmpty)({ message: 'La contraseña es requerida' }),
     __metadata("design:type", String)
 ], LoginDto.prototype, "password", void 0);
+//# sourceMappingURL=login.dto.js.map

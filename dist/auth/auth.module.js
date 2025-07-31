@@ -8,25 +8,34 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthModule = void 0;
 const common_1 = require("@nestjs/common");
-const jwt_1 = require("@nestjs/jwt");
+const typeorm_1 = require("@nestjs/typeorm");
 const passport_1 = require("@nestjs/passport");
-const auth_service_1 = require("./auth.service");
-const jwt_strategy_1 = require("./jwt.strategy");
-const auth_controller_1 = require("./auth.controller");
+const jwt_1 = require("@nestjs/jwt");
+const config_1 = require("@nestjs/config");
+const auth_controller_1 = require("./controllers/auth.controller");
+const auth_service_1 = require("./services/auth.service");
+const user_entity_1 = require("../entities/user.entity");
+const user_write_entity_1 = require("../entities/user-write.entity");
+const jwt_strategy_1 = require("./strategies/jwt.strategy");
+const crypto_service_1 = require("../common/services/crypto.service");
+const jwt_config_1 = require("../config/jwt.config");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            typeorm_1.TypeOrmModule.forFeature([user_entity_1.User, user_write_entity_1.UserWrite]),
             passport_1.PassportModule,
-            jwt_1.JwtModule.register({
-                secret: 'your_jwt_secret_key',
-                signOptions: { expiresIn: '1h' },
+            jwt_1.JwtModule.registerAsync({
+                imports: [config_1.ConfigModule],
+                useFactory: (configService) => (0, jwt_config_1.getJwtConfig)(configService),
+                inject: [config_1.ConfigService],
             }),
         ],
-        providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy],
         controllers: [auth_controller_1.AuthController],
-        exports: [auth_service_1.AuthService],
+        providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, crypto_service_1.CryptoService],
+        exports: [auth_service_1.AuthService, crypto_service_1.CryptoService],
     })
 ], AuthModule);
+//# sourceMappingURL=auth.module.js.map

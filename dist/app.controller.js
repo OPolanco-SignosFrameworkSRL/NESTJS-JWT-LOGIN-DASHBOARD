@@ -8,25 +8,25 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AppController = void 0;
 const common_1 = require("@nestjs/common");
 const swagger_1 = require("@nestjs/swagger");
 let AppController = class AppController {
-    getHello() {
-        return 'Hello World!';
-    }
-    test() {
-        return { message: 'App controller is working!' };
-    }
-    loginTest(body) {
+    getInfo() {
         return {
-            message: 'Login test endpoint',
-            received: body,
-            timestamp: new Date().toISOString()
+            name: 'API de Solicitud de Efectivo',
+            version: '1.0.0',
+            description: 'API para gestión de solicitudes de efectivo',
+            status: 'running',
+            timestamp: new Date().toISOString(),
+        };
+    }
+    getHealth() {
+        return {
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            uptime: process.uptime(),
         };
     }
 };
@@ -34,65 +34,54 @@ exports.AppController = AppController;
 __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({
-        summary: 'Endpoint raíz',
-        description: 'Endpoint principal de la aplicación'
+        summary: 'Información de la aplicación',
+        description: 'Retorna información básica sobre la API',
     }),
     (0, swagger_1.ApiResponse)({
         status: 200,
-        description: 'Respuesta exitosa',
+        description: 'Información de la aplicación',
         schema: {
-            type: 'string',
-            example: 'Hello World!'
-        }
+            type: 'object',
+            properties: {
+                data: {
+                    type: 'object',
+                    properties: {
+                        name: { type: 'string', example: 'API de Solicitud de Efectivo' },
+                        version: { type: 'string', example: '1.0.0' },
+                        description: {
+                            type: 'string',
+                            example: 'API para gestión de solicitudes de efectivo',
+                        },
+                        status: { type: 'string', example: 'running' },
+                        timestamp: { type: 'string', example: '2024-01-01T00:00:00.000Z' },
+                    },
+                },
+                statusCode: { type: 'number', example: 200 },
+                message: { type: 'string', example: 'Operación exitosa' },
+                timestamp: { type: 'string', example: '2024-01-01T00:00:00.000Z' },
+            },
+        },
     }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
-    __metadata("design:returntype", String)
-], AppController.prototype, "getHello", null);
+    __metadata("design:returntype", void 0)
+], AppController.prototype, "getInfo", null);
 __decorate([
-    (0, common_1.Get)('test'),
+    (0, common_1.Get)('health'),
     (0, swagger_1.ApiOperation)({
-        summary: 'Probar aplicación',
-        description: 'Endpoint de prueba para verificar que la aplicación funciona'
+        summary: 'Estado de salud de la aplicación',
+        description: 'Verifica que la aplicación esté funcionando correctamente',
     }),
     (0, swagger_1.ApiResponse)({
         status: 200,
         description: 'Aplicación funcionando correctamente',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'App controller is working!' }
-            }
-        }
     }),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", void 0)
-], AppController.prototype, "test", null);
-__decorate([
-    (0, common_1.Post)('login-test'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Probar login',
-        description: 'Endpoint de prueba para simular un login'
-    }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Login de prueba exitoso',
-        schema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: 'Login test endpoint' },
-                received: { type: 'object', example: { email: 'test@test.com', password: '123456' } },
-                timestamp: { type: 'string', example: '2024-01-01T00:00:00.000Z' }
-            }
-        }
-    }),
-    __param(0, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
-    __metadata("design:returntype", void 0)
-], AppController.prototype, "loginTest", null);
+], AppController.prototype, "getHealth", null);
 exports.AppController = AppController = __decorate([
-    (0, swagger_1.ApiTags)('app'),
+    (0, swagger_1.ApiTags)('Aplicación'),
     (0, common_1.Controller)()
 ], AppController);
+//# sourceMappingURL=app.controller.js.map
