@@ -34,9 +34,6 @@ RUN npm ci --only=production && npm cache clean --force
 # Copiar archivos construidos
 COPY --from=builder --chown=nestjs:nodejs /app/dist ./dist
 
-# Copiar archivos estáticos
-COPY --chown=nestjs:nodejs src/frontend ./dist/frontend
-
 # Cambiar al usuario no-root
 USER nestjs
 

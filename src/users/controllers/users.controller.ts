@@ -10,6 +10,7 @@ import {
   UseGuards,
   HttpStatus,
   ParseIntPipe,
+  Request,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -21,13 +22,14 @@ import {
 } from '@nestjs/swagger';
 import { UsersService } from '../services/users.service';
 import { AuthService } from '../../auth/services/auth.service';
-import { UpdateUserDto } from '../dto/update-user.dto';
-import { RegisterDto } from '../../auth/dto/register.dto';
-import { UserFiltersDto } from '../dto/user-filters.dto';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
-import { UserRole } from '../../common/interfaces/user.interface';
+import { UpdateUserDto } from '../../application/dto/update-user.dto';
+import { RegisterDto } from '../../application/dto/register.dto';
+import { UserFiltersDto } from '../../application/dto/user-filters.dto';
+import { UpdatePhoneDto } from '../../application/dto/update-phone.dto';
+import { JwtAuthGuard } from '../../presentation/guards/jwt-auth.guard';
+import { RolesGuard } from '../../presentation/guards/roles.guard';
+import { Roles } from '../../presentation/decorators/roles.decorator';
+import { UserRole } from '../../domain/interfaces/user.interface';
 //import { ApiPaginatedResponse } from '../../common/decorators/api-paginated-response.decorator';
 
 @ApiTags('Usuarios')
@@ -187,8 +189,8 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @Roles(UserRole.Admin)
-  @ApiOperation({ summary: 'Actualizar un usuario' })
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({ summary: 'Actualizar un usuario (Admin puede actualizar cualquier usuario, Usuario solo puede actualizar sus propios datos)' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -206,17 +208,19 @@ export class UsersController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
+    @Request() req,
   ) {
-    return await this.usersService.update(id, updateUserDto);
+    const currentUser = req.user;
+    return await this.usersService.update(id, updateUserDto, currentUser);
   }
 
   @Delete(':id')
   @Roles(UserRole.Admin)
-  @ApiOperation({ summary: 'Eliminar un usuario (soft delete)' })
+  @ApiOperation({ summary: 'Eliminar un usuario permanentemente de la base de datos (¡CUIDADO! Esta acción no se puede deshacer)' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Usuario eliminado exitosamente',
+    description: 'Usuario eliminado permanentemente',
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
@@ -224,6 +228,52 @@ export class UsersController {
   })
   async remove(@Param('id', ParseIntPipe) id: number) {
     await this.usersService.remove(id);
-    return { message: 'Usuario eliminado exitosamente' };
+    return { 
+      message: 'Usuario eliminado permanentemente de la base de datos',
+      warning: 'Esta acción no se puede deshacer'
+    };
+  }
+
+
+
+
+
+  @Post('update-phone')
+  @ApiOperation({ summary: 'Actualizar teléfono del usuario' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Teléfono actualizado exitosamente',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Teléfono actualizado exitosamente' },
+        user: {
+          type: 'object',
+          properties: {
+            id: { type: 'number', example: 1 },
+            cedula: { type: 'string', example: '40245980129' },
+            nombre: { type: 'string', example: 'Raul' },
+            apellido: { type: 'string', example: 'Vargas' },
+            telefono: { type: 'string', example: '8091234567' },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.UNAUTHORIZED,
+    description: 'Credenciales inválidas',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Datos de entrada inválidos',
+  })
+  async updatePhone(@Body() updatePhoneDto: UpdatePhoneDto) {
+    return await this.usersService.updateUserPhone(
+      updatePhoneDto.cedula,
+      updatePhoneDto.clave,
+      updatePhoneDto.telefono,
+    );
   }
 }

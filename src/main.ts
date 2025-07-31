@@ -3,10 +3,9 @@ import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
-import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { HttpExceptionFilter } from './presentation/filters/http-exception.filter';
+import { ResponseInterceptor } from './presentation/interceptors/response.interceptor';
 import { NestExpressApplication } from '@nestjs/platform-express';
-import { join } from 'path';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
@@ -35,9 +34,6 @@ async function bootstrap() {
   const corsConfig = configService.get('app.cors');
   app.enableCors(corsConfig);
 
-  // Servir archivos estáticos del frontend
-  app.useStaticAssets(join(__dirname, '..', 'src', 'frontend'));
-
   // Configuración de Swagger
   const swaggerConfig = configService.get('app.swagger');
   const config = new DocumentBuilder()
@@ -52,7 +48,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup(swaggerConfig.path, app, document);
 
-  const port = configService.get('app.port', 3000);
+  const port = configService.get('app.port', 3001);
   const environment = configService.get('app.environment', 'development');
 
   await app.listen(port);
@@ -61,7 +57,6 @@ async function bootstrap() {
   logger.log(
     `📚 Documentación disponible en: http://localhost:${port}/${swaggerConfig.path}`,
   );
-  logger.log(`🌐 Frontend disponible en: http://localhost:${port}`);
   logger.log(`🔧 Entorno: ${environment}`);
 }
 

@@ -12,7 +12,7 @@ export const getDatabaseConfig = (
   database: configService.get<string>('DB_DATABASE', 'DbSolicitudEfectivo'),
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   synchronize: false, // Deshabilitado porque vappusuarios es una vista, no una tabla
-  logging: configService.get<boolean>('DB_LOGGING', false),
+  logging: configService.get<boolean>('DB_LOGGING', true),
   options: {
     encrypt: true,
     trustServerCertificate: true,

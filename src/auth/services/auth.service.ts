@@ -2,16 +2,16 @@ import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { User } from '../../entities/user.entity';
-import { UserWrite } from '../../entities/user-write.entity';
+import { UserEntity } from '../../infrastructure/database/entities/user.entity';
+import { UserWriteEntity } from '../../infrastructure/database/entities/user-write.entity';
 import {
   IUser,
   IUserPayload,
   ILoginResponse,
   IUserCreateData,
   UserRole,
-} from '../../common/interfaces/user.interface';
-import { CryptoService } from '../../common/services/crypto.service';
+} from '../../domain/interfaces/user.interface';
+import { CryptoService } from '../../infrastructure/services/crypto.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -23,10 +23,10 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly cryptoService: CryptoService,
     private readonly configService: ConfigService,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(UserWrite)
-    private readonly userWriteRepository: Repository<UserWrite>,
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+    @InjectRepository(UserWriteEntity)
+    private readonly userWriteRepository: Repository<UserWriteEntity>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -37,6 +37,9 @@ export class AuthService {
    * proporcionada solo durante el registro.
    */
   async validateUser(cedula: string, password: string): Promise<IUser | null> {
+
+   
+
     if (!cedula || !password) {
       return null;
     }
@@ -44,7 +47,7 @@ export class AuthService {
     try {
       // Buscar usuario en la vista para obtener datos completos
       const user = await this.userRepository.findOne({
-        where: { cedula, valido: true },
+        where: { cedula, valido: '1' },
       });
 
       if (!user) {
@@ -64,10 +67,24 @@ export class AuthService {
         return null;
       }
 
-      // Validar contraseña
-      const hashedPassword = this.cryptoService.calculateSHA256(password);
+      // Verificar si el password ya es un hash (64 caracteres hexadecimales)
+      const isHash = /^[a-fA-F0-9]{64}$/.test(password);
+      
+      let hashedPassword: string;
+      if (isHash) {
+        // Si ya es un hash, usarlo directamente
+        hashedPassword = password;
+        this.logger.log(`Password detectado como hash para usuario: ${cedula}`);
+      } else {
+        // Si no es hash, calcular el hash (cedula + password)
+        hashedPassword = this.cryptoService.calculateSHA256(cedula + password);
+        this.logger.log(`Password hasheado para usuario: ${cedula}`);
+      }
+      
       if (hashedPassword !== userWrite.password) {
         this.logger.warn(`Contraseña inválida para usuario: ${cedula}`);
+        this.logger.warn(`Hash recibido: ${hashedPassword}`);
+        this.logger.warn(`Hash esperado: ${userWrite.password}`);
         return null;
       }
 
@@ -108,8 +125,8 @@ export class AuthService {
     userId?: number;
   }> {
     try {
-      // Verificar si el usuario ya existe en la vista (para mostrar datos completos)
-      const existingUser = await this.userRepository.findOne({
+      // Verificar si el usuario ya existe en la TABLA REAL (no en la vista)
+      const existingUser = await this.userWriteRepository.findOne({
         where: { cedula: data.cedula },
       });
 
@@ -120,38 +137,64 @@ export class AuthService {
         };
       }
 
-      // Generar el hash para el campo 'codigo' usando la cédula y la clave proporcionada por el usuario
+      // Hash de la contraseña del usuario (cedula + clave)
       const codigoHash = this.cryptoService.calculateSHA256(
         data.cedula + data.clave,
       );
 
-      // Hash de la contraseña del usuario
-      const hashedPassword = this.cryptoService.calculateSHA256(data.password);
+      // Hash para el campo 'codigo' (fórmula diferente: cedula + password)
+      const hashedPassword = this.cryptoService.calculateSHA256(
+        data.cedula + data.password,
+      );
 
       // Crear el nuevo usuario en la tabla real
       const newUser = this.userWriteRepository.create({
         cedula: data.cedula,
         nombre: data.nombre,
         apellido: data.apellido,
-        codigo: null,
-        password: codigoHash,
+        codigo: codigoHash,
+        password: hashedPassword, // Usar hashedPassword, no codigoHash
         role: data.role || 'Usuario',
         user_email: data.user_email,
-        valido: true,
-        // ❌ REMOVER: division, cargo, dependencia, recinto, estado
+        telefono: data.telefono,
+        direccion: data.direccion,
+        celular: data.celular,
+        user_status: data.user_status || 1,
+        caja_id: data.caja_id,
+        tienda_id: data.tienda_id,
+        allow_multi_tienda: data.allow_multi_tienda || '0',
+        max_descuento: data.max_descuento,
+        close_caja: data.close_caja || '0',
+        user_account_email: data.user_account_email,
+        user_account_email_passw: data.user_account_email_passw,
+        comision_porciento: data.comision_porciento,
+        default_portalid: data.default_portalid,
+        nuevocampo: data.nuevocampo,
+        encargadoId: data.encargadoId,
+        passwchanged: '0',
+        valido: '1',
       });
 
       const savedUser = await this.userWriteRepository.save(newUser);
 
-      this.logger.log(`Usuario creado exitosamente: ${data.cedula}`);
+      this.logger.log(`Usuario creado exitosamente: ${data.cedula} con ID: ${savedUser.id}`);
 
       return {
         success: true,
         message: 'Usuario creado exitosamente',
-        userId: savedUser[0].id,
+        userId: savedUser.id,
       };
     } catch (error) {
       this.logger.error(`Error creando usuario ${data.cedula}:`, error);
+      
+      // Manejar errores específicos de SQL Server
+      if (error.message && error.message.includes('duplicate key')) {
+        return {
+          success: false,
+          error: 'Ya existe un usuario con esta cédula',
+        };
+      }
+      
       return {
         success: false,
         error: `Error interno del servidor: ${error.message}`,
@@ -268,6 +311,236 @@ export class AuthService {
         return value * 24 * 60 * 60;
       default:
         return 24 * 60 * 60; // 24 horas por defecto
+    }
+  }
+
+  /**
+   * Método para verificar el hasheo según el ejemplo proporcionado
+   */
+  async testHashing(): Promise<any> {
+    try {
+      const cedula = '12245980129';
+      const password = '456789';
+      const clave = 'MiClaveSecreta2024'; // Ejemplo de clave
+      
+      // Hash para password (cedula + clave)
+      const passwordHash = this.cryptoService.calculateSHA256(cedula + clave);
+      
+      // Hash para codigo (cedula + password)
+      const codigoHash = this.cryptoService.calculateSHA256(cedula + password);
+      
+      // Hash esperado según el ejemplo
+      const expectedHash = '13e85726a3b1d0c46560a5d90dd9d042d1e4c4ac117fa3bf0c41b4306ad1ac6e';
+      
+      this.logger.log('=== PRUEBA DE HASHEO ===');
+      this.logger.log(`Cédula: ${cedula}`);
+      this.logger.log(`Password: ${password}`);
+      this.logger.log(`Clave: ${clave}`);
+      this.logger.log(`Hash Password (cedula + clave): ${passwordHash}`);
+      this.logger.log(`Hash Código (cedula + password): ${codigoHash}`);
+      this.logger.log(`Hash Esperado: ${expectedHash}`);
+      this.logger.log(`¿Coincide Código?: ${codigoHash === expectedHash}`);
+      
+      return {
+        cedula,
+        password,
+        clave,
+        passwordHash,
+        codigoHash,
+        expectedHash,
+        codigoMatches: codigoHash === expectedHash,
+        passwordHashLength: passwordHash.length,
+        codigoHashLength: codigoHash.length
+      };
+    } catch (error) {
+      this.logger.error('Error en prueba de hasheo:', error);
+      return { error: error.message };
+    }
+  }
+
+  /**
+   * Método para verificar los hashes de un usuario específico
+   */
+  async checkUserHashes(cedula: string): Promise<any> {
+    try {
+      // Buscar usuario en la tabla real
+      const userWrite = await this.userWriteRepository.findOne({
+        where: { cedula },
+      });
+
+      if (!userWrite) {
+        return { error: 'Usuario no encontrado' };
+      }
+
+      // Calcular hashes esperados
+      const passwordHash = this.cryptoService.calculateSHA256(cedula + 'password123'); // Asumiendo password123
+      const codigoHash = this.cryptoService.calculateSHA256(cedula + 'password123'); // Mismo que password
+
+      this.logger.log('=== VERIFICACIÓN DE HASHES ===');
+      this.logger.log(`Cédula: ${cedula}`);
+      this.logger.log(`Password en BD: ${userWrite.password}`);
+      this.logger.log(`Código en BD: ${userWrite.codigo}`);
+      this.logger.log(`Hash esperado (cedula + password123): ${passwordHash}`);
+      this.logger.log(`¿Password coincide?: ${userWrite.password === passwordHash}`);
+      this.logger.log(`¿Código coincide?: ${userWrite.codigo === codigoHash}`);
+
+      return {
+        cedula,
+        passwordInDB: userWrite.password,
+        codigoInDB: userWrite.codigo,
+        expectedPasswordHash: passwordHash,
+        expectedCodigoHash: codigoHash,
+        passwordMatches: userWrite.password === passwordHash,
+        codigoMatches: userWrite.codigo === codigoHash
+      };
+    } catch (error) {
+      this.logger.error('Error verificando hashes:', error);
+      return { error: error.message };
+    }
+  }
+
+  /**
+   * Método temporal para verificar el esquema de la base de datos
+   */
+  async checkDatabaseSchema(): Promise<any> {
+    try {
+      // Consulta 1: Esquema completo
+      const schemaQuery = `
+        SELECT 
+          COLUMN_NAME,
+          DATA_TYPE,
+          CHARACTER_MAXIMUM_LENGTH,
+          IS_NULLABLE,
+          COLUMN_DEFAULT,
+          ORDINAL_POSITION
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME = 'appusuarios'
+        ORDER BY ORDINAL_POSITION
+      `;
+      
+      // Consulta 2: Campos numéricos (posibles bigint)
+      const numericQuery = `
+        SELECT 
+          COLUMN_NAME,
+          DATA_TYPE,
+          CHARACTER_MAXIMUM_LENGTH
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME = 'appusuarios'
+          AND DATA_TYPE IN ('bigint', 'int', 'smallint', 'tinyint')
+        ORDER BY ORDINAL_POSITION
+      `;
+      
+      // Consulta 3: Campos de texto
+      const textQuery = `
+        SELECT 
+          COLUMN_NAME,
+          DATA_TYPE,
+          CHARACTER_MAXIMUM_LENGTH
+        FROM INFORMATION_SCHEMA.COLUMNS 
+        WHERE TABLE_NAME = 'appusuarios'
+          AND DATA_TYPE LIKE '%char%'
+        ORDER BY ORDINAL_POSITION
+      `;
+      
+      // Consulta 4: Datos actuales
+      const dataQuery = `
+        SELECT TOP 5 *
+        FROM appusuarios
+        ORDER BY id DESC
+      `;
+      
+      // Consulta 5: Contar registros
+      const countQuery = `
+        SELECT COUNT(*) as total_registros
+        FROM appusuarios
+      `;
+      
+      const [schema, numericFields, textFields, data, count] = await Promise.all([
+        this.dataSource.query(schemaQuery),
+        this.dataSource.query(numericQuery),
+        this.dataSource.query(textQuery),
+        this.dataSource.query(dataQuery),
+        this.dataSource.query(countQuery)
+      ]);
+      
+      this.logger.log('Análisis completo de la tabla appusuarios completado');
+      
+      return {
+        schema: schema,
+        numericFields: numericFields,
+        textFields: textFields,
+        sampleData: data,
+        totalRecords: count[0]?.total_registros || 0,
+        analysis: {
+          totalColumns: schema.length,
+          numericColumns: numericFields.length,
+          textColumns: textFields.length
+        }
+      };
+    } catch (error) {
+      this.logger.error('Error verificando esquema:', error);
+      return { error: error.message };
+    }
+  }
+
+  /**
+   * Busca un usuario por cédula y contraseña, y actualiza su teléfono si existe.
+   * La contraseña se valida usando el hash SHA-256 de (cedula + clave).
+   */
+  async updateUserPhone(
+    cedula: string, 
+    clave: string, 
+    telefono: string
+  ): Promise<{ success: boolean; message: string; user?: any }> {
+    try {
+      if (!cedula || !clave || !telefono) {
+        throw new UnauthorizedException('Cédula, clave y teléfono son requeridos');
+      }
+
+      // Generar el hash de la contraseña (cedula + clave)
+      const passwordHash = this.cryptoService.calculateSHA256(cedula + clave);
+
+      // Buscar usuario en la tabla real usando cédula y hash de contraseña
+      const user = await this.userWriteRepository.findOne({
+        where: { 
+          cedula,
+          password: passwordHash,
+          valido: '1' 
+        },
+      });
+
+      if (!user) {
+        this.logger.warn(`Credenciales inválidas para cédula: ${cedula}`);
+        throw new UnauthorizedException('Credenciales inválidas');
+      }
+
+      // Actualizar el número de teléfono
+      user.telefono = telefono;
+      
+      await this.userWriteRepository.save(user);
+
+      this.logger.log(`Teléfono actualizado para usuario: ${cedula}`);
+
+      return {
+        success: true,
+        message: 'Teléfono actualizado exitosamente',
+        user: {
+          id: user.id,
+          cedula: user.cedula,
+          nombre: user.nombre,
+          apellido: user.apellido,
+          telefono: telefono, // Campo actualizado
+        }
+      };
+
+    } catch (error) {
+      this.logger.error(`Error actualizando teléfono para usuario ${cedula}:`, error);
+      
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      
+      throw new UnauthorizedException('Error interno del servidor');
     }
   }
 }

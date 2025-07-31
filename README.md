@@ -13,7 +13,6 @@ API RESTful para gestión de solicitudes de efectivo con autenticación JWT y Ty
 - **Logging**: Sistema de logging estructurado
 - **Configuración Flexible**: Configuración por variables de entorno
 - **CORS**: Configuración de Cross-Origin Resource Sharing
-- **Frontend Integrado**: Interfaz web incluida
 
 ## 📋 Prerrequisitos
 
@@ -188,7 +187,6 @@ src/
 │   ├── controllers/        # Controladores de usuarios
 │   ├── dto/               # DTOs de usuarios
 │   └── services/          # Servicios de usuarios
-├── frontend/              # Frontend integrado
 ├── app.controller.ts      # Controlador principal
 ├── app.module.ts          # Módulo principal
 └── main.ts               # Punto de entrada
@@ -283,4 +281,3 @@ Si tienes problemas o preguntas:
 - ✅ Configuración flexible
 - ✅ Logging estructurado
 - ✅ Validación robusta
-- ✅ Frontend integrado
