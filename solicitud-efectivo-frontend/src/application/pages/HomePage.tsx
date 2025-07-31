@@ -1,6 +1,7 @@
 import { FaPlus } from "react-icons/fa";
 import CardSection1 from "@/application/components/Home/CardSection1";
 import CardSection2 from "@/application/components/Home/CardSection2";
+import HomeTable from "@/application/components/Home/HomeTable";
 
 
 const Home = () => {
@@ -33,18 +34,20 @@ const Home = () => {
 
       <section>
 
-        <div>
-          <CardSection1/>
-        </div>
+        <CardSection1/>
 
       </section>
 
       <section>
 
-        <div>
-          <CardSection2/>
-        </div>
+        <CardSection2/>
+        
+      </section>
 
+      <section>
+        
+        <HomeTable/>
+        
       </section>
 
 

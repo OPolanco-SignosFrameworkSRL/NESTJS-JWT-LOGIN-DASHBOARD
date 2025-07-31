@@ -53,7 +53,7 @@ const Layout = () => {
       ${!isMobile && isOpen ? 'ml-72' : 'ml-0'}
     `}>
       
-      <header className="w-full"> 
+      <header className="w-full sticky top-0 z-50 lg:relative"> 
           <Header handleOpen={handleOpen}/>
       </header>
 
