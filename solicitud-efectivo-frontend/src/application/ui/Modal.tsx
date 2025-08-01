@@ -14,6 +14,7 @@ const Modal = ({children, isActive, onMouseLeave, onClick, className}: ModalProp
   const handleShowModal = useAppStore(state => state.handleShowModal)
 
   useEffect(() => {
+
     function handleClickOutside(event: MouseEvent) {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
         handleShowModal(); 
@@ -21,9 +22,11 @@ const Modal = ({children, isActive, onMouseLeave, onClick, className}: ModalProp
     }
 
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
+
   }, []);
 
   const modalRef = useRef<HTMLDivElement>(null);
@@ -37,7 +40,7 @@ const Modal = ({children, isActive, onMouseLeave, onClick, className}: ModalProp
   
         <div onMouseLeave={onMouseLeave} onClick={onClick} className={className} ref={modalRef}>
 
-            {children}
+          {children}
 
         </div>
       )}
