@@ -20,7 +20,7 @@ const Nav = () => {
 
     const navItems = [
         {label: "Inicio", path: "/home", icon: <IoHomeSharp size={26} />},
-        {label: "Solicitud De Gasto", path: "/solicitud-de-gasto", icon: <MdAttachMoney size={26} />},
+        {label: "Solicitud De Gasto", path: "/solicitud-gastos", icon: <MdAttachMoney size={26} />},
         {label: "Actividades", path: "/actividades", icon: <LuActivity size={26} />},
         {label: "Estadísticas", path: "/estadisticas", icon: <PiChartLineUpBold size={26} />},
         {label: "Recursos Humanos", path: "/recursos-humanos", icon: <IoPeopleSharp size={26} />},

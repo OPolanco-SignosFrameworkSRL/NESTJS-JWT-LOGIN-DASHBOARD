@@ -4,6 +4,9 @@ import { ProtectedRoute } from '../layout/AuthLayout';
 import Layout from '../layout/Layout';
 import Home from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
+import SolicitudGastos from '../pages/SolicitudGastos';
+import AdminDashboard from '../pages/AdminDashboard';
+import CreateEmployee from '../pages/CreateEmployee';
 
 
 const RouterComponent = () => {
@@ -29,6 +32,18 @@ const RouterComponent = () => {
           path: '/home',
           element: <Home />,
         },
+        {
+          path: '/solicitud-gastos',
+          element: <SolicitudGastos/>
+        },
+        {
+          path: '/admin-dashboard',
+          element: <AdminDashboard/>
+        },
+        {
+          path: '/create-employee',
+          element: <CreateEmployee/>
+        }
       ],
     },
     {/*

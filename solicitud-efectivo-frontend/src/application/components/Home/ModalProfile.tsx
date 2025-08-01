@@ -4,25 +4,23 @@ import { FaUser } from "react-icons/fa";
 import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { MdOutlineLogout } from "react-icons/md";
 import { useAppStore } from "@/application/store/useAppStore";
-
-
-
+import { Link } from "react-router-dom";
 
 const ModalProfile = () => {
 
     const modalItems = [
-        {icon: <FaUser size={24} />, label: "Perfil"},
-        {icon: <TbLayoutDashboardFilled size={24}/>, label: "Admin Dashboard"},
-        {icon: <IoMdSettings size={24}/>, label: "Configuración"}
+        {icon: <FaUser size={24} />, label: "Perfil", path: "/perfil"},
+        {icon: <TbLayoutDashboardFilled size={24}/>, label: "Admin Dashboard", path: "/admin-dashboard"},
+        {icon: <IoMdSettings size={24}/>, label: "Configuración", path: "/configuracion"}
     ]
 
-    const show = useAppStore(state => state.show)
 
+    const show = useAppStore(state => state.show)
 
   return (
 
     <>
-        <div className="relative">
+        <div className="sticky top-18 z-50 lg:relative md:top-0">
 
             <Modal isActive={show} className="absolute right-0 flex justify-end"> 
 
@@ -47,9 +45,9 @@ const ModalProfile = () => {
                                         {item.icon}
                                     </div>
 
-                                    <button key={index} className="flex flex-col mx-2 font-medium cursor-pointer">
+                                    <Link to={item.path} key={index} className="flex flex-col mx-2 font-medium cursor-pointer">
                                         {item.label}
-                                    </button>
+                                    </Link>
 
                                 </div>
 
@@ -65,9 +63,9 @@ const ModalProfile = () => {
 
                         <MdOutlineLogout size={24} className="cursor-pointer"/>
 
-                        <button className="cursor-pointer">
+                        <Link to="/login" className="cursor-pointer">
                             Cerrar Sesión
-                        </button>
+                        </Link>
 
                     </div>
 

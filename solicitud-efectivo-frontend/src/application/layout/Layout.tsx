@@ -7,8 +7,11 @@ import Container from "../ui/Container"
 import { useState, useEffect } from "react"
 import { useAppStore } from "../store/useAppStore"
 import ModalProfile from "../components/Home/ModalProfile"
+import { useCloseModalOnRouteChange } from "../hooks/useCloseModalOnRouteChange"
 
 const Layout = () => {
+
+  useCloseModalOnRouteChange();
 
   const [isOpen, setIsOpen] = useState(true)
   const [isMobile, setIsMobile] = useState(false)
@@ -20,6 +23,8 @@ const Layout = () => {
   const handleTouchStart = () => {
     setIsOpen(false) 
   }
+
+  console.log(isMobile ? false : isOpen)
 
   useEffect(() => {
 
@@ -56,6 +61,7 @@ const Layout = () => {
         ease-in-out 
         ${!isMobile && isOpen ? 'ml-72' : 'ml-0'}
       `}>
+        
         
         <header className="w-full sticky top-0 z-50 lg:relative"> 
             <Header handleOpen={handleOpen}/>
