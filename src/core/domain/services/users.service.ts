@@ -1,16 +1,16 @@
-import { Injectable, NotFoundException, Logger, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
-import { UserEntity } from '../../infrastructure/database/entities/user.entity';
-import { UserWriteEntity } from '../../infrastructure/database/entities/user-write.entity';
-import { CryptoService } from '../../infrastructure/services/crypto.service';
+import { UserEntity } from '../../../infrastructure/database/entities/user.entity';
+import { UserWriteEntity } from '../../../infrastructure/database/entities/user-write.entity';
+import { CryptoService } from '../../../infrastructure/services/crypto.service';
 import {
   IUserResponse,
   IUserStats,
   IUserFilters,
   IUserUpdateData,
   UserRole,
-} from '../../domain/interfaces/user.interface';
+} from '../user.interface';
 
 @Injectable()
 export class UsersService {
@@ -150,9 +150,14 @@ export class UsersService {
   }
 
   /**
-   * Elimina un usuario (soft delete)
+   * Elimina un usuario (soft delete por defecto, eliminación física con confirmación)
    */
-  async remove(id: number): Promise<void> {
+  async remove(
+    id: number, 
+    currentUser?: { id: number; role: UserRole },
+    confirmPermanentDelete: boolean = false,
+    reason?: string
+  ): Promise<{ message: string; type: 'soft' | 'permanent'; user: any }> {
     try {
       // Buscar usuario en la tabla real
       const userWrite = await this.userWriteRepository.findOne({
@@ -163,12 +168,141 @@ export class UsersService {
         throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
       }
 
-      // Eliminación física real
-      await this.userWriteRepository.remove(userWrite);
+      // Validaciones antes de eliminar
+      await this.validateUserDeletion(userWrite, currentUser);
 
-      this.logger.log(`Usuario ${id} eliminado permanentemente de la base de datos`);
+      if (confirmPermanentDelete) {
+        // Eliminación física permanente
+        await this.userWriteRepository.remove(userWrite);
+        this.logger.log(`Usuario ${id} eliminado permanentemente por ${currentUser?.id || 'sistema'}. Razón: ${reason || 'No especificada'}`);
+        
+        return {
+          message: 'Usuario eliminado permanentemente de la base de datos',
+          type: 'permanent',
+          user: { id: userWrite.id, cedula: userWrite.cedula, nombre: userWrite.nombre, apellido: userWrite.apellido }
+        };
+      } else {
+        // Soft delete
+        userWrite.valido = '0';
+        userWrite.deleted_at = new Date();
+        userWrite.deleted_by = currentUser?.id || null;
+        
+        await this.userWriteRepository.save(userWrite);
+        
+        this.logger.log(`Usuario ${id} marcado como eliminado (soft delete) por ${currentUser?.id || 'sistema'}. Razón: ${reason || 'No especificada'}`);
+        
+        return {
+          message: 'Usuario marcado como eliminado (soft delete)',
+          type: 'soft',
+          user: { id: userWrite.id, cedula: userWrite.cedula, nombre: userWrite.nombre, apellido: userWrite.apellido }
+        };
+      }
     } catch (error) {
       this.logger.error(`Error eliminando usuario ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Valida si un usuario puede ser eliminado
+   */
+  private async validateUserDeletion(user: UserWriteEntity, currentUser?: { id: number; role: UserRole }): Promise<void> {
+    // Verificar si es el último administrador
+    if (user.role === 'Admin') {
+      const adminCount = await this.userWriteRepository.count({
+        where: { role: 'Admin', valido: '1' }
+      });
+      
+      if (adminCount <= 1) {
+        throw new Error('No se puede eliminar el último administrador del sistema');
+      }
+    }
+
+    // Verificar si el usuario actual está intentando eliminarse a sí mismo
+    if (currentUser && currentUser.id === user.id) {
+      throw new Error('No puedes eliminarte a ti mismo');
+    }
+
+    // Aquí podrías agregar más validaciones como:
+    // - Verificar si tiene registros relacionados en otras tablas
+    // - Verificar si tiene transacciones pendientes
+    // - etc.
+  }
+
+  /**
+   * Restaura un usuario eliminado (soft delete)
+   */
+  async restore(id: number, currentUser?: { id: number; role: UserRole }): Promise<{ message: string; user: any }> {
+    try {
+      const userWrite = await this.userWriteRepository.findOne({
+        where: { id }
+      });
+
+      if (!userWrite) {
+        throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+      }
+
+      if (userWrite.valido === '1') {
+        throw new BadRequestException('El usuario ya está activo');
+      }
+
+      // Restaurar usuario
+      userWrite.valido = '1';
+      userWrite.deleted_at = null;
+      userWrite.deleted_by = null;
+      
+      await this.userWriteRepository.save(userWrite);
+      
+      this.logger.log(`Usuario ${id} restaurado por ${currentUser?.id || 'sistema'}`);
+      
+      return {
+        message: 'Usuario restaurado exitosamente',
+        user: { id: userWrite.id, cedula: userWrite.cedula, nombre: userWrite.nombre, apellido: userWrite.apellido }
+      };
+    } catch (error) {
+      this.logger.error(`Error restaurando usuario ${id}:`, error);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtiene usuarios eliminados (soft delete)
+   */
+  async findDeleted(): Promise<IUserResponse[]> {
+    try {
+      const deletedUsers = await this.userWriteRepository.find({
+        where: { valido: '0' },
+        order: { deleted_at: 'DESC' }
+      });
+
+      return deletedUsers.map(user => ({
+        id: user.id,
+        cedula: user.cedula,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        fullname: user.getFullName(),
+        role: user.role as UserRole,
+        user_email: user.user_email,
+        telefono: user.telefono,
+        direccion: user.direccion,
+        celular: user.celular,
+        user_status: user.user_status,
+        caja_id: user.caja_id,
+        tienda_id: user.tienda_id,
+        allow_multi_tienda: user.allow_multi_tienda,
+        max_descuento: user.max_descuento,
+        close_caja: user.close_caja,
+        user_account_email: user.user_account_email,
+        comision_porciento: user.comision_porciento,
+        default_portalid: user.default_portalid,
+        nuevocampo: user.nuevocampo,
+        encargadoId: user.encargadoId,
+        valido: user.valido,
+        deleted_at: user.deleted_at,
+        deleted_by: user.deleted_by
+      }));
+    } catch (error) {
+      this.logger.error('Error obteniendo usuarios eliminados:', error);
       throw error;
     }
   }

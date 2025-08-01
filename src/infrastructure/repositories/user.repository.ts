@@ -3,10 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserEntity } from '../database/entities/user.entity';
 import { UserWriteEntity } from '../database/entities/user-write.entity';
-import { IUserRepository, IUserWriteRepository } from '../../domain/repositories/user.repository.interface';
-import { User } from '../../domain/entities/user.entity';
-import { UserWrite } from '../../domain/entities/user-write.entity';
-import { UserRole } from '../../domain/interfaces/user.interface';
+import { IUserRepository, IUserWriteRepository } from '../../core/domain/repositories/user.repository.interface';
+import { User } from '../../core/domain/entities/user.entity';
+import { UserWrite } from '../../core/domain/entities/user-write.entity';
+import { UserRole } from '../../core/domain/user.interface';
 
 @Injectable()
 export class UserRepository implements IUserRepository {

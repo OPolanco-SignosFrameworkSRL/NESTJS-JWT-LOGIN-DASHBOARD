@@ -229,6 +229,22 @@ export class UserWriteEntity {
   @Column({ length: 1, default: '1' })
   valido: string;
 
+  @ApiProperty({
+    description: 'Fecha de eliminación (soft delete)',
+    example: '2024-01-01T00:00:00.000Z',
+    nullable: true,
+  })
+  @Column({ type: 'datetime', nullable: true })
+  deleted_at: Date;
+
+  @ApiProperty({
+    description: 'ID del usuario que realizó la eliminación',
+    example: 1,
+    nullable: true,
+  })
+  @Column({ type: 'int', nullable: true })
+  deleted_by: number;
+
   getFullName(): string {
     return `${this.nombre} ${this.apellido}`.trim();
   }

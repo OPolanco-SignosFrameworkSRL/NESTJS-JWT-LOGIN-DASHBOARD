@@ -15,12 +15,12 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { AuthService } from '../services/auth.service';
-import { LoginDto } from '../../application/dto/login.dto';
-import { RegisterDto } from '../../application/dto/register.dto';
-import { UpdatePhoneDto } from '../../application/dto/update-phone.dto';
-import { JwtAuthGuard } from '../../presentation/guards/jwt-auth.guard';
-import { ILoginResponse } from '../../domain/interfaces/user.interface';
+import { AuthService } from '../../core/domain/services/auth.service';
+import { LoginDto } from '../../core/application/dto/login.dto';
+import { RegisterDto } from '../../core/application/dto/register.dto';
+import { UpdatePhoneDto } from '../../core/application/dto/update-phone.dto';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { ILoginResponse } from '../../core/domain/user.interface';
 
 @ApiTags('Autenticación')
 @Controller('auth')

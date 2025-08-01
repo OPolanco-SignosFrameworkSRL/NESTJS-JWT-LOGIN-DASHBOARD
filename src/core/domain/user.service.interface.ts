@@ -10,7 +10,17 @@ export interface IUserService {
     updateData: IUserUpdateData,
     currentUser?: { id: number; role: UserRole },
   ): Promise<IUserResponse>;
-  remove(id: number): Promise<void>;
+  remove(
+    id: number, 
+    currentUser?: { id: number; role: UserRole },
+    confirmPermanentDelete?: boolean,
+    reason?: string
+  ): Promise<{ message: string; type: 'soft' | 'permanent'; user: any }>;
+  restore(
+    id: number, 
+    currentUser?: { id: number; role: UserRole }
+  ): Promise<{ message: string; user: any }>;
+  findDeleted(): Promise<IUserResponse[]>;
   searchByTerm(term: string): Promise<IUserResponse[]>;
   findByRole(role: UserRole): Promise<IUserResponse[]>;
   findByDivision(division: string): Promise<IUserResponse[]>;

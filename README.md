@@ -1,283 +1,424 @@
-# API de Solicitud de Efectivo
+# 🚀 NestJS JWT Login Dashboard
 
-API RESTful para gestión de solicitudes de efectivo con autenticación JWT y TypeORM.
+> **Sistema de autenticación y gestión de usuarios con Clean Architecture**
 
-## 🚀 Características
+[![NestJS](https://img.shields.io/badge/NestJS-8.0.0-red.svg)](https://nestjs.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-4.9.0-blue.svg)](https://www.typescriptlang.org/)
+[![TypeORM](https://img.shields.io/badge/TypeORM-0.3.0-green.svg)](https://typeorm.io/)
+[![SQL Server](https://img.shields.io/badge/SQL%20Server-2019-orange.svg)](https://www.microsoft.com/en-us/sql-server/)
+[![Clean Architecture](https://img.shields.io/badge/Clean%20Architecture-✅-brightgreen.svg)](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html)
 
-- **Autenticación JWT**: Sistema de autenticación seguro con tokens JWT
-- **Gestión de Usuarios**: CRUD completo para usuarios del sistema
-- **Autorización por Roles**: Control de acceso basado en roles (Admin, Usuario, Supervisor, Manager)
-- **Base de Datos SQL Server**: Integración con Microsoft SQL Server
-- **Documentación API**: Swagger/OpenAPI integrado
-- **Validación de Datos**: Validación robusta con class-validator
-- **Logging**: Sistema de logging estructurado
-- **Configuración Flexible**: Configuración por variables de entorno
-- **CORS**: Configuración de Cross-Origin Resource Sharing
+## 📋 Tabla de Contenidos
 
-## 📋 Prerrequisitos
+- [🎯 Características](#-características)
+- [🏗️ Arquitectura](#️-arquitectura)
+- [🚀 Instalación](#-instalación)
+- [⚙️ Configuración](#️-configuración)
+- [📚 API Documentation](#-api-documentation)
+- [🔧 Uso](#-uso)
+- [🧪 Testing](#-testing)
+- [📁 Estructura del Proyecto](#-estructura-del-proyecto)
+- [🤝 Contribución](#-contribución)
+- [📄 Licencia](#-licencia)
 
-- Node.js (v16 o superior)
-- npm o yarn
-- Microsoft SQL Server
-- Git
+## 🎯 Características
 
-## 🛠️ Instalación
+### ✅ **Autenticación JWT**
+- 🔐 Login seguro con cédula y contraseña
+- 🎫 Tokens JWT con expiración configurable
+- 🔒 Hashing SHA256 de contraseñas
+- 👥 Sistema de roles y permisos
 
-1. **Clonar el repositorio**
-   ```bash
-   git clone <repository-url>
-   cd nestjs-jwt-login-dashboard
-   ```
+### ✅ **Gestión de Usuarios**
+- 👤 CRUD completo de usuarios
+- 🗑️ Soft delete con restauración
+- 🔍 Búsqueda y filtros avanzados
+- 📊 Estadísticas de usuarios
+- 📱 Actualización de teléfonos
 
-2. **Instalar dependencias**
-   ```bash
-   npm install
-   ```
+### ✅ **Seguridad**
+- 🛡️ Validación de roles con Guards
+- 🔐 Decoradores de autorización
+- ✅ Validación de datos con DTOs
+- 🚫 Protección contra auto-eliminación
+- 👑 Protección del último administrador
 
-3. **Configurar variables de entorno**
-   ```bash
-   cp env.example .env
-   ```
-   
-   Editar el archivo `.env` con tus configuraciones:
-   ```env
-   # Base de datos
-   DB_HOST=tu-servidor-sql
-   DB_PORT=1433
-   DB_USERNAME=tu-usuario
-   DB_PASSWORD=tu-contraseña
-   DB_DATABASE=tu-base-de-datos
-   
-   # JWT
-   JWT_SECRET=tu-clave-secreta-super-segura
-   
-   # Aplicación
-   PORT=3000
-   NODE_ENV=development
-   ```
+### ✅ **Base de Datos**
+- 🗄️ SQL Server con TypeORM
+- 📖 Entidades separadas para lectura/escritura
+- 🔄 Migraciones automáticas
+- 🗑️ Soft delete implementado
 
-4. **Ejecutar migraciones** (si es necesario)
-   ```bash
-   npm run migration:run
-   ```
+## 🏗️ Arquitectura
 
-## 🚀 Ejecución
+Este proyecto implementa **Clean Architecture** siguiendo los principios de Uncle Bob:
 
-### Desarrollo
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    PRESENTATION LAYER                       │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
+│  │ Controllers │ │   Guards    │ │ Decorators  │           │
+│  └─────────────┘ └─────────────┘ └─────────────┘           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                   APPLICATION LAYER                         │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
+│  │  Use Cases  │ │    DTOs     │ │ Validators  │           │
+│  └─────────────┘ └─────────────┘ └─────────────┘           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     DOMAIN LAYER                            │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
+│  │  Entities   │ │  Services   │ │Interfaces   │           │
+│  └─────────────┘ └─────────────┘ └─────────────┘           │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 INFRASTRUCTURE LAYER                        │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐           │
+│  │Repositories │ │   Services  │ │   Database  │           │
+│  └─────────────┘ └─────────────┘ └─────────────┘           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 🎯 **Principios Aplicados**
+
+- **Independencia de Frameworks**: El dominio no depende de NestJS
+- **Testabilidad**: Cada capa puede ser testeada independientemente
+- **Independencia de UI**: La lógica de negocio no depende de la interfaz
+- **Independencia de Base de Datos**: El dominio no conoce detalles de la DB
+- **Independencia de Agentes Externos**: El dominio no depende de servicios externos
+
+## 🚀 Instalación
+
+### Prerrequisitos
+
+- [Node.js](https://nodejs.org/) (v16 o superior)
+- [npm](https://www.npmjs.com/) o [yarn](https://yarnpkg.com/)
+- [Docker](https://www.docker.com/) (opcional, para SQL Server)
+- [SQL Server](https://www.microsoft.com/en-us/sql-server/) (2019 o superior)
+
+### 1. Clonar el repositorio
+
 ```bash
+git clone <repository-url>
+cd nestjs-jwt-login-dashboard
+```
+
+### 2. Instalar dependencias
+
+```bash
+npm install
+```
+
+### 3. Configurar variables de entorno
+
+```bash
+cp env.example .env
+```
+
+Editar `.env` con tus configuraciones:
+
+```env
+# App
+PORT=3000
+NODE_ENV=development
+
+# Database
+DB_HOST=localhost
+DB_PORT=1433
+DB_USERNAME=sa
+DB_PASSWORD=YourStrong@Passw0rd
+DB_DATABASE=appusuarios
+
+# JWT
+JWT_SECRET=your-super-secret-key-here
+JWT_EXPIRES_IN=24h
+```
+
+### 4. Configurar base de datos
+
+#### Opción A: Docker (Recomendado)
+
+```bash
+docker-compose up -d
+```
+
+#### Opción B: SQL Server local
+
+1. Instalar SQL Server
+2. Crear base de datos `appusuarios`
+3. Ejecutar el script de migración:
+
+```sql
+-- Ejecutar en SQL Server Management Studio
+-- o usar el archivo add-soft-delete-fields.sql
+```
+
+### 5. Ejecutar migraciones
+
+```bash
+npm run migration:run
+```
+
+### 6. Iniciar el servidor
+
+```bash
+# Desarrollo
 npm run start:dev
-```
 
-### Producción
-```bash
+# Producción
 npm run build
-npm run start
+npm run start:prod
 ```
 
-### Con logs preservados
-```bash
-npm run start:fast
-```
-
-## 📚 Documentación de la API
-
-Una vez que la aplicación esté ejecutándose, puedes acceder a la documentación Swagger en:
-
-```
-http://localhost:3000/api
-```
-
-## 🔐 Autenticación
-
-### Login
-```http
-POST /auth/login
-Content-Type: application/json
-
-{
-  "cedula": "40245980129",
-  "password": "cualquier-password"
-}
-```
-
-### Respuesta
-```json
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-  "user": {
-    "id": 1,
-    "cedula": "40245980129",
-    "fullname": "Raul Vargas",
-    "role": "Usuario",
-    "user_email": "raul.vargas@grupoastro.com.do"
-  },
-  "expires_in": 86400
-}
-```
-
-### Uso del Token
-```http
-GET /users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
-
-## 👥 Gestión de Usuarios
-
-### Crear Usuario (Solo Admin)
-```http
-POST /users
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "cedula": "40245980129",
-  "nombre": "Raul",
-  "apellido": "Vargas",
-  "role": "Usuario",
-  "user_email": "raul.vargas@grupoastro.com.do",
-  "division": "TI",
-  "cargo": "Desarrollador",
-  "dependencia": "Sistemas",
-  "recinto": "Santo Domingo",
-  "estado": "ACTIVO"
-}
-```
-
-### Obtener Usuarios
-```http
-GET /users
-GET /users?role=Usuario
-GET /users?division=TI
-GET /users?search=Raul
-GET /users?active=true
-```
-
-### Obtener Estadísticas
-```http
-GET /users/stats
-Authorization: Bearer <token>
-```
-
-## 🏗️ Estructura del Proyecto
-
-```
-src/
-├── auth/                    # Módulo de autenticación
-│   ├── controllers/         # Controladores de auth
-│   ├── dto/                # DTOs de autenticación
-│   ├── guards/             # Guards de autenticación
-│   ├── services/           # Servicios de auth
-│   └── strategies/         # Estrategias de Passport
-├── common/                 # Código compartido
-│   ├── constants/          # Constantes de la aplicación
-│   ├── decorators/         # Decoradores personalizados
-│   ├── filters/            # Filtros de excepción
-│   ├── guards/             # Guards de autorización
-│   ├── interceptors/       # Interceptores
-│   ├── interfaces/         # Interfaces TypeScript
-│   ├── services/           # Servicios compartidos
-│   └── utils/              # Utilidades
-├── config/                 # Configuraciones
-│   ├── app.config.ts       # Configuración de la app
-│   ├── database.config.ts  # Configuración de BD
-│   └── jwt.config.ts       # Configuración JWT
-├── entities/               # Entidades de TypeORM
-│   └── user.entity.ts      # Entidad de usuario
-├── users/                  # Módulo de usuarios
-│   ├── controllers/        # Controladores de usuarios
-│   ├── dto/               # DTOs de usuarios
-│   └── services/          # Servicios de usuarios
-├── app.controller.ts      # Controlador principal
-├── app.module.ts          # Módulo principal
-└── main.ts               # Punto de entrada
-```
-
-## 🔧 Configuración
+## ⚙️ Configuración
 
 ### Variables de Entorno
 
 | Variable | Descripción | Valor por Defecto |
 |----------|-------------|-------------------|
-| `NODE_ENV` | Entorno de ejecución | `development` |
 | `PORT` | Puerto del servidor | `3000` |
-| `DB_HOST` | Host de la base de datos | `10.8.2.226` |
+| `NODE_ENV` | Entorno de ejecución | `development` |
+| `DB_HOST` | Host de la base de datos | `localhost` |
 | `DB_PORT` | Puerto de la base de datos | `1433` |
-| `DB_USERNAME` | Usuario de la BD | `sa` |
-| `DB_PASSWORD` | Contraseña de la BD | `$ignos1234` |
-| `DB_DATABASE` | Nombre de la BD | `DbSolicitudEfectivo` |
-| `JWT_SECRET` | Clave secreta JWT | `tu_clave_secreta_aqui` |
-| `JWT_EXPIRES_IN` | Tiempo de expiración JWT | `24h` |
+| `DB_USERNAME` | Usuario de la base de datos | `sa` |
+| `DB_PASSWORD` | Contraseña de la base de datos | - |
+| `DB_DATABASE` | Nombre de la base de datos | `appusuarios` |
+| `JWT_SECRET` | Clave secreta para JWT | - |
+| `JWT_EXPIRES_IN` | Tiempo de expiración del token | `24h` |
 
-### Roles de Usuario
+### Scripts Disponibles
+
+```bash
+# Desarrollo
+npm run start:dev          # Servidor de desarrollo con hot reload
+npm run start:debug        # Servidor con debugging
+
+# Producción
+npm run build              # Compilar el proyecto
+npm run start:prod         # Servidor de producción
+
+# Testing
+npm run test               # Tests unitarios
+npm run test:e2e           # Tests end-to-end
+npm run test:cov           # Tests con cobertura
+
+# Utilidades
+npm run clean              # Limpiar archivos generados
+npm run migration:run      # Ejecutar migraciones
+npm run migration:revert   # Revertir última migración
+```
+
+## 📚 API Documentation
+
+### Swagger UI
+La documentación interactiva está disponible en:
+```
+http://localhost:3000/api
+```
+
+### Endpoints Principales
+
+#### 🔐 Autenticación
+- `POST /auth/login` - Iniciar sesión
+- `POST /auth/register` - Registrar usuario
+- `POST /auth/verify-token` - Verificar token
+- `POST /auth/update-phone` - Actualizar teléfono
+
+#### 👥 Usuarios
+- `GET /users` - Listar usuarios
+- `POST /users` - Crear usuario
+- `GET /users/:id` - Obtener usuario por ID
+- `PATCH /users/:id` - Actualizar usuario
+- `DELETE /users/:id` - Eliminar usuario (soft delete)
+- `PATCH /users/:id/restore` - Restaurar usuario
+- `GET /users/deleted/list` - Listar usuarios eliminados
+- `GET /users/stats` - Estadísticas de usuarios
+
+### Ejemplo de Uso
+
+#### 1. Login
+```bash
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "cedula": "40245980129",
+    "password": "password123"
+  }'
+```
+
+#### 2. Crear Usuario
+```bash
+curl -X POST http://localhost:3000/users \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{
+    "cedula": "40245980130",
+    "nombre": "Juan",
+    "apellido": "Pérez",
+    "password": "password123",
+    "clave": "MiClaveSecreta",
+    "role": "Usuario",
+    "user_email": "juan.perez@email.com"
+  }'
+```
+
+## 🔧 Uso
+
+### Roles Disponibles
 
 - **Admin**: Acceso completo al sistema
-- **Usuario**: Acceso básico
-- **Supervisor**: Acceso intermedio con estadísticas
-- **Manager**: Acceso de gestión
+- **Supervisor**: Gestión de usuarios y estadísticas
+- **Manager**: Gestión limitada de usuarios
+- **Usuario**: Acceso básico al sistema
+
+### Funcionalidades por Rol
+
+| Funcionalidad | Admin | Supervisor | Manager | Usuario |
+|---------------|-------|------------|---------|---------|
+| Ver usuarios | ✅ | ✅ | ✅ | ❌ |
+| Crear usuarios | ✅ | ✅ | ❌ | ❌ |
+| Editar usuarios | ✅ | ✅ | ✅ | ❌ |
+| Eliminar usuarios | ✅ | ❌ | ❌ | ❌ |
+| Ver estadísticas | ✅ | ✅ | ❌ | ❌ |
+| Restaurar usuarios | ✅ | ❌ | ❌ | ❌ |
+
+### Soft Delete
+
+El sistema implementa **soft delete** para mayor seguridad:
+
+- Los usuarios no se eliminan físicamente
+- Se marcan como `valido = '0'`
+- Se registra `deleted_at` y `deleted_by`
+- Se pueden restaurar con el endpoint `/users/:id/restore`
+
+Para eliminación física permanente:
+```json
+{
+  "confirmPermanentDelete": true,
+  "confirmText": "SI, ELIMINAR PERMANENTEMENTE",
+  "reason": "Motivo de la eliminación"
+}
+```
 
 ## 🧪 Testing
+
+### Ejecutar Tests
 
 ```bash
 # Tests unitarios
 npm run test
 
-# Tests en modo watch
-npm run test:watch
-
-# Tests con coverage
-npm run test:cov
-
-# Tests e2e
+# Tests end-to-end
 npm run test:e2e
+
+# Tests con cobertura
+npm run test:cov
 ```
 
-## 📦 Scripts Disponibles
+### Estructura de Tests
 
-| Script | Descripción |
-|--------|-------------|
-| `start` | Inicia la aplicación en modo producción |
-| `start:dev` | Inicia la aplicación en modo desarrollo con hot reload |
-| `start:fast` | Inicia con logs preservados |
-| `build` | Compila el proyecto |
-| `test` | Ejecuta tests unitarios |
-| `test:watch` | Ejecuta tests en modo watch |
-| `test:cov` | Ejecuta tests con coverage |
-| `test:e2e` | Ejecuta tests end-to-end |
+```
+test/
+├── unit/                    # Tests unitarios
+│   ├── auth.service.spec.ts
+│   └── users.service.spec.ts
+├── e2e/                     # Tests end-to-end
+│   ├── auth.e2e-spec.ts
+│   └── users.e2e-spec.ts
+└── jest-e2e.json           # Configuración Jest E2E
+```
 
-## 🔒 Seguridad
+## 📁 Estructura del Proyecto
 
-- **JWT**: Tokens con expiración configurable
-- **Validación**: Validación robusta de entrada de datos
-- **CORS**: Configuración de Cross-Origin Resource Sharing
-- **Roles**: Control de acceso basado en roles
-- **Logging**: Logging de eventos de seguridad
+```
+src/
+├── core/                          # 🎯 Capa de Dominio
+│   ├── domain/                    # Entidades y Reglas de Negocio
+│   │   ├── entities/              # Entidades del dominio
+│   │   ├── repositories/          # Interfaces de repositorios
+│   │   ├── services/              # Servicios del dominio
+│   │   └── *.interface.ts         # Interfaces del dominio
+│   └── application/               # Casos de Uso
+│       ├── use-cases/             # Casos de uso específicos
+│       └── dto/                   # Data Transfer Objects
+├── infrastructure/                # 🔧 Capa de Infraestructura
+│   ├── database/                  # Configuración de base de datos
+│   ├── repositories/              # Implementaciones de repositorios
+│   └── services/                  # Servicios externos
+├── presentation/                  # 🎨 Capa de Presentación
+│   ├── controllers/               # Controladores REST
+│   ├── modules/                   # Módulos de NestJS
+│   ├── guards/                    # Guards de autenticación
+│   ├── decorators/                # Decoradores personalizados
+│   └── strategies/                # Estrategias de Passport
+├── config/                        # ⚙️ Configuración
+├── app.controller.ts              # Controlador principal
+├── app.module.ts                  # Módulo principal
+└── main.ts                        # Punto de entrada
+```
 
 ## 🤝 Contribución
 
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
+### 1. Fork el proyecto
+
+### 2. Crear una rama para tu feature
+```bash
+git checkout -b feature/AmazingFeature
+```
+
+### 3. Commit tus cambios
+```bash
+git commit -m 'Add some AmazingFeature'
+```
+
+### 4. Push a la rama
+```bash
+git push origin feature/AmazingFeature
+```
+
+### 5. Abrir un Pull Request
+
+### Guías de Contribución
+
+- Sigue los principios de Clean Architecture
+- Escribe tests para nuevas funcionalidades
+- Mantén la documentación actualizada
+- Usa commits semánticos
+- Sigue las convenciones de código
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+Este proyecto está bajo la Licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
 
-## 🆘 Soporte
+## 🙏 Agradecimientos
 
-Si tienes problemas o preguntas:
+- [NestJS](https://nestjs.com/) - Framework de Node.js
+- [TypeORM](https://typeorm.io/) - ORM para TypeScript
+- [Passport](http://www.passportjs.org/) - Autenticación para Node.js
+- [Clean Architecture](https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html) - Uncle Bob
 
-1. Revisa la documentación de la API en `/api`
-2. Verifica los logs de la aplicación
-3. Abre un issue en el repositorio
+## 📞 Soporte
 
-## 🔄 Changelog
+Si tienes alguna pregunta o necesitas ayuda:
 
-### v1.0.0
-- ✅ Sistema de autenticación JWT
-- ✅ Gestión completa de usuarios
-- ✅ Documentación Swagger
-- ✅ Configuración flexible
-- ✅ Logging estructurado
-- ✅ Validación robusta
+- 📧 Email: [tu-email@ejemplo.com]
+- 🐛 Issues: [GitHub Issues](https://github.com/tu-usuario/nestjs-jwt-login-dashboard/issues)
+- 📖 Documentación: [Wiki](https://github.com/tu-usuario/nestjs-jwt-login-dashboard/wiki)
+
+---
+
+<div align="center">
+
+**¡Construido con ❤️ usando Clean Architecture!**
+
+[![NestJS](https://nestjs.com/img/logo-small.svg)](https://nestjs.com/)
+[![TypeScript](https://www.typescriptlang.org/images/branding/logo.svg)](https://www.typescriptlang.org/)
+
+</div>

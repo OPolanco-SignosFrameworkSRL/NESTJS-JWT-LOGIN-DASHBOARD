@@ -1,78 +1,42 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
-  IsNotEmpty,
-  Length,
-  Matches,
-  IsEmail,
   IsOptional,
+  IsEmail,
   IsEnum,
   IsNumber,
+  Length,
 } from 'class-validator';
-import { UserRole } from '../../domain/interfaces/user.interface';
+import { UserRole } from '../../domain/user.interface';
 
-export class RegisterDto {
-  @ApiProperty({
-    description: 'Número de cédula del usuario (11 dígitos)',
-    example: '40245980129',
-    minLength: 11,
-    maxLength: 11,
-  })
-  @IsString({ message: 'La cédula debe ser una cadena de texto' })
-  @IsNotEmpty({ message: 'La cédula es requerida' })
-  @Length(11, 11, { message: 'La cédula debe tener exactamente 11 dígitos' })
-  @Matches(/^\d{11}$/, { message: 'La cédula debe contener solo números' })
-  cedula: string;
-
+export class UpdateUserDto {
   @ApiProperty({
     description: 'Nombre del usuario',
     example: 'Raul',
     maxLength: 100,
+    required: false,
   })
+  @IsOptional()
   @IsString({ message: 'El nombre debe ser una cadena de texto' })
-  @IsNotEmpty({ message: 'El nombre es requerido' })
   @Length(2, 100, { message: 'El nombre debe tener entre 2 y 100 caracteres' })
-  nombre: string;
+  nombre?: string;
 
   @ApiProperty({
     description: 'Apellido del usuario',
     example: 'Vargas',
     maxLength: 100,
+    required: false,
   })
+  @IsOptional()
   @IsString({ message: 'El apellido debe ser una cadena de texto' })
-  @IsNotEmpty({ message: 'El apellido es requerido' })
-  @Length(2, 100, {
-    message: 'El apellido debe tener entre 2 y 100 caracteres',
-  })
-  apellido: string;
-
-  @ApiProperty({
-    description: 'Contraseña del usuario',
-    example: 'password123',
-    minLength: 4,
-    maxLength: 50,
-  })
-  @IsString({ message: 'La contraseña debe ser una cadena de texto' })
-  @IsNotEmpty({ message: 'La contraseña es requerida' })
-  @Length(4, 50, {
-    message: 'La contraseña debe tener entre 4 y 50 caracteres',
-  })
-  password: string;
-
-  @ApiProperty({
-    description: 'Clave dinámica proporcionada por el usuario (requerida)',
-    example: 'MiClaveSecreta2024',
-    minLength: 1,
-  })
-  @IsString({ message: 'La clave debe ser una cadena de texto' })
-  @IsNotEmpty({ message: 'La clave es requerida' })
-  clave: string;
+  @Length(2, 100, { message: 'El apellido debe tener entre 2 y 100 caracteres' })
+  apellido?: string;
 
   @ApiProperty({
     description: 'Rol del usuario en el sistema',
     example: 'Usuario',
     enum: ['Admin', 'Usuario', 'Supervisor', 'Manager'],
-    default: 'Usuario',
+    required: false,
   })
   @IsOptional()
   @IsEnum(UserRole, {
@@ -253,4 +217,15 @@ export class RegisterDto {
   @IsString({ message: 'El ID del encargado debe ser una cadena de texto' })
   @Length(1, 50, { message: 'El ID del encargado debe tener entre 1 y 50 caracteres' })
   encargadoId?: string;
+
+  @ApiProperty({
+    description: 'Indica si el usuario está activo',
+    example: '1',
+    maxLength: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'El campo valido debe ser una cadena de texto' })
+  @Length(1, 1, { message: 'El campo valido debe tener exactamente 1 carácter' })
+  valido?: string;
 } 

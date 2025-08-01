@@ -2,16 +2,16 @@ import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { UserEntity } from '../../infrastructure/database/entities/user.entity';
-import { UserWriteEntity } from '../../infrastructure/database/entities/user-write.entity';
+import { UserEntity } from '../../../infrastructure/database/entities/user.entity';
+import { UserWriteEntity } from '../../../infrastructure/database/entities/user-write.entity';
 import {
   IUser,
   IUserPayload,
   ILoginResponse,
   IUserCreateData,
   UserRole,
-} from '../../domain/interfaces/user.interface';
-import { CryptoService } from '../../infrastructure/services/crypto.service';
+} from '../user.interface';
+import { CryptoService } from '../../../infrastructure/services/crypto.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()

@@ -28,6 +28,8 @@ export class UserWrite {
     public readonly encargadoId: string,
     public readonly passwchanged: string,
     public readonly valido: string,
+    public readonly deleted_at?: Date,
+    public readonly deleted_by?: number,
   ) {}
 
   getFullName(): string {

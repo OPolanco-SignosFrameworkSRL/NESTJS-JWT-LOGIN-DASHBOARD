@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsEnum, IsString, IsBoolean } from 'class-validator';
-import { UserRole } from '../../domain/interfaces/user.interface';
+import { UserRole } from '../../domain/user.interface';
 
 export class UserFiltersDto {
   @ApiProperty({

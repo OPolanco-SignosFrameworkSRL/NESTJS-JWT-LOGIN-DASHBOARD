@@ -11,6 +11,7 @@ import {
   HttpStatus,
   ParseIntPipe,
   Request,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -20,16 +21,17 @@ import {
   ApiQuery,
   ApiParam,
 } from '@nestjs/swagger';
-import { UsersService } from '../services/users.service';
-import { AuthService } from '../../auth/services/auth.service';
-import { UpdateUserDto } from '../../application/dto/update-user.dto';
-import { RegisterDto } from '../../application/dto/register.dto';
-import { UserFiltersDto } from '../../application/dto/user-filters.dto';
-import { UpdatePhoneDto } from '../../application/dto/update-phone.dto';
-import { JwtAuthGuard } from '../../presentation/guards/jwt-auth.guard';
-import { RolesGuard } from '../../presentation/guards/roles.guard';
-import { Roles } from '../../presentation/decorators/roles.decorator';
-import { UserRole } from '../../domain/interfaces/user.interface';
+import { UsersService } from '../../core/domain/services/users.service';
+import { AuthService } from '../../core/domain/services/auth.service';
+import { UpdateUserDto } from '../../core/application/dto/update-user.dto';
+import { RegisterDto } from '../../core/application/dto/register.dto';
+import { UserFiltersDto } from '../../core/application/dto/user-filters.dto';
+import { UpdatePhoneDto } from '../../core/application/dto/update-phone.dto';
+import { DeleteUserDto } from '../../core/application/dto/delete-user.dto';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { RolesGuard } from '../guards/roles.guard';
+import { Roles } from '../decorators/roles.decorator';
+import { UserRole } from '../../core/domain/user.interface';
 //import { ApiPaginatedResponse } from '../../common/decorators/api-paginated-response.decorator';
 
 @ApiTags('Usuarios')
@@ -216,22 +218,107 @@ export class UsersController {
 
   @Delete(':id')
   @Roles(UserRole.Admin)
-  @ApiOperation({ summary: 'Eliminar un usuario permanentemente de la base de datos (¡CUIDADO! Esta acción no se puede deshacer)' })
+  @ApiOperation({ 
+    summary: 'Eliminar un usuario (soft delete por defecto, eliminación física con confirmación)',
+    description: 'Por defecto realiza soft delete. Para eliminación física permanente, enviar confirmPermanentDelete: true y confirmText: "SI, ELIMINAR PERMANENTEMENTE"'
+  })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Usuario eliminado permanentemente',
+    description: 'Usuario eliminado exitosamente',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Usuario marcado como eliminado (soft delete)' },
+        type: { type: 'string', enum: ['soft', 'permanent'], example: 'soft' },
+        user: {
+          type: 'object',
+          properties: {
+            id: { type: 'number', example: 1 },
+            cedula: { type: 'string', example: '40245980129' },
+            nombre: { type: 'string', example: 'Raul' },
+            apellido: { type: 'string', example: 'Vargas' },
+          },
+        },
+      },
+    },
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
     description: 'Usuario no encontrado',
   })
-  async remove(@Param('id', ParseIntPipe) id: number) {
-    await this.usersService.remove(id);
-    return { 
-      message: 'Usuario eliminado permanentemente de la base de datos',
-      warning: 'Esta acción no se puede deshacer'
-    };
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Validaciones fallidas (último admin, auto-eliminación, etc.)',
+  })
+  async remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() deleteUserDto: DeleteUserDto,
+    @Request() req
+  ) {
+    const currentUser = req.user;
+    
+    // Validar confirmación para eliminación permanente
+    if (deleteUserDto.confirmPermanentDelete) {
+      if (deleteUserDto.confirmText !== 'SI, ELIMINAR PERMANENTEMENTE') {
+        throw new BadRequestException('Para eliminación permanente, debes escribir exactamente: "SI, ELIMINAR PERMANENTEMENTE"');
+      }
+    }
+
+    return await this.usersService.remove(
+      id, 
+      currentUser, 
+      deleteUserDto.confirmPermanentDelete, 
+      deleteUserDto.reason
+    );
+  }
+
+  @Patch(':id/restore')
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Restaurar un usuario eliminado (soft delete)' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Usuario restaurado exitosamente',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Usuario restaurado exitosamente' },
+        user: {
+          type: 'object',
+          properties: {
+            id: { type: 'number', example: 1 },
+            cedula: { type: 'string', example: '40245980129' },
+            nombre: { type: 'string', example: 'Raul' },
+            apellido: { type: 'string', example: 'Vargas' },
+          },
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Usuario no encontrado',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'El usuario ya está activo',
+  })
+  async restore(@Param('id', ParseIntPipe) id: number, @Request() req) {
+    const currentUser = req.user;
+    return await this.usersService.restore(id, currentUser);
+  }
+
+  @Get('deleted/list')
+  @Roles(UserRole.Admin)
+  @ApiOperation({ summary: 'Obtener lista de usuarios eliminados (soft delete)' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Lista de usuarios eliminados obtenida exitosamente',
+    type: [Object],
+  })
+  async findDeleted() {
+    return await this.usersService.findDeleted();
   }
 
 

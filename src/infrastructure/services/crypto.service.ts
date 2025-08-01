@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { createHash } from 'crypto';
-import { ICryptoService } from '../../domain/interfaces/crypto.service.interface';
+import { ICryptoService } from '../../core/domain/crypto.service.interface';
 
 @Injectable()
 export class CryptoService implements ICryptoService {

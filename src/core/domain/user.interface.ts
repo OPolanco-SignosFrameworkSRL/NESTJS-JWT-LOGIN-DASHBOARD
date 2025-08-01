@@ -116,6 +116,8 @@ export interface IUserResponse {
   nuevocampo: string;
   encargadoId: string;
   valido: string;
+  deleted_at?: Date;
+  deleted_by?: number;
 }
 
 export interface IUserFilters {
