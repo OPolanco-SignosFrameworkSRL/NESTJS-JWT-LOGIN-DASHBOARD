@@ -24,8 +24,6 @@ const Layout = () => {
     setIsOpen(false) 
   }
 
-  console.log(isMobile ? false : isOpen)
-
   useEffect(() => {
 
     const checkMobile = () => {
