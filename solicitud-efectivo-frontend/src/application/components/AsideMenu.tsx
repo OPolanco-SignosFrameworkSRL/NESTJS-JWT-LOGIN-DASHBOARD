@@ -1,4 +1,4 @@
-import Container from "../ui/Container"
+import Container from "../ui/Container/Container"
 import { useEffect, useState } from "react"
 import Nav from "./Nav"
 

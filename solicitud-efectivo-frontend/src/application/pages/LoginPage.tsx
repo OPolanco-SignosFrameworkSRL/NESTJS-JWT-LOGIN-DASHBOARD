@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { GoPersonFill } from "react-icons/go";
 
-import Container from '@/application/ui/Container'
+import Container from '@/application/ui/Container/Container'
 
 const LoginPage = () => {
 

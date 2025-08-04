@@ -1,4 +1,4 @@
-import Modal from "@/application/ui/Modal"
+import Modal from "@/application/ui/Modal/Modal"
 import { IoMdSettings } from "react-icons/io";
 import { FaUser } from "react-icons/fa";
 import { TbLayoutDashboardFilled } from "react-icons/tb";

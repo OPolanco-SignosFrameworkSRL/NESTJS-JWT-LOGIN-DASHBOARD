@@ -7,11 +7,6 @@ import { MdAttachMoney } from "react-icons/md";
 import { IoIosSettings } from "react-icons/io";
 import { PiChartLineUpBold } from "react-icons/pi";
 
-
-
-
-
-
 import { Link, useLocation } from "react-router-dom";
 
 const Nav = () => {

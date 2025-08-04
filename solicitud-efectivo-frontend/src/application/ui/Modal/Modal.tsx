@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react"
-import { useAppStore } from "../store/useAppStore"
+import { useAppStore } from "@/application/store/useAppStore"
 
 type ModalProps = {
     isActive: boolean

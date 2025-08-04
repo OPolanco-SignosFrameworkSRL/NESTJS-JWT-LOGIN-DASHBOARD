@@ -1,4 +1,4 @@
-import Container from "../ui/Container"
+import Container from "../ui/Container/Container"
 import { RxHamburgerMenu } from "react-icons/rx";
 import { useAppStore } from "../store/useAppStore";
 

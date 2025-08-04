@@ -1,4 +1,6 @@
 import { FaPlus } from "react-icons/fa";
+import { Link } from "react-router-dom";
+
 import CardSection1 from "@/application/components/Home/CardSection1";
 import CardSection2 from "@/application/components/Home/CardSection2";
 import HomeTable from "@/application/components/Home/HomeTable";
@@ -22,12 +24,12 @@ const Home = () => {
         </div>
 
         <div>
-          <button className="flex items-center gap-2 text-sm sm:text-base bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg cursor-pointer  ">
+          <Link to="/new-request" className="flex items-center gap-2 text-sm sm:text-base bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg cursor-pointer  ">
             <span>
               <FaPlus size={18}/>
             </span>
             Nueva Solicitud
-          </button>
+          </Link>
         </div>
 
       </div>
