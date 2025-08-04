@@ -90,3 +90,7 @@ jspm_packages/
 # Temporary folders
 tmp/
 temp/
+
+# Database migration files with real credentials
+database-migrations/*.sql
+!database-migrations/*-migration.sql

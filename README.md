@@ -153,12 +153,14 @@ docker-compose up -d
 
 1. Instalar SQL Server
 2. Crear base de datos `appusuarios`
-3. Ejecutar el script de migración:
+3. Ejecutar la migración de soft delete (si es necesario):
 
-```sql
--- Ejecutar en SQL Server Management Studio
--- o usar el archivo add-soft-delete-fields.sql
+```bash
+# Ver el script de migración
+cat database-migrations/soft-delete-migration.sql
 ```
+
+**Nota:** El script de migración solo es necesario si tu base de datos no tiene los campos `deleted_at` y `deleted_by` en la tabla `appusuarios`.
 
 ### 5. Ejecutar migraciones
 
@@ -166,7 +168,37 @@ docker-compose up -d
 npm run migration:run
 ```
 
-### 6. Iniciar el servidor
+### 6. Migración de Soft Delete (Opcional)
+
+Si tu base de datos no tiene los campos necesarios para soft delete, ejecuta:
+
+```sql
+-- En SQL Server Management Studio
+-- Usar el script: database-migrations/soft-delete-migration.sql
+-- Reemplazar 'TU_BASE_DE_DATOS' con el nombre real de tu BD
+```
+
+**Campos que se agregan:**
+- `deleted_at` (DATETIME NULL) - Fecha de eliminación
+- `deleted_by` (INT NULL) - ID del usuario que eliminó
+- Índice para mejorar performance
+
+### 7. Migración de Solicitudes de Efectivo (Opcional)
+
+Para crear la tabla de solicitudes de efectivo, ejecuta:
+
+```sql
+-- En SQL Server Management Studio
+-- Usar el script: database-migrations/create-cash-requests-table.sql
+-- Reemplazar 'TU_BASE_DE_DATOS' con el nombre real de tu BD
+```
+
+**Tabla que se crea:**
+- `cash_requests` - Tabla principal para solicitudes de efectivo
+- Índices para mejorar performance
+- Foreign keys con la tabla de usuarios
+
+### 8. Iniciar el servidor
 
 ```bash
 # Desarrollo
@@ -238,6 +270,19 @@ http://localhost:3000/api
 - `PATCH /users/:id` - Actualizar usuario
 - `DELETE /users/:id` - Eliminar usuario (soft delete)
 - `PATCH /users/:id/restore` - Restaurar usuario
+
+#### 💰 Solicitudes de Efectivo
+- `GET /cash-requests` - Listar solicitudes
+- `GET /cash-requests/my-requests` - Mis solicitudes
+- `GET /cash-requests/:id` - Obtener solicitud por ID
+- `POST /cash-requests` - Crear solicitud
+- `PATCH /cash-requests/:id` - Actualizar solicitud
+- `PATCH /cash-requests/:id/approve` - Aprobar solicitud (admin)
+- `PATCH /cash-requests/:id/reject` - Rechazar solicitud (admin)
+- `DELETE /cash-requests/:id` - Eliminar solicitud (soft delete)
+- `PATCH /cash-requests/:id/restore` - Restaurar solicitud (admin)
+- `GET /cash-requests/filters` - Filtrar solicitudes
+- `GET /cash-requests/stats` - Estadísticas (admin)
 - `GET /users/deleted/list` - Listar usuarios eliminados
 - `GET /users/stats` - Estadísticas de usuarios
 
