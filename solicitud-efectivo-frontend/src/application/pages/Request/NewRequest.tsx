@@ -1,6 +1,10 @@
 import ButtonForms from "@/application/ui/ButtonForm/ButtonForms";
+import Input from "@/application/ui/Input/Input";
 import { useState } from "react"
 import { CiUser } from "react-icons/ci";
+import { useForm } from "react-hook-form"
+import NewRequestForm from "@/application/components/newRequest/newRequestForm";
+
 
 
 const NewRequest = () => {
@@ -31,6 +35,8 @@ const NewRequest = () => {
     }
 
   }
+
+  const {register, reset, handleSubmit, formState: {errors}} = useForm()
 
   
   return (
@@ -74,25 +80,32 @@ const NewRequest = () => {
 
       </div>
 
-      {activeItem.label === "Información Básica" && (
-        <div>
-          <h1>Información Básica</h1>
-        </div>
-      )}
+      <form
+        noValidate
+      >
 
-      {activeItem.label === "Datos Producción" && (
-        <div>
-          <h1>Datos Producción</h1>
-        </div>
-      )}
+        <div className="mt-5">
 
-      {activeItem.label === "Integrantes" && (
-        <div>
-          <h1>Integrantes</h1>
-        </div>
-      )}
-      
+          {activeItem.label === "Información Básica" && (
 
+            <NewRequestForm register={register} errors={errors}/>
+           
+          )}
+
+          {activeItem.label === "Datos Producción" && (
+            <div>
+              <h1>Datos Producción</h1>
+            </div>
+          )}
+
+          {activeItem.label === "Integrantes" && (
+            <div>
+              <h1>Integrantes</h1>
+            </div>
+          )}
+        </div>
+
+      </form>
 
       <div className="w-full flex justify-between">
 
@@ -100,6 +113,7 @@ const NewRequest = () => {
           label="Anterior" 
           border={true}
           onClick={handleClickPrevious}
+          className="bg-red-500"
         />
 
         {activeItem.label === "Integrantes" ? (
@@ -120,19 +134,12 @@ const NewRequest = () => {
             className="hover:from-green-700 hover:to-emerald-700"
             onClick={handleClickNext}
           />
-          
+
         )}
 
       </div>
 
- 
-      
-
-
-
-
     </>
-
 
   )
 }

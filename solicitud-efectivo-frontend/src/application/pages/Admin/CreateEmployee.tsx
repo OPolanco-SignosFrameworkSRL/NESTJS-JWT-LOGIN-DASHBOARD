@@ -62,16 +62,21 @@ export default function Register() {
             />
           </div>
 
-          <div className="mb-4">
+          <div className="mb-4 relative">
             <label className="text-gray-800" htmlFor="role">Rol:</label>
             <select
               id="role"
-              className="mt-2 block w-full p-3 bg-gray-50 border border-gray-300 rounded"
+              className="mt-2 block w-full p-3 pr-8 bg-gray-50 border border-gray-300 rounded appearance-none"
             >
               <option value="">Selecciona un rol</option>
               <option value="Admin">Admin</option>
               <option value="Employee">Empleado</option>
             </select>
+            <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none mt-8">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
           </div>
 
           <div className="mb-4">

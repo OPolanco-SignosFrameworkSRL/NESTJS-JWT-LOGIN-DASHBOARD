@@ -47,8 +47,11 @@ const Layout = () => {
     <>
 
       {/* AsideMenu Start */}
-
+      
+      <aside>
         <AsideMenu isOpen={isOpen} handleTouchStart={handleTouchStart} />
+      </aside>
+
         
       {/* AsideMenu End */}
 

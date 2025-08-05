@@ -6,8 +6,9 @@ export interface IColor {
 }
 
 export const bColor: IColor = {
-    primary: "border-green-300",
+    primary: "border-green-300 ",
     secondary: "none"
+    
 }
 
 export const bgColor: IColor = {

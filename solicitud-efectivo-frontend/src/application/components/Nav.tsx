@@ -68,8 +68,6 @@ const Nav = () => {
             </nav>
 
         </div>
-
-    
     </>
 
    
