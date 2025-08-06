@@ -40,28 +40,38 @@ export class UserRepository implements IUserRepository {
   }
 
   async findById(id: number): Promise<User | null> {
-    const user = await this.userRepository.findOne({
-      where: { id, valido: '1' },
-    });
+    try {
+      console.log(`Buscando usuario con ID: ${id}`);
+      const user = await this.userRepository.findOne({
+        where: { id, valido: '1' },
+      });
 
-    if (!user) return null;
+      if (!user) {
+        console.log(`Usuario con ID ${id} no encontrado`);
+        return null;
+      }
 
-    return new User(
-      user.id,
-      user.cedula,
-      user.nombre,
-      user.apellido,
-      user.codigo,
-      user.role,
-      user.user_email,
-      user.telefono,
-      user.valido,
-      user.division,
-      user.cargo,
-      user.dependencia,
-      user.recinto,
-      user.estado,
-    );
+      console.log(`Usuario encontrado: ${user.nombre} ${user.apellido}`);
+      return new User(
+        user.id,
+        user.cedula,
+        user.nombre,
+        user.apellido,
+        user.codigo,
+        user.role,
+        user.user_email,
+        user.telefono,
+        user.valido,
+        user.division,
+        user.cargo,
+        user.dependencia,
+        user.recinto,
+        user.estado,
+      );
+    } catch (error) {
+      console.error(`Error buscando usuario con ID ${id}:`, error);
+      throw error;
+    }
   }
 
   async findByCedula(cedula: string): Promise<User | null> {

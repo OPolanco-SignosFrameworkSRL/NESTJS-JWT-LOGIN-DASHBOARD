@@ -11,6 +11,7 @@ import {
   Req,
   ParseIntPipe,
   UseGuards,
+  Inject,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -20,7 +21,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { ICashRequestService } from '../../core/domain/services/cash-request.service.interface';
+import { ICashRequestService } from '../../core/domain/cash-request.service.interface';
 import { CreateCashRequestDto } from '../../core/application/dto/create-cash-request.dto';
 import { UpdateCashRequestDto } from '../../core/application/dto/update-cash-request.dto';
 import { CashRequestFiltersDto } from '../../core/application/dto/cash-request-filters.dto';
@@ -37,7 +38,10 @@ import { ICashRequestResponse, ICashRequestStats } from '../../core/domain/cash-
 @Controller('cash-requests')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class CashRequestController {
-  constructor(private readonly cashRequestService: ICashRequestService) {}
+  constructor(
+    @Inject('ICashRequestService')
+    private readonly cashRequestService: ICashRequestService
+  ) {}
 
   @Get()
   @ApiOperation({
@@ -109,7 +113,12 @@ export class CashRequestController {
     description: 'Lista de solicitudes filtradas obtenida exitosamente',
   })
   async findByFilters(@Query() filters: CashRequestFiltersDto): Promise<ICashRequestResponse[]> {
-    return await this.cashRequestService.findByFilters(filters);
+    const convertedFilters = {
+      ...filters,
+      startDate: filters.startDate ? new Date(filters.startDate) : undefined,
+      endDate: filters.endDate ? new Date(filters.endDate) : undefined,
+    };
+    return await this.cashRequestService.findByFilters(convertedFilters);
   }
 
   @Get('stats')
@@ -121,7 +130,7 @@ export class CashRequestController {
     status: 200,
     description: 'Estadísticas obtenidas exitosamente',
   })
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.Admin)
   async getStats(): Promise<ICashRequestStats> {
     return await this.cashRequestService.getStats();
   }
@@ -135,7 +144,7 @@ export class CashRequestController {
     status: 200,
     description: 'Lista de solicitudes eliminadas obtenida exitosamente',
   })
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.Admin)
   async findDeleted(): Promise<ICashRequestResponse[]> {
     return await this.cashRequestService.findDeleted();
   }
@@ -218,7 +227,7 @@ export class CashRequestController {
     status: 403,
     description: 'Solo los administradores pueden aprobar solicitudes',
   })
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.Admin)
   async approve(
     @Param('id', ParseIntPipe) id: number,
     @Body() approveCashRequestDto: ApproveCashRequestDto,
@@ -241,7 +250,7 @@ export class CashRequestController {
     status: 403,
     description: 'Solo los administradores pueden rechazar solicitudes',
   })
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.Admin)
   async reject(
     @Param('id', ParseIntPipe) id: number,
     @Body() approveCashRequestDto: ApproveCashRequestDto,
@@ -264,7 +273,7 @@ export class CashRequestController {
     status: 403,
     description: 'Solo los administradores pueden restaurar solicitudes',
   })
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.Admin)
   async restore(
     @Param('id', ParseIntPipe) id: number,
     @Req() req: any

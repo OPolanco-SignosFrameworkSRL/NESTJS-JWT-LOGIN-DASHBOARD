@@ -1,9 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { CashRequestStatus, CashRequestType, PaymentType, Division } from '../../../core/domain/cash-request.interface';
 
-@Entity('vsolicitud_generales')
-export class CashRequestWriteEntity {
+@Entity('solicitud_desembolso_web')
+export class SolicitudGeneralEntity {
   @ApiProperty({
     description: 'ID único de la solicitud',
     example: 1,
@@ -80,9 +79,8 @@ export class CashRequestWriteEntity {
   @ApiProperty({
     description: 'Concepto de la solicitud',
     example: 'Materiales para mantenimiento',
-    nullable: true,
   })
-  @Column({ type: 'varchar', length: 2500, nullable: true })
+  @Column({ type: 'varchar', length: 2500 })
   concepto: string;
 
   @ApiProperty({
@@ -102,7 +100,7 @@ export class CashRequestWriteEntity {
   num_orden_prod: string;
 
   @ApiProperty({
-    description: 'Número del ticket de producción',
+    description: 'Número de ticket de producción',
     example: 'TK-001',
     nullable: true,
   })
@@ -149,81 +147,58 @@ export class CashRequestWriteEntity {
   razon_rechazon: string;
 
   @ApiProperty({
-    description: 'Nombre del usuario solicitante',
-    example: 'Juan Pérez',
+    description: 'Fecha de desembolso',
+    example: '2024-01-15T10:30:00.000Z',
     nullable: true,
   })
-  @Column({ type: 'varchar', length: 511, nullable: true })
-  usuarionombre: string;
+  @Column({ type: 'datetime', nullable: true, name: 'fecha_desembolso' })
+  fecha_desembolso: Date;
 
   @ApiProperty({
-    description: 'Nombre del usuario autorizador',
-    example: 'María García',
+    description: 'Fecha de aprobación',
+    example: '2024-01-15T10:30:00.000Z',
     nullable: true,
   })
-  @Column({ type: 'varchar', length: 511, nullable: true, name: 'autorizadopor_nombre' })
-  autorizadopor_nombre: string;
+  @Column({ type: 'datetime', nullable: true, name: 'fecha_aprobada' })
+  fecha_aprobada: Date;
 
   @ApiProperty({
-    description: 'Cédula del usuario',
+    description: 'ID del usuario que verificó',
+    example: 1,
+    nullable: true,
+  })
+  @Column({ type: 'int', nullable: true, name: 'verificada_porid' })
+  verificada_porid: number;
+
+  @ApiProperty({
+    description: 'Fecha de verificación',
+    example: '2024-01-15T10:30:00.000Z',
+    nullable: true,
+  })
+  @Column({ type: 'datetime', nullable: true, name: 'fecha_verificada' })
+  fecha_verificada: Date;
+
+  @ApiProperty({
+    description: 'Comentario de verificación',
+    example: 'Verificado correctamente',
+    nullable: true,
+  })
+  @Column({ type: 'varchar', length: 4000, nullable: true, name: 'verificacion_comennt' })
+  verificacion_comennt: string;
+
+  @ApiProperty({
+    description: 'ID del desembolso',
+    example: 1,
+    nullable: true,
+  })
+  @Column({ type: 'int', nullable: true, name: 'desembolsoid' })
+  desembolsoid: number;
+
+  @ApiProperty({
+    description: 'Cédula del autorizador',
     example: '12345678',
     nullable: true,
   })
-  @Column({ type: 'varchar', length: 25, nullable: true })
-  cedula: string;
-
-  @ApiProperty({
-    description: 'Nombre de la división',
-    example: 'Administración',
-    nullable: true,
-  })
-  @Column({ type: 'varchar', length: 500, nullable: true, name: 'division_nombre' })
-  division_nombre: string;
-
-  @ApiProperty({
-    description: 'Descripción del estado',
-    example: 'Pendiente',
-    nullable: true,
-  })
-  @Column({ type: 'varchar', length: 255, nullable: true, name: 'estatus_desc' })
-  estatus_desc: string;
-
-  @ApiProperty({
-    description: 'Ícono del estado',
-    example: 'pending-icon',
-    nullable: true,
-  })
-  @Column({ type: 'varchar', length: 500, nullable: true, name: 'estatus_icon' })
-  estatus_icon: string;
-
-  @ApiProperty({
-    description: 'Descripción del tipo de solicitud',
-    example: 'Compra de materiales',
-    nullable: true,
-  })
-  @Column({ type: 'varchar', length: 255, nullable: true, name: 'solicitud_tipo_desc' })
-  solicitud_tipo_desc: string;
-
-  @ApiProperty({
-    description: 'Campo de producción',
-    example: 1,
-  })
-  @Column({ type: 'int', name: 'produccion' })
-  produccion: number;
-
-  @ApiProperty({
-    description: 'Descripción del tipo de pago',
-    example: 'Efectivo',
-    nullable: true,
-  })
-  @Column({ type: 'varchar', length: 45, nullable: true, name: 'tipo_pago_desc' })
-  tipo_pago_desc: string;
-
-  @ApiProperty({
-    description: 'Nombre del usuario verificador',
-    example: 'Carlos López',
-    nullable: true,
-  })
-  @Column({ type: 'varchar', length: 511, nullable: true, name: 'verificadopor_nombre' })
-  verificadopor_nombre: string;
+  @Column({ type: 'varchar', length: 25, nullable: true, name: 'cedula_autoriza' })
+  cedula_autoriza: string;
 } 

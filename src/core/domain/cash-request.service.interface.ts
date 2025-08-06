@@ -9,32 +9,32 @@ export interface ICashRequestService {
   getStats(): Promise<ICashRequestStats>;
   create(
     cashRequestData: any,
-    currentUser: { id: number; role: UserRole }
+    currentUser: { sub: number; role: UserRole }
   ): Promise<ICashRequestResponse>;
   update(
     id: number,
     cashRequestData: any,
-    currentUser: { id: number; role: UserRole }
+    currentUser: { sub: number; role: UserRole }
   ): Promise<ICashRequestResponse>;
   approve(
     id: number,
-    currentUser: { id: number; role: UserRole },
+    currentUser: { sub: number; role: UserRole },
     notes?: string
   ): Promise<ICashRequestResponse>;
   reject(
     id: number,
-    currentUser: { id: number; role: UserRole },
+    currentUser: { sub: number; role: UserRole },
     notes?: string
   ): Promise<ICashRequestResponse>;
   remove(
     id: number,
-    currentUser: { id: number; role: UserRole },
+    currentUser: { sub: number; role: UserRole },
     confirmPermanentDelete?: boolean,
     reason?: string
   ): Promise<{ message: string; type: 'soft' | 'permanent'; cashRequest: any }>;
   restore(
     id: number,
-    currentUser: { id: number; role: UserRole }
+    currentUser: { sub: number; role: UserRole }
   ): Promise<{ message: string; cashRequest: any }>;
   findDeleted(): Promise<ICashRequestResponse[]>;
 } 

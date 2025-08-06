@@ -1,51 +1,49 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsNumber, IsDateString, IsEnum, Min, Max } from 'class-validator';
-import { CashRequestStatus, CashRequestType, PaymentType, Division } from '../../domain/cash-request.interface';
+import { IsOptional, IsNumber, IsString, IsDateString, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
+import { SolicitudStatus, SolicitudTipo } from '../../domain/solicitud-general.interface';
 
-export class CashRequestFiltersDto {
+export class SolicitudGeneralFiltersDto {
   @ApiProperty({
-    description: 'Estado de la solicitud',
-    example: 1,
-    enum: CashRequestStatus,
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(CashRequestStatus)
-  @Type(() => Number)
-  status?: number;
-
-  @ApiProperty({
-    description: 'División',
-    example: 1,
-    enum: Division,
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(Division)
-  @Type(() => Number)
-  division?: number;
-
-  @ApiProperty({
-    description: 'Tipo de solicitud',
-    example: 1,
-    enum: CashRequestType,
-    required: false,
-  })
-  @IsOptional()
-  @IsEnum(CashRequestType)
-  @Type(() => Number)
-  requestType?: number;
-
-  @ApiProperty({
-    description: 'ID del usuario que solicitó',
+    description: 'ID del usuario solicitante',
     example: 1,
     required: false,
   })
   @IsOptional()
   @IsNumber()
   @Type(() => Number)
-  requestedBy?: number;
+  solicitada_porid?: number;
+
+  @ApiProperty({
+    description: 'Tipo de solicitud',
+    example: 1,
+    enum: SolicitudTipo,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  solicitud_tipo?: number;
+
+  @ApiProperty({
+    description: 'Estado de la solicitud',
+    example: 1,
+    enum: SolicitudStatus,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  solicitud_status?: number;
+
+  @ApiProperty({
+    description: 'Departamento',
+    example: 'ADMINISTRACION',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  departamento?: string;
 
   @ApiProperty({
     description: 'Fecha de inicio',
@@ -86,4 +84,13 @@ export class CashRequestFiltersDto {
   @Min(0)
   @Type(() => Number)
   maxAmount?: number;
+
+  @ApiProperty({
+    description: 'Nombre del usuario',
+    example: 'Juan Pérez',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  usuarionombre?: string;
 } 

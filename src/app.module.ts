@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './presentation/modules/auth.module';
 import { UsersModule } from './presentation/modules/users.module';
 import { CashRequestModule } from './presentation/modules/cash-request.module';
+import { SolicitudGeneralModule } from './presentation/modules/solicitud-general.module';
 import { AppController } from './app.controller';
 import { getDatabaseConfig } from './config/database.config';
 import { appConfig } from './config/app.config';
@@ -24,6 +25,7 @@ import { appConfig } from './config/app.config';
     AuthModule,
     UsersModule,
     CashRequestModule,
+    SolicitudGeneralModule,
   ],
   controllers: [AppController],
   providers: [],

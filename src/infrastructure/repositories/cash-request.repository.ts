@@ -16,226 +16,321 @@ export class CashRequestRepository implements ICashRequestRepository {
   ) {}
 
   async findAll(): Promise<CashRequest[]> {
-    const cashRequests = await this.cashRequestRepository.find({
-      where: { valido: '1' },
-      order: { createdAt: 'DESC' },
-    });
+    try {
+      console.log('Iniciando findAll en CashRequestRepository');
+      const cashRequests = await this.cashRequestRepository.find({
+        order: { fechacreada: 'DESC' },
+      });
+      console.log(`Encontradas ${cashRequests.length} solicitudes en la base de datos`);
 
-    return cashRequests.map(cashRequest => new CashRequest(
-      cashRequest.id,
-      cashRequest.requestedBy,
-      Number(cashRequest.requestedAmount),
-      cashRequest.requestType,
-      cashRequest.division,
-      cashRequest.paymentType,
-      cashRequest.status,
-      cashRequest.createdAt,
-      cashRequest.updatedAt,
-      cashRequest.approvedBy,
-      cashRequest.approvedAt,
-      cashRequest.notes,
-      cashRequest.valido,
-    ));
+      return cashRequests.map(cashRequest => new CashRequest(
+        cashRequest.id,
+        cashRequest.fechacreada,
+        cashRequest.solicitada_porid,
+        Number(cashRequest.monto_solicitado),
+        cashRequest.solicitud_tipo,
+        cashRequest.solicitud_status,
+        cashRequest.divicionid,
+        cashRequest.tipo_pago,
+        cashRequest.produccion,
+        cashRequest.autorizado_porid,
+        cashRequest.fecha_requerida,
+        cashRequest.departamento,
+        cashRequest.concepto,
+        cashRequest.fecha_orden_prod,
+        cashRequest.num_orden_prod,
+        cashRequest.num_ticket_prod,
+        cashRequest.nombre_cliente,
+        cashRequest.solicitud_numero,
+        cashRequest.fecha_rechazada,
+        cashRequest.razon_rechazon,
+        cashRequest.usuarionombre,
+        cashRequest.autorizadopor_nombre,
+        cashRequest.cedula,
+        cashRequest.division_nombre,
+        cashRequest.estatus_desc,
+        cashRequest.estatus_icon,
+        cashRequest.solicitud_tipo_desc,
+        cashRequest.tipo_pago_desc,
+        cashRequest.verificadopor_nombre,
+      ));
+    } catch (error) {
+      console.error('Error en findAll del repositorio:', error);
+      throw error;
+    }
   }
 
   async findById(id: number): Promise<CashRequest | null> {
     const cashRequest = await this.cashRequestRepository.findOne({
-      where: { id, valido: '1' },
+      where: { id },
     });
 
     if (!cashRequest) return null;
 
     return new CashRequest(
       cashRequest.id,
-      cashRequest.requestedBy,
-      Number(cashRequest.requestedAmount),
-      cashRequest.requestType,
-      cashRequest.division,
-      cashRequest.paymentType,
-      cashRequest.status,
-      cashRequest.createdAt,
-      cashRequest.updatedAt,
-      cashRequest.approvedBy,
-      cashRequest.approvedAt,
-      cashRequest.notes,
-      cashRequest.valido,
+      cashRequest.fechacreada,
+      cashRequest.solicitada_porid,
+      Number(cashRequest.monto_solicitado),
+      cashRequest.solicitud_tipo,
+      cashRequest.solicitud_status,
+      cashRequest.divicionid,
+      cashRequest.tipo_pago,
+      cashRequest.produccion,
+      cashRequest.autorizado_porid,
+      cashRequest.fecha_requerida,
+      cashRequest.departamento,
+      cashRequest.concepto,
+      cashRequest.fecha_orden_prod,
+      cashRequest.num_orden_prod,
+      cashRequest.num_ticket_prod,
+      cashRequest.nombre_cliente,
+      cashRequest.solicitud_numero,
+      cashRequest.fecha_rechazada,
+      cashRequest.razon_rechazon,
+      cashRequest.usuarionombre,
+      cashRequest.autorizadopor_nombre,
+      cashRequest.cedula,
+      cashRequest.division_nombre,
+      cashRequest.estatus_desc,
+      cashRequest.estatus_icon,
+      cashRequest.solicitud_tipo_desc,
+      cashRequest.tipo_pago_desc,
+      cashRequest.verificadopor_nombre,
     );
   }
 
   async findByUser(userId: number): Promise<CashRequest[]> {
     const cashRequests = await this.cashRequestRepository.find({
-      where: { requestedBy: userId, valido: '1' },
-      order: { createdAt: 'DESC' },
+      where: { solicitada_porid: userId },
+      order: { fechacreada: 'DESC' },
     });
 
     return cashRequests.map(cashRequest => new CashRequest(
       cashRequest.id,
-      cashRequest.requestedBy,
-      Number(cashRequest.requestedAmount),
-      cashRequest.requestType,
-      cashRequest.division,
-      cashRequest.paymentType,
-      cashRequest.status,
-      cashRequest.createdAt,
-      cashRequest.updatedAt,
-      cashRequest.approvedBy,
-      cashRequest.approvedAt,
-      cashRequest.notes,
-      cashRequest.valido,
+      cashRequest.fechacreada,
+      cashRequest.solicitada_porid,
+      Number(cashRequest.monto_solicitado),
+      cashRequest.solicitud_tipo,
+      cashRequest.solicitud_status,
+      cashRequest.divicionid,
+      cashRequest.tipo_pago,
+      cashRequest.produccion,
+      cashRequest.autorizado_porid,
+      cashRequest.fecha_requerida,
+      cashRequest.departamento,
+      cashRequest.concepto,
+      cashRequest.fecha_orden_prod,
+      cashRequest.num_orden_prod,
+      cashRequest.num_ticket_prod,
+      cashRequest.nombre_cliente,
+      cashRequest.solicitud_numero,
+      cashRequest.fecha_rechazada,
+      cashRequest.razon_rechazon,
+      cashRequest.usuarionombre,
+      cashRequest.autorizadopor_nombre,
+      cashRequest.cedula,
+      cashRequest.division_nombre,
+      cashRequest.estatus_desc,
+      cashRequest.estatus_icon,
+      cashRequest.solicitud_tipo_desc,
+      cashRequest.tipo_pago_desc,
+      cashRequest.verificadopor_nombre,
     ));
   }
 
-  async findByStatus(status: string): Promise<CashRequest[]> {
+  async findByStatus(status: number): Promise<CashRequest[]> {
     const cashRequests = await this.cashRequestRepository.find({
-      where: { status, valido: '1' },
-      order: { createdAt: 'DESC' },
+      where: { solicitud_status: status },
+      order: { fechacreada: 'DESC' },
     });
 
     return cashRequests.map(cashRequest => new CashRequest(
       cashRequest.id,
-      cashRequest.requestedBy,
-      Number(cashRequest.requestedAmount),
-      cashRequest.requestType,
-      cashRequest.division,
-      cashRequest.paymentType,
-      cashRequest.status,
-      cashRequest.createdAt,
-      cashRequest.updatedAt,
-      cashRequest.approvedBy,
-      cashRequest.approvedAt,
-      cashRequest.notes,
-      cashRequest.valido,
+      cashRequest.fechacreada,
+      cashRequest.solicitada_porid,
+      Number(cashRequest.monto_solicitado),
+      cashRequest.solicitud_tipo,
+      cashRequest.solicitud_status,
+      cashRequest.divicionid,
+      cashRequest.tipo_pago,
+      cashRequest.produccion,
+      cashRequest.autorizado_porid,
+      cashRequest.fecha_requerida,
+      cashRequest.departamento,
+      cashRequest.concepto,
+      cashRequest.fecha_orden_prod,
+      cashRequest.num_orden_prod,
+      cashRequest.num_ticket_prod,
+      cashRequest.nombre_cliente,
+      cashRequest.solicitud_numero,
+      cashRequest.fecha_rechazada,
+      cashRequest.razon_rechazon,
+      cashRequest.usuarionombre,
+      cashRequest.autorizadopor_nombre,
+      cashRequest.cedula,
+      cashRequest.division_nombre,
+      cashRequest.estatus_desc,
+      cashRequest.estatus_icon,
+      cashRequest.solicitud_tipo_desc,
+      cashRequest.tipo_pago_desc,
+      cashRequest.verificadopor_nombre,
     ));
   }
 
-  async findByDivision(division: string): Promise<CashRequest[]> {
+  async findByDivision(divicionid: number): Promise<CashRequest[]> {
     const cashRequests = await this.cashRequestRepository.find({
-      where: { division, valido: '1' },
-      order: { createdAt: 'DESC' },
+      where: { divicionid: divicionid },
+      order: { fechacreada: 'DESC' },
     });
 
     return cashRequests.map(cashRequest => new CashRequest(
       cashRequest.id,
-      cashRequest.requestedBy,
-      Number(cashRequest.requestedAmount),
-      cashRequest.requestType,
-      cashRequest.division,
-      cashRequest.paymentType,
-      cashRequest.status,
-      cashRequest.createdAt,
-      cashRequest.updatedAt,
-      cashRequest.approvedBy,
-      cashRequest.approvedAt,
-      cashRequest.notes,
-      cashRequest.valido,
+      cashRequest.fechacreada,
+      cashRequest.solicitada_porid,
+      Number(cashRequest.monto_solicitado),
+      cashRequest.solicitud_tipo,
+      cashRequest.solicitud_status,
+      cashRequest.divicionid,
+      cashRequest.tipo_pago,
+      cashRequest.produccion,
+      cashRequest.autorizado_porid,
+      cashRequest.fecha_requerida,
+      cashRequest.departamento,
+      cashRequest.concepto,
+      cashRequest.fecha_orden_prod,
+      cashRequest.num_orden_prod,
+      cashRequest.num_ticket_prod,
+      cashRequest.nombre_cliente,
+      cashRequest.solicitud_numero,
+      cashRequest.fecha_rechazada,
+      cashRequest.razon_rechazon,
+      cashRequest.usuarionombre,
+      cashRequest.autorizadopor_nombre,
+      cashRequest.cedula,
+      cashRequest.division_nombre,
+      cashRequest.estatus_desc,
+      cashRequest.estatus_icon,
+      cashRequest.solicitud_tipo_desc,
+      cashRequest.tipo_pago_desc,
+      cashRequest.verificadopor_nombre,
     ));
   }
 
   async findByFilters(filters: ICashRequestFilters): Promise<CashRequest[]> {
     const queryBuilder = this.cashRequestRepository
-      .createQueryBuilder('cashRequest')
-      .where('cashRequest.valido = :valido', { valido: '1' });
+      .createQueryBuilder('cashRequest');
 
     if (filters.status) {
-      queryBuilder.andWhere('cashRequest.status = :status', { status: filters.status });
+      queryBuilder.andWhere('cashRequest.solicitud_status = :status', { status: filters.status });
     }
 
     if (filters.division) {
-      queryBuilder.andWhere('cashRequest.division = :division', { division: filters.division });
+      queryBuilder.andWhere('cashRequest.divicionid = :division', { division: filters.division });
     }
 
     if (filters.requestType) {
-      queryBuilder.andWhere('cashRequest.requestType = :requestType', { requestType: filters.requestType });
+      queryBuilder.andWhere('cashRequest.solicitud_tipo = :requestType', { requestType: filters.requestType });
     }
 
     if (filters.requestedBy) {
-      queryBuilder.andWhere('cashRequest.requestedBy = :requestedBy', { requestedBy: filters.requestedBy });
+      queryBuilder.andWhere('cashRequest.solicitada_porid = :requestedBy', { requestedBy: filters.requestedBy });
     }
 
     if (filters.startDate) {
-      queryBuilder.andWhere('cashRequest.createdAt >= :startDate', { startDate: filters.startDate });
+      queryBuilder.andWhere('cashRequest.fechacreada >= :startDate', { startDate: filters.startDate });
     }
 
     if (filters.endDate) {
-      queryBuilder.andWhere('cashRequest.createdAt <= :endDate', { endDate: filters.endDate });
+      queryBuilder.andWhere('cashRequest.fechacreada <= :endDate', { endDate: filters.endDate });
     }
 
     if (filters.minAmount) {
-      queryBuilder.andWhere('cashRequest.requestedAmount >= :minAmount', { minAmount: filters.minAmount });
+      queryBuilder.andWhere('cashRequest.monto_solicitado >= :minAmount', { minAmount: filters.minAmount });
     }
 
     if (filters.maxAmount) {
-      queryBuilder.andWhere('cashRequest.requestedAmount <= :maxAmount', { maxAmount: filters.maxAmount });
+      queryBuilder.andWhere('cashRequest.monto_solicitado <= :maxAmount', { maxAmount: filters.maxAmount });
     }
 
-    queryBuilder.orderBy('cashRequest.createdAt', 'DESC');
+    queryBuilder.orderBy('cashRequest.fechacreada', 'DESC');
 
     const cashRequests = await queryBuilder.getMany();
 
     return cashRequests.map(cashRequest => new CashRequest(
       cashRequest.id,
-      cashRequest.requestedBy,
-      Number(cashRequest.requestedAmount),
-      cashRequest.requestType,
-      cashRequest.division,
-      cashRequest.paymentType,
-      cashRequest.status,
-      cashRequest.createdAt,
-      cashRequest.updatedAt,
-      cashRequest.approvedBy,
-      cashRequest.approvedAt,
-      cashRequest.notes,
-      cashRequest.valido,
+      cashRequest.fechacreada,
+      cashRequest.solicitada_porid,
+      Number(cashRequest.monto_solicitado),
+      cashRequest.solicitud_tipo,
+      cashRequest.solicitud_status,
+      cashRequest.divicionid,
+      cashRequest.tipo_pago,
+      cashRequest.produccion,
+      cashRequest.autorizado_porid,
+      cashRequest.fecha_requerida,
+      cashRequest.departamento,
+      cashRequest.concepto,
+      cashRequest.fecha_orden_prod,
+      cashRequest.num_orden_prod,
+      cashRequest.num_ticket_prod,
+      cashRequest.nombre_cliente,
+      cashRequest.solicitud_numero,
+      cashRequest.fecha_rechazada,
+      cashRequest.razon_rechazon,
+      cashRequest.usuarionombre,
+      cashRequest.autorizadopor_nombre,
+      cashRequest.cedula,
+      cashRequest.division_nombre,
+      cashRequest.estatus_desc,
+      cashRequest.estatus_icon,
+      cashRequest.solicitud_tipo_desc,
+      cashRequest.tipo_pago_desc,
+      cashRequest.verificadopor_nombre,
     ));
   }
 
   async getStats(): Promise<ICashRequestStats> {
-    const totalRequests = await this.cashRequestRepository.count({
-      where: { valido: '1' },
-    });
+    const totalRequests = await this.cashRequestRepository.count();
 
     const pendingRequests = await this.cashRequestRepository.count({
-      where: { status: 'PENDIENTE', valido: '1' },
+      where: { solicitud_status: 1 }, // Asumiendo que 1 = PENDIENTE
     });
 
     const approvedRequests = await this.cashRequestRepository.count({
-      where: { status: 'APROBADO', valido: '1' },
+      where: { solicitud_status: 2 }, // Asumiendo que 2 = APROBADO
     });
 
     const rejectedRequests = await this.cashRequestRepository.count({
-      where: { status: 'RECHAZADO', valido: '1' },
+      where: { solicitud_status: 3 }, // Asumiendo que 3 = RECHAZADO
     });
 
     const totalAmountResult = await this.cashRequestRepository
       .createQueryBuilder('cashRequest')
-      .select('SUM(cashRequest.requestedAmount)', 'total')
-      .where('cashRequest.valido = :valido', { valido: '1' })
+      .select('SUM(cashRequest.monto_solicitado)', 'total')
       .getRawOne();
 
     const totalAmount = Number(totalAmountResult?.total || 0);
 
     const requestsByStatus = await this.cashRequestRepository
       .createQueryBuilder('cashRequest')
-      .select('cashRequest.status', 'status')
+      .select('cashRequest.solicitud_status', 'status')
       .addSelect('COUNT(*)', 'count')
-      .where('cashRequest.valido = :valido', { valido: '1' })
-      .groupBy('cashRequest.status')
+      .groupBy('cashRequest.solicitud_status')
       .getRawMany();
 
     const requestsByDivision = await this.cashRequestRepository
       .createQueryBuilder('cashRequest')
-      .select('cashRequest.division', 'division')
+      .select('cashRequest.divicionid', 'division')
       .addSelect('COUNT(*)', 'count')
-      .where('cashRequest.valido = :valido', { valido: '1' })
-      .groupBy('cashRequest.division')
+      .groupBy('cashRequest.divicionid')
       .getRawMany();
 
     const requestsByType = await this.cashRequestRepository
       .createQueryBuilder('cashRequest')
-      .select('cashRequest.requestType', 'requestType')
+      .select('cashRequest.solicitud_tipo', 'requestType')
       .addSelect('COUNT(*)', 'count')
-      .where('cashRequest.valido = :valido', { valido: '1' })
-      .groupBy('cashRequest.requestType')
+      .groupBy('cashRequest.solicitud_tipo')
       .getRawMany();
 
     return {
@@ -261,7 +356,7 @@ export class CashRequestRepository implements ICashRequestRepository {
 
   async exists(id: number): Promise<boolean> {
     const count = await this.cashRequestRepository.count({
-      where: { id, valido: '1' },
+      where: { id },
     });
     return count > 0;
   }
@@ -283,20 +378,34 @@ export class CashRequestWriteRepository implements ICashRequestWriteRepository {
 
     return new CashRequestWrite(
       cashRequest.id,
-      cashRequest.requestedBy,
-      Number(cashRequest.requestedAmount),
-      cashRequest.requestType,
-      cashRequest.division,
-      cashRequest.paymentType,
-      cashRequest.status,
-      cashRequest.createdAt,
-      cashRequest.updatedAt,
-      cashRequest.approvedBy,
-      cashRequest.approvedAt,
-      cashRequest.notes,
-      cashRequest.valido,
-      cashRequest.deletedAt,
-      cashRequest.deletedBy,
+      cashRequest.fechacreada,
+      cashRequest.solicitada_porid,
+      Number(cashRequest.monto_solicitado),
+      cashRequest.solicitud_tipo,
+      cashRequest.solicitud_status,
+      cashRequest.divicionid,
+      cashRequest.tipo_pago,
+      cashRequest.produccion,
+      cashRequest.autorizado_porid,
+      cashRequest.fecha_requerida,
+      cashRequest.departamento,
+      cashRequest.concepto,
+      cashRequest.fecha_orden_prod,
+      cashRequest.num_orden_prod,
+      cashRequest.num_ticket_prod,
+      cashRequest.nombre_cliente,
+      cashRequest.solicitud_numero,
+      cashRequest.fecha_rechazada,
+      cashRequest.razon_rechazon,
+      cashRequest.usuarionombre,
+      cashRequest.autorizadopor_nombre,
+      cashRequest.cedula,
+      cashRequest.division_nombre,
+      cashRequest.estatus_desc,
+      cashRequest.estatus_icon,
+      cashRequest.solicitud_tipo_desc,
+      cashRequest.tipo_pago_desc,
+      cashRequest.verificadopor_nombre,
     );
   }
 
@@ -306,20 +415,34 @@ export class CashRequestWriteRepository implements ICashRequestWriteRepository {
 
     return new CashRequestWrite(
       savedCashRequest.id,
-      savedCashRequest.requestedBy,
-      Number(savedCashRequest.requestedAmount),
-      savedCashRequest.requestType,
-      savedCashRequest.division,
-      savedCashRequest.paymentType,
-      savedCashRequest.status,
-      savedCashRequest.createdAt,
-      savedCashRequest.updatedAt,
-      savedCashRequest.approvedBy,
-      savedCashRequest.approvedAt,
-      savedCashRequest.notes,
-      savedCashRequest.valido,
-      savedCashRequest.deletedAt,
-      savedCashRequest.deletedBy,
+      savedCashRequest.fechacreada,
+      savedCashRequest.solicitada_porid,
+      Number(savedCashRequest.monto_solicitado),
+      savedCashRequest.solicitud_tipo,
+      savedCashRequest.solicitud_status,
+      savedCashRequest.divicionid,
+      savedCashRequest.tipo_pago,
+      savedCashRequest.produccion,
+      savedCashRequest.autorizado_porid,
+      savedCashRequest.fecha_requerida,
+      savedCashRequest.departamento,
+      savedCashRequest.concepto,
+      savedCashRequest.fecha_orden_prod,
+      savedCashRequest.num_orden_prod,
+      savedCashRequest.num_ticket_prod,
+      savedCashRequest.nombre_cliente,
+      savedCashRequest.solicitud_numero,
+      savedCashRequest.fecha_rechazada,
+      savedCashRequest.razon_rechazon,
+      savedCashRequest.usuarionombre,
+      savedCashRequest.autorizadopor_nombre,
+      savedCashRequest.cedula,
+      savedCashRequest.division_nombre,
+      savedCashRequest.estatus_desc,
+      savedCashRequest.estatus_icon,
+      savedCashRequest.solicitud_tipo_desc,
+      savedCashRequest.tipo_pago_desc,
+      savedCashRequest.verificadopor_nombre,
     );
   }
 
@@ -335,20 +458,34 @@ export class CashRequestWriteRepository implements ICashRequestWriteRepository {
 
     return new CashRequestWrite(
       updatedCashRequest.id,
-      updatedCashRequest.requestedBy,
-      Number(updatedCashRequest.requestedAmount),
-      updatedCashRequest.requestType,
-      updatedCashRequest.division,
-      updatedCashRequest.paymentType,
-      updatedCashRequest.status,
-      updatedCashRequest.createdAt,
-      updatedCashRequest.updatedAt,
-      updatedCashRequest.approvedBy,
-      updatedCashRequest.approvedAt,
-      updatedCashRequest.notes,
-      updatedCashRequest.valido,
-      updatedCashRequest.deletedAt,
-      updatedCashRequest.deletedBy,
+      updatedCashRequest.fechacreada,
+      updatedCashRequest.solicitada_porid,
+      Number(updatedCashRequest.monto_solicitado),
+      updatedCashRequest.solicitud_tipo,
+      updatedCashRequest.solicitud_status,
+      updatedCashRequest.divicionid,
+      updatedCashRequest.tipo_pago,
+      updatedCashRequest.produccion,
+      updatedCashRequest.autorizado_porid,
+      updatedCashRequest.fecha_requerida,
+      updatedCashRequest.departamento,
+      updatedCashRequest.concepto,
+      updatedCashRequest.fecha_orden_prod,
+      updatedCashRequest.num_orden_prod,
+      updatedCashRequest.num_ticket_prod,
+      updatedCashRequest.nombre_cliente,
+      updatedCashRequest.solicitud_numero,
+      updatedCashRequest.fecha_rechazada,
+      updatedCashRequest.razon_rechazon,
+      updatedCashRequest.usuarionombre,
+      updatedCashRequest.autorizadopor_nombre,
+      updatedCashRequest.cedula,
+      updatedCashRequest.division_nombre,
+      updatedCashRequest.estatus_desc,
+      updatedCashRequest.estatus_icon,
+      updatedCashRequest.solicitud_tipo_desc,
+      updatedCashRequest.tipo_pago_desc,
+      updatedCashRequest.verificadopor_nombre,
     );
   }
 
@@ -371,45 +508,36 @@ export class CashRequestWriteRepository implements ICashRequestWriteRepository {
 
     return cashRequests.map(cashRequest => new CashRequestWrite(
       cashRequest.id,
-      cashRequest.requestedBy,
-      Number(cashRequest.requestedAmount),
-      cashRequest.requestType,
-      cashRequest.division,
-      cashRequest.paymentType,
-      cashRequest.status,
-      cashRequest.createdAt,
-      cashRequest.updatedAt,
-      cashRequest.approvedBy,
-      cashRequest.approvedAt,
-      cashRequest.notes,
-      cashRequest.valido,
-      cashRequest.deletedAt,
-      cashRequest.deletedBy,
+      cashRequest.fechacreada,
+      cashRequest.solicitada_porid,
+      Number(cashRequest.monto_solicitado),
+      cashRequest.solicitud_tipo,
+      cashRequest.solicitud_status,
+      cashRequest.divicionid,
+      cashRequest.tipo_pago,
+      cashRequest.produccion,
+      cashRequest.autorizado_porid,
+      cashRequest.fecha_requerida,
+      cashRequest.departamento,
+      cashRequest.concepto,
+      cashRequest.fecha_orden_prod,
+      cashRequest.num_orden_prod,
+      cashRequest.num_ticket_prod,
+      cashRequest.nombre_cliente,
+      cashRequest.solicitud_numero,
+      cashRequest.fecha_rechazada,
+      cashRequest.razon_rechazon,
+      cashRequest.usuarionombre,
+      cashRequest.autorizadopor_nombre,
+      cashRequest.cedula,
+      cashRequest.division_nombre,
+      cashRequest.estatus_desc,
+      cashRequest.estatus_icon,
+      cashRequest.solicitud_tipo_desc,
+      cashRequest.tipo_pago_desc,
+      cashRequest.verificadopor_nombre,
     ));
   }
 
-  async findByValid(valid: string): Promise<CashRequestWrite[]> {
-    const cashRequests = await this.cashRequestWriteRepository.find({
-      where: { valido: valid },
-      order: { id: 'DESC' },
-    });
 
-    return cashRequests.map(cashRequest => new CashRequestWrite(
-      cashRequest.id,
-      cashRequest.requestedBy,
-      Number(cashRequest.requestedAmount),
-      cashRequest.requestType,
-      cashRequest.division,
-      cashRequest.paymentType,
-      cashRequest.status,
-      cashRequest.createdAt,
-      cashRequest.updatedAt,
-      cashRequest.approvedBy,
-      cashRequest.approvedAt,
-      cashRequest.notes,
-      cashRequest.valido,
-      cashRequest.deletedAt,
-      cashRequest.deletedBy,
-    ));
-  }
 } 

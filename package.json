@@ -18,7 +18,8 @@
     "clean": "rimraf dist",
     "prebuild": "npm run clean",
     "postinstall": "npm run build",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "check-db": "ts-node src/scripts/check-database.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -29,6 +30,7 @@
     "@nestjs/platform-express": "^10.4.20",
     "@nestjs/swagger": "^7.3.0",
     "@nestjs/typeorm": "^10.0.0",
+    "axios": "^1.11.0",
     "bcrypt": "^5.1.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
@@ -59,6 +61,7 @@
     "prettier": "^3.0.0",
     "rimraf": "^5.0.0",
     "ts-jest": "^29.4.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.0.0"
   }
 }
