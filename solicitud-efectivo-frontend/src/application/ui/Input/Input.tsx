@@ -23,13 +23,15 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     ref
   ) => {
 
+    const baseClasses = `${className} border-2 border-green-300 rounded-md p-2 w-full bg-white focus:outline-none focus:ring-1 focus:ring-green-300`;
+    const dateClasses = type === 'date' ? 'appearance-none [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-calendar-picker-indicator]:opacity-70 [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:p-1' : '';
 
     return (
       <input
         type={type}
         onChange={onChange}
         value={value}
-        className={`${className} border-2 border-green-300 rounded-md p-2 w-full bg-white`}
+        className={`${baseClasses} ${dateClasses}`}
         placeholder={placeholder}
         ref={ref}
         defaultValue={defaultValue} 

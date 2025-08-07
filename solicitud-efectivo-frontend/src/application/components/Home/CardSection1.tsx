@@ -22,7 +22,7 @@ const CardSection1 = () => {
 
             <div className={`flex flex-col ${item.color} text-sm sm:text-base w-full shadow-xl p-5 rounded-lg`} key={index}>
 
-                <span className="text-white">
+                <span className="text-sm sm:text-base text-white">
                     {item.label}
                 </span>
 
