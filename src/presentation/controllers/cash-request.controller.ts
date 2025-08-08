@@ -30,8 +30,8 @@ import { DeleteCashRequestDto } from '../../core/application/dto/delete-cash-req
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
-import { UserRole } from '../../core/domain/user.interface';
-import { ICashRequestResponse, ICashRequestStats } from '../../core/domain/cash-request.interface';
+import { UserRole } from '../../core/domain/interfaces/user.interface';
+import { ICashRequestResponse, ICashRequestStats } from '../../core/domain/interfaces/cash-request.interface';
 
 @ApiTags('Solicitudes de Efectivo')
 @ApiBearerAuth()
@@ -130,7 +130,7 @@ export class CashRequestController {
     status: 200,
     description: 'Estadísticas obtenidas exitosamente',
   })
-  @Roles(UserRole.Admin)
+  @Roles('Admin')
   async getStats(): Promise<ICashRequestStats> {
     return await this.cashRequestService.getStats();
   }
@@ -144,7 +144,7 @@ export class CashRequestController {
     status: 200,
     description: 'Lista de solicitudes eliminadas obtenida exitosamente',
   })
-  @Roles(UserRole.Admin)
+  @Roles('Admin')
   async findDeleted(): Promise<ICashRequestResponse[]> {
     return await this.cashRequestService.findDeleted();
   }
@@ -227,7 +227,7 @@ export class CashRequestController {
     status: 403,
     description: 'Solo los administradores pueden aprobar solicitudes',
   })
-  @Roles(UserRole.Admin)
+  @Roles('Admin')
   async approve(
     @Param('id', ParseIntPipe) id: number,
     @Body() approveCashRequestDto: ApproveCashRequestDto,
@@ -250,7 +250,7 @@ export class CashRequestController {
     status: 403,
     description: 'Solo los administradores pueden rechazar solicitudes',
   })
-  @Roles(UserRole.Admin)
+  @Roles('Admin')
   async reject(
     @Param('id', ParseIntPipe) id: number,
     @Body() approveCashRequestDto: ApproveCashRequestDto,
@@ -273,7 +273,7 @@ export class CashRequestController {
     status: 403,
     description: 'Solo los administradores pueden restaurar solicitudes',
   })
-  @Roles(UserRole.Admin)
+  @Roles('Admin')
   async restore(
     @Param('id', ParseIntPipe) id: number,
     @Req() req: any

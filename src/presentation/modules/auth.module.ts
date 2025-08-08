@@ -1,28 +1,46 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
 import { AuthController } from '../controllers/auth.controller';
-import { AuthService } from '../../core/domain/services/auth.service';
+import { JwtStrategy } from '../strategies/jwt.strategy';
+
+// Entidades de base de datos
 import { UserEntity } from '../../infrastructure/database/entities/user.entity';
 import { UserWriteEntity } from '../../infrastructure/database/entities/user-write.entity';
-import { JwtStrategy } from '../strategies/jwt.strategy';
-import { CryptoService } from '../../infrastructure/services/crypto.service';
-import { getJwtConfig } from '../../config/jwt.config';
 
+// Casos de uso y servicios
+import { ApplicationModule } from '../../core/application/application.module';
+
+/**
+ * Módulo de Autenticación
+ * Configura la autenticación JWT y los casos de uso relacionados
+ */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([UserEntity, UserWriteEntity]),
+    // Módulo de aplicación (casos de uso)
+    ApplicationModule,
+    
+    // Módulos de NestJS
     PassportModule,
+    TypeOrmModule.forFeature([UserEntity, UserWriteEntity]),
+    
+    // Configuración JWT
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => getJwtConfig(configService),
+      useFactory: async (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: {
+          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '24h'),
+        },
+      }),
       inject: [ConfigService],
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, CryptoService],
-  exports: [AuthService, CryptoService],
+  providers: [JwtStrategy],
+  exports: [ApplicationModule],
 })
 export class AuthModule {}

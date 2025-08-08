@@ -327,12 +327,12 @@ curl -X POST http://localhost:3000/users \
 
 | Funcionalidad | Admin | Supervisor | Manager | Usuario |
 |---------------|-------|------------|---------|---------|
-| Ver usuarios | ✅ | ✅ | ✅ | ❌ |
-| Crear usuarios | ✅ | ✅ | ❌ | ❌ |
-| Editar usuarios | ✅ | ✅ | ✅ | ❌ |
-| Eliminar usuarios | ✅ | ❌ | ❌ | ❌ |
-| Ver estadísticas | ✅ | ✅ | ❌ | ❌ |
-| Restaurar usuarios | ✅ | ❌ | ❌ | ❌ |
+|Ver usuarios   |  ✅  |     ✅     |   ✅   |    ❌   |
+|Crear usuarios |  ✅  |     ✅     |   ❌   |    ❌   |
+|Editar usuarios|  ✅  |     ✅     |   ✅   |    ❌   |
+|Eliminar usuarios| ✅ |     ❌     |   ❌   |    ❌   |
+|Ver estadísticas | ✅ |     ✅     |   ❌   |    ❌   |
+|Restaurar usuarios| ✅|     ❌     |   ❌   |    ❌   |
 
 ### Soft Delete
 

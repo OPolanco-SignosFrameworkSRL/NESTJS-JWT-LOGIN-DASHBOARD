@@ -1,5 +1,5 @@
-import { ICashRequestResponse, ICashRequestFilters, ICashRequestStats } from './cash-request.interface';
-import { UserRole } from './user.interface';
+import { ICashRequestResponse, ICashRequestFilters, ICashRequestStats } from './interfaces/cash-request.interface';
+import { UserRole } from './interfaces/user.interface';
 
 export interface ICashRequestService {
   findAll(): Promise<ICashRequestResponse[]>;

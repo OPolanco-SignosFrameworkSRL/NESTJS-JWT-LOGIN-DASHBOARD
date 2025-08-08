@@ -2,196 +2,173 @@ import {
   Controller,
   Post,
   Body,
+  HttpCode,
+  HttpStatus,
   UseGuards,
   Request,
-  HttpStatus,
-  HttpCode,
-  UnauthorizedException,
   Get,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-} from '@nestjs/swagger';
-import { AuthService } from '../../core/domain/services/auth.service';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from '@nestjs/passport';
+import { CreateUserUseCase } from '../../core/application/use-cases/create-user.use-case';
+import { AuthenticateUserUseCase } from '../../core/application/use-cases/authenticate-user.use-case';
 import { LoginDto } from '../../core/application/dto/login.dto';
 import { RegisterDto } from '../../core/application/dto/register.dto';
-import { UpdatePhoneDto } from '../../core/application/dto/update-phone.dto';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { ILoginResponse } from '../../core/domain/user.interface';
+import { IUserPayload } from '../../core/domain/interfaces/user.interface';
 
+/**
+ * Controlador de Autenticación
+ * Maneja las operaciones de autenticación y autorización
+ * Sigue Clean Architecture - solo maneja HTTP, no lógica de negocio
+ */
 @ApiTags('Autenticación')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly createUserUseCase: CreateUserUseCase,
+    private readonly authenticateUserUseCase: AuthenticateUserUseCase,
+    private readonly jwtService: JwtService,
+  ) {}
 
+  /**
+   * Registra un nuevo usuario
+   */
+  @Post('register')
+  @ApiOperation({ summary: 'Registrar un nuevo usuario' })
+  @ApiResponse({ status: 201, description: 'Usuario creado exitosamente' })
+  @ApiResponse({ status: 400, description: 'Datos inválidos' })
+  @ApiResponse({ status: 409, description: 'Usuario ya existe' })
+  async register(@Body() registerDto: RegisterDto) {
+    const result = await this.createUserUseCase.execute(registerDto);
+
+    if (!result.success) {
+      return {
+        data: {
+          success: false,
+          error: result.error,
+        },
+        statusCode: 201,
+        message: 'Operación exitosa',
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    return {
+      data: {
+        success: true,
+        message: result.message,
+        userId: result.userId,
+      },
+      statusCode: 201,
+      message: 'Operación exitosa',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /**
+   * Autentica un usuario y genera un token JWT
+   */
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Iniciar sesión' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Login exitoso',
-    schema: {
-      type: 'object',
-      properties: {
-        access_token: {
-          type: 'string',
-          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-        },
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'number', example: 1 },
-            cedula: { type: 'string', example: '40245980129' },
-            fullname: { type: 'string', example: 'Raul Vargas' },
-            role: { type: 'string', example: 'Usuario' },
-            user_email: {
-              type: 'string',
-              example: 'raul.vargas@grupoastro.com.do',
-            },
-          },
-        },
-        expires_in: { type: 'number', example: 86400 },
-      },
-    },
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'Credenciales inválidas',
-  })
-  async login(@Body() loginDto: LoginDto): Promise<ILoginResponse> {
-    const user = await this.authService.validateUser(
+  @ApiResponse({ status: 200, description: 'Login exitoso' })
+  @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
+  async login(@Body() loginDto: LoginDto) {
+    const user = await this.authenticateUserUseCase.execute(
       loginDto.cedula,
       loginDto.password,
     );
 
-    
-
     if (!user) {
-      throw new UnauthorizedException('Credenciales inválidas BUG');
+      return {
+        data: {
+          success: false,
+          error: 'Credenciales inválidas',
+        },
+        statusCode: 200,
+        message: 'Operación exitosa',
+        timestamp: new Date().toISOString(),
+      };
     }
 
-    return await this.authService.login(user);
-  }
+    const payload: IUserPayload = {
+      username: user.cedula,
+      sub: user.id,
+      fullname: user.fullname,
+      role: user.role,
+    };
 
-  @Post('register')
-  @ApiOperation({ summary: 'Registrar un nuevo usuario' })
-  @ApiResponse({
-    status: HttpStatus.CREATED,
-    description: 'Usuario registrado exitosamente',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        message: { type: 'string', example: 'Usuario creado correctamente' },
-      },
-    },
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Datos de entrada inválidos',
-  })
-  @ApiResponse({
-    status: HttpStatus.CONFLICT,
-    description: 'El usuario ya existe',
-  })
-  async register(@Body() registerDto: RegisterDto) {
-    return await this.authService.createUser(registerDto);
-  }
+    const access_token = this.jwtService.sign(payload);
 
-  @Post('check-user')
-  @ApiOperation({ summary: 'Verificar información de usuario (debug)' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Información del usuario obtenida',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Usuario no encontrado',
-  })
-  async checkUserInfo(@Body('cedula') cedula: string) {
-    return await this.authService.checkUserInfo(cedula);
-  }
-
-  @Post('verify-token')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Verificar token JWT' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Token válido',
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'Token inválido',
-  })
-  async verifyToken(@Request() req) {
     return {
-      valid: true,
-      user: req.user,
-      message: 'Token válido',
+      data: {
+        success: true,
+        access_token,
+        user: {
+          id: user.id,
+          cedula: user.cedula,
+          nombre: user.nombre,
+          apellido: user.apellido,
+          fullname: user.fullname,
+          role: user.role,
+          user_email: user.user_email,
+          telefono: user.telefono,
+          valido: user.valido,
+          division: user.division,
+          cargo: user.cargo,
+          dependencia: user.dependencia,
+          recinto: user.recinto,
+          estado: user.estado,
+        },
+        expires_in: 86400, // 24 horas
+      },
+      statusCode: 200,
+      message: 'Operación exitosa',
+      timestamp: new Date().toISOString(),
     };
   }
 
-  @Post('update-phone')
-  @ApiOperation({ summary: 'Actualizar teléfono del usuario' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Teléfono actualizado exitosamente',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        message: { type: 'string', example: 'Teléfono actualizado exitosamente' },
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'number', example: 1 },
-            cedula: { type: 'string', example: '40245980129' },
-            nombre: { type: 'string', example: 'Raul' },
-            apellido: { type: 'string', example: 'Vargas' },
-            telefono: { type: 'string', example: '8091234567' },
-          },
-        },
+  /**
+   * Verifica el token JWT y retorna información del usuario
+   */
+  @Get('profile')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Obtener perfil del usuario autenticado' })
+  @ApiResponse({ status: 200, description: 'Perfil obtenido exitosamente' })
+  @ApiResponse({ status: 401, description: 'No autorizado' })
+  async getProfile(@Request() req) {
+    return {
+      data: {
+        success: true,
+        user: req.user,
       },
-    },
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'Credenciales inválidas',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Datos de entrada inválidos',
-  })
-  async updatePhone(@Body() updatePhoneDto: UpdatePhoneDto) {
-    return await this.authService.updateUserPhone(
-      updatePhoneDto.cedula,
-      updatePhoneDto.clave,
-      updatePhoneDto.telefono,
-    );
+      statusCode: 200,
+      message: 'Operación exitosa',
+      timestamp: new Date().toISOString(),
+    };
   }
 
-  @Get('check-schema')
-  @ApiOperation({ summary: 'Verificar esquema de la base de datos (temporal)' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Esquema de la base de datos' })
-  async checkSchema() {
-    return await this.authService.checkDatabaseSchema();
-  }
-
-  @Get('test-hashing')
-  @ApiOperation({ summary: 'Probar hasheo según ejemplo proporcionado' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Resultado de prueba de hasheo' })
-  async testHashing() {
-    return await this.authService.testHashing();
-  }
-
-  @Post('check-user-hashes')
-  @ApiOperation({ summary: 'Verificar hashes de un usuario específico' })
-  @ApiResponse({ status: HttpStatus.OK, description: 'Hashes del usuario' })
-  async checkUserHashes(@Body('cedula') cedula: string) {
-    return await this.authService.checkUserHashes(cedula);
+  /**
+   * Verifica si el token JWT es válido
+   */
+  @Post('verify')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Verificar token JWT' })
+  @ApiResponse({ status: 200, description: 'Token válido' })
+  @ApiResponse({ status: 401, description: 'Token inválido' })
+  async verifyToken(@Request() req) {
+    return {
+      data: {
+        success: true,
+        message: 'Token válido',
+        user: req.user,
+      },
+      statusCode: 200,
+      message: 'Operación exitosa',
+      timestamp: new Date().toISOString(),
+    };
   }
 }
