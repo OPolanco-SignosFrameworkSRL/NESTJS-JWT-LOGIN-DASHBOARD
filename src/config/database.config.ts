@@ -9,7 +9,7 @@ export const getDatabaseConfig = (
   port: parseInt(configService.get<string>('DB_PORT', '1433'), 10),
   username: configService.get<string>('DB_USERNAME', 'sa'),
   password: configService.get<string>('DB_PASSWORD', '$ignos1234'),
-  database: configService.get<string>('DB_DATABASE', 'DbSolicitudEfectivo'),
+  database: configService.get<string>('DB_DATABASE', 'DbSolicitudEfectivo_v1'),
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   synchronize: false, // Deshabilitado porque vappusuarios es una vista, no una tabla
   logging: configService.get<boolean>('DB_LOGGING', true),

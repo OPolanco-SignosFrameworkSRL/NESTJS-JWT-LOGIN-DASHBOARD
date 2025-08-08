@@ -1,22 +1,99 @@
 import { CashRequest } from '../entities/cash-request.entity';
-import { CashRequestWrite } from '../entities/cash-request-write.entity';
-import { ICashRequestFilters, ICashRequestStats } from '../cash-request.interface';
+import { ICashRequestFilters, ICashRequestStats } from '../interfaces/cash-request.interface';
 
+/**
+ * Interfaz del repositorio de solicitudes de efectivo
+ * Define los contratos para el acceso a datos de solicitudes
+ * Sigue el principio de inversión de dependencias
+ */
 export interface ICashRequestRepository {
-  findAll(): Promise<CashRequest[]>;
-  findById(id: number): Promise<CashRequest | null>;
-  findByUser(userId: number): Promise<CashRequest[]>;
-  findByStatus(status: number): Promise<CashRequest[]>;
-  findByDivision(divisionId: number): Promise<CashRequest[]>;
-  findByFilters(filters: ICashRequestFilters): Promise<CashRequest[]>;
-  getStats(): Promise<ICashRequestStats>;
-  exists(id: number): Promise<boolean>;
-}
+  /**
+   * Encuentra todas las solicitudes con filtros opcionales
+   */
+  findAll(filters?: ICashRequestFilters): Promise<CashRequest[]>;
 
-export interface ICashRequestWriteRepository {
-  findById(id: number): Promise<CashRequestWrite | null>;
-  create(cashRequestData: Partial<CashRequestWrite>): Promise<CashRequestWrite>;
-  update(id: number, cashRequestData: Partial<CashRequestWrite>): Promise<CashRequestWrite>;
+  /**
+   * Encuentra una solicitud por ID
+   */
+  findById(id: number): Promise<CashRequest | null>;
+
+  /**
+   * Encuentra solicitudes por usuario solicitante
+   */
+  findByUserId(userId: number): Promise<CashRequest[]>;
+
+  /**
+   * Encuentra solicitudes por estado
+   */
+  findByStatus(status: number): Promise<CashRequest[]>;
+
+  /**
+   * Encuentra solicitudes por tipo
+   */
+  findByType(type: number): Promise<CashRequest[]>;
+
+  /**
+   * Encuentra solicitudes por división
+   */
+  findByDivision(divisionId: number): Promise<CashRequest[]>;
+
+  /**
+   * Busca solicitudes por término
+   */
+  searchByTerm(term: string): Promise<CashRequest[]>;
+
+  /**
+   * Crea una nueva solicitud
+   */
+  create(cashRequestData: any): Promise<CashRequest>;
+
+  /**
+   * Actualiza una solicitud existente
+   */
+  update(id: number, cashRequestData: any): Promise<CashRequest>;
+
+  /**
+   * Aprobar una solicitud
+   */
+  approve(id: number, autorizado_porid: number): Promise<CashRequest>;
+
+  /**
+   * Rechazar una solicitud
+   */
+  reject(id: number, autorizado_porid: number, razon_rechazon: string): Promise<CashRequest>;
+
+  /**
+   * Liquidar una solicitud
+   */
+  liquidate(id: number): Promise<CashRequest>;
+
+  /**
+   * Elimina una solicitud (soft delete)
+   */
   delete(id: number): Promise<void>;
-  findAll(): Promise<CashRequestWrite[]>;
+
+  /**
+   * Restaura una solicitud eliminada
+   */
+  restore(id: number): Promise<CashRequest>;
+
+  /**
+   * Encuentra solicitudes eliminadas
+   */
+  findDeleted(): Promise<CashRequest[]>;
+
+  /**
+   * Obtiene estadísticas de solicitudes
+   */
+  getStats(): Promise<ICashRequestStats>;
+
+  /**
+   * Obtiene solicitudes por rango de fechas
+   */
+  findByDateRange(startDate: Date, endDate: Date): Promise<CashRequest[]>;
+
+  /**
+   * Obtiene solicitudes por rango de montos
+   */
+  findByAmountRange(minAmount: number, maxAmount: number): Promise<CashRequest[]>;
 } 

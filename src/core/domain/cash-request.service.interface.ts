@@ -1,11 +1,12 @@
-import { ICashRequestResponse, ICashRequestFilters, ICashRequestStats } from './cash-request.interface';
-import { UserRole } from './user.interface';
+import { ICashRequestResponse, ICashRequestFilters, ICashRequestStats } from './interfaces/cash-request.interface';
+import { UserRole } from './interfaces/user.interface';
 
 export interface ICashRequestService {
   findAll(): Promise<ICashRequestResponse[]>;
   findById(id: number): Promise<ICashRequestResponse | null>;
   findByUser(userId: number): Promise<ICashRequestResponse[]>;
   findByFilters(filters: ICashRequestFilters): Promise<ICashRequestResponse[]>;
+  findPendingRequests(): Promise<ICashRequestResponse[]>;
   getStats(): Promise<ICashRequestStats>;
   create(
     cashRequestData: any,

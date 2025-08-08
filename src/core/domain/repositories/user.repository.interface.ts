@@ -1,23 +1,79 @@
 import { User } from '../entities/user.entity';
-import { UserWrite } from '../entities/user-write.entity';
+import { IUserFilters, IUserStats } from '../interfaces/user.interface';
 
+/**
+ * Interfaz del repositorio de usuarios
+ * Define los contratos para el acceso a datos de usuarios
+ * Sigue el principio de inversión de dependencias
+ */
 export interface IUserRepository {
-  findAll(): Promise<User[]>;
-  findById(id: number): Promise<User | null>;
-  findByCedula(cedula: string): Promise<User | null>;
-  findByRole(role: string): Promise<User[]>;
-  findByDivision(division: string): Promise<User[]>;
-  searchByTerm(term: string): Promise<User[]>;
-  getStats(): Promise<any>;
-  exists(cedula: string): Promise<boolean>;
-}
+  /**
+   * Encuentra todos los usuarios con filtros opcionales
+   */
+  findAll(filters?: IUserFilters): Promise<User[]>;
 
-export interface IUserWriteRepository {
-  findById(id: number): Promise<UserWrite | null>;
-  findByCedula(cedula: string): Promise<UserWrite | null>;
-  create(userData: Partial<UserWrite>): Promise<UserWrite>;
-  update(id: number, userData: Partial<UserWrite>): Promise<UserWrite>;
+  /**
+   * Encuentra un usuario por ID
+   */
+  findById(id: number): Promise<User | null>;
+
+  /**
+   * Encuentra un usuario por cédula
+   */
+  findByCedula(cedula: string): Promise<User | null>;
+
+  /**
+   * Encuentra usuarios por rol
+   */
+  findByRole(role: string): Promise<User[]>;
+
+  /**
+   * Encuentra usuarios por división
+   */
+  findByDivision(division: string): Promise<User[]>;
+
+  /**
+   * Busca usuarios por término
+   */
+  searchByTerm(term: string): Promise<User[]>;
+
+  /**
+   * Crea un nuevo usuario
+   */
+  create(userData: any): Promise<User>;
+
+  /**
+   * Actualiza un usuario existente
+   */
+  update(id: number, userData: any): Promise<User>;
+
+  /**
+   * Elimina un usuario (soft delete)
+   */
   delete(id: number): Promise<void>;
-  findAll(): Promise<UserWrite[]>;
-  findByValido(valido: string): Promise<UserWrite[]>;
+
+  /**
+   * Restaura un usuario eliminado
+   */
+  restore(id: number): Promise<User>;
+
+  /**
+   * Encuentra usuarios eliminados
+   */
+  findDeleted(): Promise<User[]>;
+
+  /**
+   * Verifica si existe un usuario con la cédula dada
+   */
+  exists(cedula: string): Promise<boolean>;
+
+  /**
+   * Obtiene estadísticas de usuarios
+   */
+  getStats(): Promise<IUserStats>;
+
+  /**
+   * Actualiza el teléfono de un usuario
+   */
+  updatePhone(cedula: string, telefono: string): Promise<User>;
 } 

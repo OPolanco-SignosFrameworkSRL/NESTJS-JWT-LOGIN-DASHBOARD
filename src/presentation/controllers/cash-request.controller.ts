@@ -30,8 +30,8 @@ import { DeleteCashRequestDto } from '../../core/application/dto/delete-cash-req
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
-import { UserRole } from '../../core/domain/user.interface';
-import { ICashRequestResponse, ICashRequestStats } from '../../core/domain/cash-request.interface';
+import { UserRole } from '../../core/domain/interfaces/user.interface';
+import { ICashRequestResponse, ICashRequestStats } from '../../core/domain/interfaces/cash-request.interface';
 
 @ApiTags('Solicitudes de Efectivo')
 @ApiBearerAuth()
@@ -130,9 +130,23 @@ export class CashRequestController {
     status: 200,
     description: 'Estadísticas obtenidas exitosamente',
   })
-  @Roles(UserRole.Admin)
+  @Roles('Admin')
   async getStats(): Promise<ICashRequestStats> {
     return await this.cashRequestService.getStats();
+  }
+
+  @Get('pending')
+  @ApiOperation({
+    summary: 'Obtener solicitudes pendientes de aprobación',
+    description: 'Retorna las solicitudes de efectivo que están pendientes de aprobación',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de solicitudes pendientes obtenida exitosamente',
+  })
+  @Roles('Admin', 'Manager', 'Supervisor')
+  async findPendingRequests(): Promise<ICashRequestResponse[]> {
+    return await this.cashRequestService.findPendingRequests();
   }
 
   @Get('deleted/list')
@@ -144,7 +158,7 @@ export class CashRequestController {
     status: 200,
     description: 'Lista de solicitudes eliminadas obtenida exitosamente',
   })
-  @Roles(UserRole.Admin)
+  @Roles('Admin')
   async findDeleted(): Promise<ICashRequestResponse[]> {
     return await this.cashRequestService.findDeleted();
   }
@@ -216,7 +230,7 @@ export class CashRequestController {
   @Patch(':id/approve')
   @ApiOperation({
     summary: 'Aprobar solicitud de efectivo',
-    description: 'Aprueba una solicitud de efectivo pendiente (solo administradores)',
+    description: 'Aprueba una solicitud de efectivo pendiente (solo usuarios autorizados)',
   })
   @ApiParam({ name: 'id', description: 'ID de la solicitud' })
   @ApiResponse({
@@ -225,9 +239,9 @@ export class CashRequestController {
   })
   @ApiResponse({
     status: 403,
-    description: 'Solo los administradores pueden aprobar solicitudes',
+    description: 'No tienes permisos para aprobar solicitudes',
   })
-  @Roles(UserRole.Admin)
+  @Roles('Admin', 'Manager', 'Supervisor')
   async approve(
     @Param('id', ParseIntPipe) id: number,
     @Body() approveCashRequestDto: ApproveCashRequestDto,
@@ -239,7 +253,7 @@ export class CashRequestController {
   @Patch(':id/reject')
   @ApiOperation({
     summary: 'Rechazar solicitud de efectivo',
-    description: 'Rechaza una solicitud de efectivo pendiente (solo administradores)',
+    description: 'Rechaza una solicitud de efectivo pendiente (solo usuarios autorizados)',
   })
   @ApiParam({ name: 'id', description: 'ID de la solicitud' })
   @ApiResponse({
@@ -248,9 +262,9 @@ export class CashRequestController {
   })
   @ApiResponse({
     status: 403,
-    description: 'Solo los administradores pueden rechazar solicitudes',
+    description: 'No tienes permisos para rechazar solicitudes',
   })
-  @Roles(UserRole.Admin)
+  @Roles('Admin', 'Manager', 'Supervisor')
   async reject(
     @Param('id', ParseIntPipe) id: number,
     @Body() approveCashRequestDto: ApproveCashRequestDto,
@@ -273,7 +287,7 @@ export class CashRequestController {
     status: 403,
     description: 'Solo los administradores pueden restaurar solicitudes',
   })
-  @Roles(UserRole.Admin)
+  @Roles('Admin')
   async restore(
     @Param('id', ParseIntPipe) id: number,
     @Req() req: any
