@@ -6,6 +6,7 @@ export interface ICashRequestService {
   findById(id: number): Promise<ICashRequestResponse | null>;
   findByUser(userId: number): Promise<ICashRequestResponse[]>;
   findByFilters(filters: ICashRequestFilters): Promise<ICashRequestResponse[]>;
+  findPendingRequests(): Promise<ICashRequestResponse[]>;
   getStats(): Promise<ICashRequestStats>;
   create(
     cashRequestData: any,

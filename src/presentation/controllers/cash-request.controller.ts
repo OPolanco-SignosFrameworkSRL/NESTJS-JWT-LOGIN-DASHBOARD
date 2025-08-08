@@ -135,6 +135,20 @@ export class CashRequestController {
     return await this.cashRequestService.getStats();
   }
 
+  @Get('pending')
+  @ApiOperation({
+    summary: 'Obtener solicitudes pendientes de aprobación',
+    description: 'Retorna las solicitudes de efectivo que están pendientes de aprobación',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Lista de solicitudes pendientes obtenida exitosamente',
+  })
+  @Roles('Admin', 'Manager', 'Supervisor')
+  async findPendingRequests(): Promise<ICashRequestResponse[]> {
+    return await this.cashRequestService.findPendingRequests();
+  }
+
   @Get('deleted/list')
   @ApiOperation({
     summary: 'Obtener lista de solicitudes eliminadas',
@@ -216,7 +230,7 @@ export class CashRequestController {
   @Patch(':id/approve')
   @ApiOperation({
     summary: 'Aprobar solicitud de efectivo',
-    description: 'Aprueba una solicitud de efectivo pendiente (solo administradores)',
+    description: 'Aprueba una solicitud de efectivo pendiente (solo usuarios autorizados)',
   })
   @ApiParam({ name: 'id', description: 'ID de la solicitud' })
   @ApiResponse({
@@ -225,9 +239,9 @@ export class CashRequestController {
   })
   @ApiResponse({
     status: 403,
-    description: 'Solo los administradores pueden aprobar solicitudes',
+    description: 'No tienes permisos para aprobar solicitudes',
   })
-  @Roles('Admin')
+  @Roles('Admin', 'Manager', 'Supervisor')
   async approve(
     @Param('id', ParseIntPipe) id: number,
     @Body() approveCashRequestDto: ApproveCashRequestDto,
@@ -239,7 +253,7 @@ export class CashRequestController {
   @Patch(':id/reject')
   @ApiOperation({
     summary: 'Rechazar solicitud de efectivo',
-    description: 'Rechaza una solicitud de efectivo pendiente (solo administradores)',
+    description: 'Rechaza una solicitud de efectivo pendiente (solo usuarios autorizados)',
   })
   @ApiParam({ name: 'id', description: 'ID de la solicitud' })
   @ApiResponse({
@@ -248,9 +262,9 @@ export class CashRequestController {
   })
   @ApiResponse({
     status: 403,
-    description: 'Solo los administradores pueden rechazar solicitudes',
+    description: 'No tienes permisos para rechazar solicitudes',
   })
-  @Roles('Admin')
+  @Roles('Admin', 'Manager', 'Supervisor')
   async reject(
     @Param('id', ParseIntPipe) id: number,
     @Body() approveCashRequestDto: ApproveCashRequestDto,

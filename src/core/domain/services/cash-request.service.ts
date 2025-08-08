@@ -48,6 +48,14 @@ export class CashRequestService implements ICashRequestService {
     return await this.enrichWithUserData(cashRequests);
   }
 
+  /**
+   * Obtiene solo las solicitudes pendientes de aprobación
+   */
+  async findPendingRequests(): Promise<ICashRequestResponse[]> {
+    const pendingRequests = await this.cashRequestRepository.findByStatus(CashRequestStatus.PENDIENTE);
+    return await this.enrichWithUserData(pendingRequests);
+  }
+
   async getStats(): Promise<ICashRequestStats> {
     return await this.cashRequestRepository.getStats();
   }
@@ -62,12 +70,25 @@ export class CashRequestService implements ICashRequestService {
       throw new BadRequestException('Usuario no encontrado');
     }
 
-    // Crear la solicitud usando el repositorio
+    // Validar que el monto sea válido
+    if (!cashRequestData.monto_solicitado || cashRequestData.monto_solicitado <= 0) {
+      throw new BadRequestException('El monto solicitado debe ser mayor a 0');
+    }
+
+    // Validar que el concepto no esté vacío
+    if (!cashRequestData.concepto || cashRequestData.concepto.trim() === '') {
+      throw new BadRequestException('El concepto de la solicitud es obligatorio');
+    }
+
+    // Crear la solicitud usando el repositorio - SIEMPRE en estado PENDIENTE
     const newCashRequest = await this.cashRequestRepository.create({
       ...cashRequestData,
       solicitada_porid: currentUser.sub,
-      solicitud_status: CashRequestStatus.PENDIENTE,
+      solicitud_status: CashRequestStatus.PENDIENTE, // Estado por defecto
       fechacreada: new Date(),
+      autorizado_porid: null, // No autorizado inicialmente
+      fecha_rechazada: null, // No rechazada inicialmente
+      razon_rechazon: null, // Sin razón de rechazo inicialmente
     });
 
     const enrichedRequests = await this.enrichWithUserData([newCashRequest]);
@@ -110,14 +131,19 @@ export class CashRequestService implements ICashRequestService {
       throw new NotFoundException('Solicitud de efectivo no encontrada');
     }
 
-    // Validar permisos: solo admins pueden aprobar
-    if (currentUser.role !== 'Admin') {
-      throw new ForbiddenException('Solo los administradores pueden aprobar solicitudes');
+    // Validar permisos: solo usuarios autorizados pueden aprobar
+    if (!this.isUserAuthorizedToApprove(currentUser.role)) {
+      throw new ForbiddenException('No tienes permisos para aprobar solicitudes de efectivo');
     }
 
     // No permitir aprobar solicitudes ya procesadas
     if (cashRequest.solicitud_status !== CashRequestStatus.PENDIENTE) {
-      throw new BadRequestException('La solicitud ya fue procesada');
+      throw new BadRequestException('Solo se pueden aprobar solicitudes en estado PENDIENTE');
+    }
+
+    // Validar que el usuario que aprueba no sea el mismo que solicitó
+    if (cashRequest.solicitada_porid === currentUser.sub) {
+      throw new ForbiddenException('No puedes aprobar tu propia solicitud de efectivo');
     }
 
     // Aprobar la solicitud
@@ -136,18 +162,28 @@ export class CashRequestService implements ICashRequestService {
       throw new NotFoundException('Solicitud de efectivo no encontrada');
     }
 
-    // Validar permisos: solo admins pueden rechazar
-    if (currentUser.role !== 'Admin') {
-      throw new ForbiddenException('Solo los administradores pueden rechazar solicitudes');
+    // Validar permisos: solo usuarios autorizados pueden rechazar
+    if (!this.isUserAuthorizedToApprove(currentUser.role)) {
+      throw new ForbiddenException('No tienes permisos para rechazar solicitudes de efectivo');
     }
 
     // No permitir rechazar solicitudes ya procesadas
     if (cashRequest.solicitud_status !== CashRequestStatus.PENDIENTE) {
-      throw new BadRequestException('La solicitud ya fue procesada');
+      throw new BadRequestException('Solo se pueden rechazar solicitudes en estado PENDIENTE');
+    }
+
+    // Validar que el usuario que rechaza no sea el mismo que solicitó
+    if (cashRequest.solicitada_porid === currentUser.sub) {
+      throw new ForbiddenException('No puedes rechazar tu propia solicitud de efectivo');
+    }
+
+    // Validar que se proporcione una razón para el rechazo
+    if (!notes || notes.trim() === '') {
+      throw new BadRequestException('Es obligatorio proporcionar una razón para rechazar la solicitud');
     }
 
     // Rechazar la solicitud
-    const rejectedCashRequest = await this.cashRequestRepository.reject(id, currentUser.sub, notes || 'Rechazada por administrador');
+    const rejectedCashRequest = await this.cashRequestRepository.reject(id, currentUser.sub, notes);
     const enrichedRequests = await this.enrichWithUserData([rejectedCashRequest]);
     return enrichedRequests[0];
   }
@@ -316,5 +352,14 @@ export class CashRequestService implements ICashRequestService {
       default:
         return 'Desconocido';
     }
+  }
+
+  /**
+   * Verifica si un usuario tiene permisos para aprobar solicitudes de efectivo
+   */
+  private isUserAuthorizedToApprove(userRole: UserRole): boolean {
+    // Roles autorizados para aprobar solicitudes de efectivo
+    const authorizedRoles: UserRole[] = ['Admin', 'Administrator', 'Manager', 'Supervisor'];
+    return authorizedRoles.includes(userRole);
   }
 } 
