@@ -1,6 +1,7 @@
 import { FaRegCheckCircle } from "react-icons/fa";
 import { IoAlertCircleOutline } from "react-icons/io5";
 import { GiCash } from "react-icons/gi";
+import ButtonForms from "@/application/ui/ButtonForm/ButtonForms";
 
 
 
@@ -15,12 +16,14 @@ const MembersForm = () => {
 
   return (
 
-    <div className="grid grid-cols-1 sm:grid-cols-1 gap-2 mb-4">
-      {cardItems.map((item, index) => (
+    <>
+    
+      <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-3 gap-2 lg:gap-5 mb-4">
+        {cardItems.map((item, index) => (
 
-        <>
+          <>
 
-            <div className={`flex flex-col gap-2 mb-4 ${item.className}`} key={index}>
+              <div className={`flex flex-col gap-2 mb-4 ${item.className}`} key={index}>
 
                 <div className="flex items-center gap-2">
                     <div className={`${item.textColor2}`}>
@@ -37,15 +40,30 @@ const MembersForm = () => {
                     {item.value}
                 </div>
 
-            </div>
+              </div>
 
 
-        </>
+          </>
 
-        
+        ))}
+      </div>
 
-      ))}
-    </div>
+      <div className="flex items-center justify-between">
+        <span className="text-sm sm:text-xl font-semibold text-gray-700">Integrantes del Desembolso</span>
+        <ButtonForms
+          label="+ Agregar Integrante"
+          backgroundColor="secondary"
+          textColor="secondary"
+        />
+      </div>
+
+
+    </>
+
+
+
+
+
 
   )
 }

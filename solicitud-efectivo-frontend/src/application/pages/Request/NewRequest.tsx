@@ -57,9 +57,9 @@ const NewRequest = () => {
 
         <div className="border-b border-gray-300">
           <nav>
-            <ul className="flex gap-10 mt-2.5">
+            <ul className="flex gap-2 sm:gap-6 lg:gap-10 mt-2.5">
               {navItems.map((item, index) => (
-                <li key={index} className={`cursor-pointer ${activeItem.label === item.label ? ' pb-5 border-b-2 border-emerald-600 text-green-600' : 'text-gray-500 hover:border-b-2 hover:border-gray-400 text-sm sm:text-base'}`} onClick={() => setActiveItem(item)}>
+                <li key={index} className={`cursor-pointer text-xs sm:text-sm md:text-base whitespace-nowrap ${activeItem.label === item.label ? 'pb-5 border-b-2 border-emerald-600 text-green-600' : 'text-gray-500 hover:border-b-2 hover:border-gray-400'}`} onClick={() => setActiveItem(item)}>
                     {item.label}
                 </li>
               ))}

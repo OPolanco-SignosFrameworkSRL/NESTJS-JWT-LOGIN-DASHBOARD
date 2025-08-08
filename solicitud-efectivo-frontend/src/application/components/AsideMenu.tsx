@@ -9,25 +9,25 @@ type AsideMenuProps = {
 
 const AsideMenu = ({ isOpen, handleTouchStart }: AsideMenuProps) => {
 
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(true) // Renombrado para mayor claridad
 
   useEffect(() => {
 
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
+    const checkScreenSize = () => {
+      setIsMobileOrTablet(window.innerWidth < 1024) // Cambiado a 1024px para incluir tablets
     }
     
-    checkMobile()
+    checkScreenSize()
     
-    window.addEventListener('resize', checkMobile)
+    window.addEventListener('resize', checkScreenSize)
     
-    return () => window.removeEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
 
   return (
     <>
-      {/* Overlay para móvil */}
-      {isMobile && isOpen && (
+      {/* Overlay para móvil y tablet */}
+      {isMobileOrTablet && isOpen && (
         <div 
           className="fixed inset-0 bg-black/50 bg-opacity-50 z-40"
           onClick={handleTouchStart}

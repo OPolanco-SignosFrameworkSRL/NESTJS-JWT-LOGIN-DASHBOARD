@@ -13,9 +13,8 @@ const Layout = () => {
 
   useCloseModalOnRouteChange();
 
-  const [isOpen, setIsOpen] = useState(true)
-  const [isMobile, setIsMobile] = useState(false)
-  
+  const [isOpen, setIsOpen] = useState(false) 
+  const [isMobileOrTablet, setIsMobileOrTablet] = useState(true) 
   const handleOpen = () => {
     setIsOpen(!isOpen)
   }
@@ -26,18 +25,22 @@ const Layout = () => {
 
   useEffect(() => {
 
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-      if (window.innerWidth < 768) {
+    const checkScreenSize = () => {
+      const isSmallScreen = window.innerWidth < 1024 
+      setIsMobileOrTablet(isSmallScreen)
+      
+      if (isSmallScreen) {
         setIsOpen(false)
+      } else {
+        setIsOpen(true)
       }
     }
     
-    checkMobile()
+    checkScreenSize()
 
-    window.addEventListener('resize', checkMobile)
+    window.addEventListener('resize', checkScreenSize)
     
-    return () => window.removeEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
 
   const show = useAppStore(state => state.show)
@@ -60,7 +63,7 @@ const Layout = () => {
         transition-all 
         duration-500 
         ease-in-out 
-        ${!isMobile && isOpen ? 'ml-72' : 'ml-0'}
+        ${!isMobileOrTablet && isOpen ? 'ml-72' : 'ml-0'}
       `}>
         
         
