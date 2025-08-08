@@ -323,16 +323,16 @@ curl -X POST http://localhost:3000/users \
 - **Manager**: Gestión limitada de usuarios
 - **Usuario**: Acceso básico al sistema
 
-### Funcionalidades por Rol
+### Funcionalidades por Roles a nivel de creacion y registro
 
-| Funcionalidad | Admin | Supervisor | Manager | Usuario |
-|---------------|-------|------------|---------|---------|
-| Ver usuarios | ✅ | ✅ | ✅ | ❌ |
-| Crear usuarios | ✅ | ✅ | ❌ | ❌ |
-| Editar usuarios | ✅ | ✅ | ✅ | ❌ |
-| Eliminar usuarios | ✅ | ❌ | ❌ | ❌ |
-| Ver estadísticas | ✅ | ✅ | ❌ | ❌ |
-| Restaurar usuarios | ✅ | ❌ | ❌ | ❌ |
+      |   Funcionalidad    | Admin | Supervisor | Manager | Usuario |
+      |--------------------|-------|------------|---------|---------|
+      |   Ver usuarios     |  ✅  |     ✅     |   ✅   |   ❌    |
+      |   Crear usuarios   |  ✅  |     ✅     |   ❌   |   ❌    |
+      | Editar usuarios    |  ✅  |     ✅     |   ✅   |   ❌    |
+      | Eliminar usuarios  |  ✅  |     ❌     |   ❌   |   ❌    |
+      | Ver estadísticas   |  ✅  |     ✅     |   ❌   |   ❌    |
+      | Restaurar usuarios |  ✅  |     ❌     |   ❌   |   ❌    |
 
 ### Soft Delete
 
