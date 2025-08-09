@@ -37,9 +37,18 @@ const NewRequest = () => {
 
   }
 
-  const {register, reset, handleSubmit, formState: {errors}} = useForm()
+  const {register, reset, handleSubmit, control, formState: {errors}, watch} = useForm({
+    defaultValues: {
+      formDataBasicInformation: [{ amount: '', requestType: '', division: '', paymentType: '' }], 
+      formDataProduction: [{ orderDate: '', orderNumber: '', clientName: '', ticketNumber: '', requestConcept: '' }],
+      formDataMembers: [{ employee: '', cedula: '', beneficiary: '', amount: '', task: '' }]
+    } as any
+  })
 
-  
+  const onSubmit = (data: any) => {
+    console.log(data)
+  }
+
   return (
 
     <>
@@ -85,58 +94,62 @@ const NewRequest = () => {
 
         <form
           noValidate
+          onSubmit={handleSubmit(onSubmit)}
         >
 
           <div className="mt-5">
 
             {activeItem.label === "Información Básica" && (
 
-              <BasicInformationForm register={register} errors={errors}/>
+              <BasicInformationForm register={register} errors={errors} control={control}/>
             
             )}
 
             {activeItem.label === "Datos Producción" && (
-              <ProductionDataForm register={register} errors={errors}/>
+              <ProductionDataForm register={register} errors={errors} control={control}/>
             )}
 
             {activeItem.label === "Integrantes" && (
-              <MembersForm/>
+              <MembersForm register={register} errors={errors} watch={watch} control={control}/>
             )}
+
+          </div>
+
+          <div className="w-full flex justify-between">
+
+            <ButtonForms 
+              label="Anterior" 
+              border={true}
+              onClick={handleClickPrevious}
+              className="bg-red-500"
+            />
+
+            {activeItem.label === "Integrantes" ? (
+
+              <ButtonForms 
+                label="Enviar Formulario" 
+                backgroundColor="secondary" 
+                textColor="secondary" 
+                className="hover:from-green-700 hover:to-emerald-700"
+                type="submit"
+              />
+
+            ) : (
+
+              <ButtonForms 
+                label="Siguiente" 
+                backgroundColor="secondary" 
+                textColor="secondary" 
+                className="hover:from-green-700 hover:to-emerald-700"
+                onClick={handleClickNext}
+              />
+
+            )}
+
           </div>
 
         </form>
 
-        <div className="w-full flex justify-between">
-
-          <ButtonForms 
-            label="Anterior" 
-            border={true}
-            onClick={handleClickPrevious}
-            className="bg-red-500"
-          />
-
-          {activeItem.label === "Integrantes" ? (
-
-            <ButtonForms 
-              label="Enviar Formulario" 
-              backgroundColor="secondary" 
-              textColor="secondary" 
-              className="hover:from-green-700 hover:to-emerald-700"
-            />
-
-          ) : (
-
-            <ButtonForms 
-              label="Siguiente" 
-              backgroundColor="secondary" 
-              textColor="secondary" 
-              className="hover:from-green-700 hover:to-emerald-700"
-              onClick={handleClickNext}
-            />
-
-          )}
-
-        </div>
       </div>
 
 

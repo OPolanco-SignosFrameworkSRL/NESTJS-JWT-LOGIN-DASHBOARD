@@ -6,16 +6,16 @@ type ButtonFormProps = {
     backgroundColor?: keyof IColor
     textColor?: keyof IColor
     border?: boolean
-    onClick?: () => void
+    onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void
     className?: string
+    type?: "button" | "submit" | "reset"
 }
 
-const ButtonForms = ({label, border, borderColor="primary", backgroundColor="primary", textColor="primary", onClick, className} : ButtonFormProps) => {
+const ButtonForms = ({label, border, borderColor="primary", backgroundColor="primary", textColor="primary", onClick, className, type="button"} : ButtonFormProps) => {
 
   return (
-    
-
     <button 
+      type={type}
       onClick={onClick}
       className={`mt-5 px-6 py-2 ${border ? `border-2 ${bColor[borderColor]}` : ''} 
       rounded-lg hover:bg-gray-100 transition-colors cursor-pointer
@@ -26,7 +26,6 @@ const ButtonForms = ({label, border, borderColor="primary", backgroundColor="pri
     }>
       {label}
     </button>
-
   )
 }
 

@@ -1,23 +1,22 @@
 import React from "react";
 
-type InputProps = {
+type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
   defaultValue?: string;
   options?: { value: string; label: string }[];
-  onChange?: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  value?: string;
   placeholder?: string;
   className?: string;
 };
 
-const Select = React.forwardRef<HTMLSelectElement, InputProps>(
+const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
   (
     {
       defaultValue,
       options = [],
       onChange,
       value,
-      className,
+      className = "",
       placeholder,
+      ...rest
     },
     ref
   ) => {
@@ -27,12 +26,13 @@ const Select = React.forwardRef<HTMLSelectElement, InputProps>(
           ref={ref}
           value={value}
           onChange={onChange}
-          className={`${className} border-2 border-green-300 rounded-md p-2 w-full bg-white appearance-none pr-8 focus:outline-none focus:ring-1 focus:ring-green-300`}
+          className={`${className} w-full h-11 border-2 border-green-300 rounded-md bg-white px-3 text-base appearance-none pr-10 focus:outline-none focus:ring-1 focus:ring-green-300`}
           defaultValue={defaultValue}
+          {...rest}
         >
          
-          <option>{placeholder}</option>
-   
+          <option value="">{placeholder}</option>
+     
           {options.map((option) => (
             <option key={option.value} value={option.value}>
               {option.label}

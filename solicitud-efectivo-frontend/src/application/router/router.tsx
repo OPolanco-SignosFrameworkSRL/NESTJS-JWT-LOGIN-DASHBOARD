@@ -8,6 +8,7 @@ import SolicitudGastos from '../pages/SolicitudGastos';
 import AdminDashboard from '../pages/Admin/AdminDashboard';
 import CreateEmployee from '../pages/Admin/CreateEmployee';
 import NewRequest from '../pages/Request/NewRequest';
+import Disbursement from '../pages/Disbursement';
 
 
 const RouterComponent = () => {
@@ -48,6 +49,10 @@ const RouterComponent = () => {
         {
           path: '/new-request',
           element: <NewRequest/>
+        },
+        {
+          path: '/disbursement',
+          element: <Disbursement/>
         }
       ],
     },
