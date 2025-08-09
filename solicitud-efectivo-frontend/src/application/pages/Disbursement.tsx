@@ -285,7 +285,7 @@ const Disbursement = () => {
                 <Input
                     type="textarea"
                     placeholder="Ingrese el número de cheque"
-                    className="p-10"
+                    className=""
                 />
         
             </div>
