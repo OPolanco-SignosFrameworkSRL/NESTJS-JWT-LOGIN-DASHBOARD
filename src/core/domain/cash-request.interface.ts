@@ -67,10 +67,11 @@ export interface ICashRequestStats {
 }
 
 export enum CashRequestStatus {
-  PENDING = 1,
-  APPROVED = 2,
-  REJECTED = 3,
-  CANCELLED = 4
+  PENDIENTE = 1,
+  APROBADA = 2,
+  AUTORIZADO = 3,
+  RECHAZADA = 4,
+  DESEMBOLSADO = 5,
 }
 
 export enum CashRequestType {

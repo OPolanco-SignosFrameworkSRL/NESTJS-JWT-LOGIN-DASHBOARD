@@ -202,6 +202,7 @@ export class UserRepository implements IUserRepository {
       Supervisor: 0,
       Manager: 0,
       Administrator: 0,
+
     };
 
     roleStats.forEach(stat => {

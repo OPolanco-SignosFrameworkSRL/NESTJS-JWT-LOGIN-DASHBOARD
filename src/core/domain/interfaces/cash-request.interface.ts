@@ -4,10 +4,9 @@
 export enum CashRequestStatus {
   PENDIENTE = 1,
   APROBADA = 2,
-  RECHAZADA = 3,
-  LIQUIDADA = 4,
-  EN_PROCESO = 5,
-  DEFINITIVO = 6,
+  AUTORIZADO = 3,
+  RECHAZADA = 4,
+  DESEMBOLSADO = 5,
 }
 
 /**
