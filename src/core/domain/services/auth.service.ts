@@ -93,7 +93,7 @@ export class AuthService {
       // esa lógica debería implementarse en un punto separado o con un DTO de login diferente.
 
       // Usuario válido
-      return {
+      const userData: any = {
         id: user.id,
         cedula: user.cedula,
         nombre: user.nombre,
@@ -108,6 +108,13 @@ export class AuthService {
         estado: user.estado,
         valido: user.valido,
       };
+
+      // Agregar telefono solo si existe
+      if ('telefono' in user && user.telefono) {
+        userData.telefono = user.telefono;
+      }
+
+      return userData;
     } catch (error) {
       this.logger.error(`Error validando usuario ${cedula}:`, error);
       return null;
@@ -207,6 +214,7 @@ export class AuthService {
    */
   async login(user: IUser): Promise<ILoginResponse> {
     const payload: IUserPayload = {
+      id: user.id,        // Agregar el campo id
       username: user.cedula,
       sub: user.id,
       fullname: user.fullname,

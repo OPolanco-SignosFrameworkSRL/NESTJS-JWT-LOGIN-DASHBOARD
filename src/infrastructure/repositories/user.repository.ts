@@ -1,464 +1,263 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { IUserRepository } from '../../core/domain/repositories/user.repository.interface';
+import { User } from '../../core/domain/entities/user.entity';
 import { UserEntity } from '../database/entities/user.entity';
 import { UserWriteEntity } from '../database/entities/user-write.entity';
-import { IUserRepository, IUserWriteRepository } from '../../core/domain/repositories/user.repository.interface';
-import { User } from '../../core/domain/entities/user.entity';
-import { UserWrite } from '../../core/domain/entities/user-write.entity';
-import { UserRole } from '../../core/domain/user.interface';
+import { IUserFilters, IUserStats, UserRole } from '../../core/domain/interfaces/user.interface';
 
+/**
+ * Implementación del repositorio de usuarios
+ * Maneja el acceso a datos de usuarios en la base de datos
+ */
 @Injectable()
 export class UserRepository implements IUserRepository {
   constructor(
     @InjectRepository(UserEntity)
-    private readonly userRepository: Repository<UserEntity>,
-  ) {}
-
-  async findAll(): Promise<User[]> {
-    const users = await this.userRepository.find({
-      where: { valido: '1' },
-      order: { nombre: 'ASC' },
-    });
-
-    return users.map(user => new User(
-      user.id,
-      user.cedula,
-      user.nombre,
-      user.apellido,
-      user.codigo,
-      user.role,
-      user.user_email,
-      user.telefono,
-      user.valido,
-      user.division,
-      user.cargo,
-      user.dependencia,
-      user.recinto,
-      user.estado,
-    ));
-  }
-
-  async findById(id: number): Promise<User | null> {
-    try {
-      console.log(`Buscando usuario con ID: ${id}`);
-      const user = await this.userRepository.findOne({
-        where: { id, valido: '1' },
-      });
-
-      if (!user) {
-        console.log(`Usuario con ID ${id} no encontrado`);
-        return null;
-      }
-
-      console.log(`Usuario encontrado: ${user.nombre} ${user.apellido}`);
-      return new User(
-        user.id,
-        user.cedula,
-        user.nombre,
-        user.apellido,
-        user.codigo,
-        user.role,
-        user.user_email,
-        user.telefono,
-        user.valido,
-        user.division,
-        user.cargo,
-        user.dependencia,
-        user.recinto,
-        user.estado,
-      );
-    } catch (error) {
-      console.error(`Error buscando usuario con ID ${id}:`, error);
-      throw error;
-    }
-  }
-
-  async findByCedula(cedula: string): Promise<User | null> {
-    const user = await this.userRepository.findOne({
-      where: { cedula, valido: '1' },
-    });
-
-    if (!user) return null;
-
-    return new User(
-      user.id,
-      user.cedula,
-      user.nombre,
-      user.apellido,
-      user.codigo,
-      user.role,
-      user.user_email,
-      user.telefono,
-      user.valido,
-      user.division,
-      user.cargo,
-      user.dependencia,
-      user.recinto,
-      user.estado,
-    );
-  }
-
-  async findByRole(role: string): Promise<User[]> {
-    const users = await this.userRepository.find({
-      where: { role, valido: '1' },
-      order: { nombre: 'ASC' },
-    });
-
-    return users.map(user => new User(
-      user.id,
-      user.cedula,
-      user.nombre,
-      user.apellido,
-      user.codigo,
-      user.role,
-      user.user_email,
-      user.telefono,
-      user.valido,
-      user.division,
-      user.cargo,
-      user.dependencia,
-      user.recinto,
-      user.estado,
-    ));
-  }
-
-  async findByDivision(division: string): Promise<User[]> {
-    const users = await this.userRepository.find({
-      where: { division, valido: '1' },
-      order: { nombre: 'ASC' },
-    });
-
-    return users.map(user => new User(
-      user.id,
-      user.cedula,
-      user.nombre,
-      user.apellido,
-      user.codigo,
-      user.role,
-      user.user_email,
-      user.telefono,
-      user.valido,
-      user.division,
-      user.cargo,
-      user.dependencia,
-      user.recinto,
-      user.estado,
-    ));
-  }
-
-  async searchByTerm(term: string): Promise<User[]> {
-    const users = await this.userRepository
-      .createQueryBuilder('user')
-      .where('user.valido = :valido', { valido: '1' })
-      .andWhere(
-        '(user.nombre LIKE :term OR user.apellido LIKE :term OR user.cedula LIKE :term)',
-        { term: `%${term}%` },
-      )
-      .orderBy('user.nombre', 'ASC')
-      .getMany();
-
-    return users.map(user => new User(
-      user.id,
-      user.cedula,
-      user.nombre,
-      user.apellido,
-      user.codigo,
-      user.role,
-      user.user_email,
-      user.telefono,
-      user.valido,
-      user.division,
-      user.cargo,
-      user.dependencia,
-      user.recinto,
-      user.estado,
-    ));
-  }
-
-  async getStats(): Promise<any> {
-    const usersByRole = await this.userRepository
-      .createQueryBuilder('user')
-      .select('user.role', 'role')
-      .addSelect('COUNT(*)', 'count')
-      .where('user.valido = :valido', { valido: '1' })
-      .groupBy('user.role')
-      .getRawMany();
-
-    const usersByDivision = await this.userRepository
-      .createQueryBuilder('user')
-      .select('user.division', 'division')
-      .addSelect('COUNT(*)', 'count')
-      .where('user.valido = :valido', { valido: '1' })
-      .groupBy('user.division')
-      .getRawMany();
-
-    const totalUsers = await this.userRepository.count({
-      where: { valido: '1' },
-    });
-
-    return {
-      totalUsers,
-      usersByRole,
-      usersByDivision,
-    };
-  }
-
-  async exists(cedula: string): Promise<boolean> {
-    const count = await this.userRepository.count({
-      where: { cedula, valido: '1' },
-    });
-    return count > 0;
-  }
-}
-
-@Injectable()
-export class UserWriteRepository implements IUserWriteRepository {
-  constructor(
+    private readonly userReadRepository: Repository<UserEntity>,
     @InjectRepository(UserWriteEntity)
     private readonly userWriteRepository: Repository<UserWriteEntity>,
   ) {}
 
-  async findById(id: number): Promise<UserWrite | null> {
-    const user = await this.userWriteRepository.findOne({
-      where: { id },
+  /**
+   * Convierte una entidad de base de datos a una entidad de dominio
+   */
+  private mapToDomain(userEntity: UserEntity): User {
+    return new User(
+      userEntity.id,
+      userEntity.cedula,
+      userEntity.nombre,
+      userEntity.apellido,
+      userEntity.role as UserRole,
+      userEntity.user_email,
+      userEntity.telefono,
+      userEntity.valido === '1',
+      userEntity.division,
+      userEntity.cargo,
+      userEntity.dependencia,
+      userEntity.recinto,
+      userEntity.estado,
+    );
+  }
+
+  /**
+   * Encuentra todos los usuarios con filtros opcionales
+   */
+  async findAll(filters?: IUserFilters): Promise<User[]> {
+    const query = this.userReadRepository.createQueryBuilder('user');
+
+    if (filters?.role) {
+      query.andWhere('user.role = :role', { role: filters.role });
+    }
+
+    if (filters?.division) {
+      query.andWhere('user.division = :division', { division: filters.division });
+    }
+
+    if (filters?.search) {
+      query.andWhere(
+        '(user.nombre LIKE :search OR user.apellido LIKE :search OR user.cedula LIKE :search)',
+        { search: `%${filters.search}%` }
+      );
+    }
+
+    if (filters?.limit) {
+      query.limit(filters.limit);
+    }
+
+    if (filters?.offset) {
+      query.offset(filters.offset);
+    }
+
+    const users = await query.getMany();
+    return users.map(user => this.mapToDomain(user));
+  }
+
+  /**
+   * Encuentra un usuario por ID
+   */
+  async findById(id: number): Promise<User | null> {
+    const user = await this.userReadRepository.findOne({ where: { id } });
+    return user ? this.mapToDomain(user) : null;
+  }
+
+  /**
+   * Encuentra un usuario por cédula
+   */
+  async findByCedula(cedula: string): Promise<User | null> {
+    const user = await this.userReadRepository.findOne({ where: { cedula } });
+    return user ? this.mapToDomain(user) : null;
+  }
+
+  /**
+   * Encuentra usuarios por rol
+   */
+  async findByRole(role: string): Promise<User[]> {
+    const users = await this.userReadRepository.find({ where: { role } });
+    return users.map(user => this.mapToDomain(user));
+  }
+
+  /**
+   * Encuentra usuarios por división
+   */
+  async findByDivision(division: string): Promise<User[]> {
+    const users = await this.userReadRepository.find({ where: { division } });
+    return users.map(user => this.mapToDomain(user));
+  }
+
+  /**
+   * Busca usuarios por término
+   */
+  async searchByTerm(term: string): Promise<User[]> {
+    const users = await this.userReadRepository
+      .createQueryBuilder('user')
+      .where(
+        'user.nombre LIKE :term OR user.apellido LIKE :term OR user.cedula LIKE :term',
+        { term: `%${term}%` }
+      )
+      .getMany();
+
+    return users.map(user => this.mapToDomain(user));
+  }
+
+  /**
+   * Crea un nuevo usuario
+   */
+  async create(userData: any): Promise<User> {
+    const newUser = this.userWriteRepository.create(userData);
+    await this.userWriteRepository.save(newUser);
+    
+    // Obtener el usuario creado desde la vista de lectura usando la cédula
+    const createdUser = await this.userReadRepository.findOne({ 
+      where: { cedula: userData.cedula } 
     });
-
-    if (!user) return null;
-
-    return new UserWrite(
-      user.id,
-      user.cedula,
-      user.nombre,
-      user.apellido,
-      user.codigo,
-      user.password,
-      user.role,
-      user.user_email,
-      user.telefono,
-      user.direccion,
-      user.celular,
-      user.user_status,
-      user.caja_id,
-      user.tienda_id,
-      user.allow_multi_tienda,
-      user.max_descuento,
-      user.close_caja,
-      user.lastlogindatetime,
-      user.lastloginip,
-      user.user_ip,
-      user.user_account_email,
-      user.user_account_email_passw,
-      user.comision_porciento,
-      user.default_portalid,
-      user.nuevocampo,
-      user.encargadoId,
-      user.passwchanged,
-      user.valido,
-    );
+    
+    return this.mapToDomain(createdUser!);
   }
 
-  async findByCedula(cedula: string): Promise<UserWrite | null> {
-    const user = await this.userWriteRepository.findOne({
-      where: { cedula },
-    });
-
-    if (!user) return null;
-
-    return new UserWrite(
-      user.id,
-      user.cedula,
-      user.nombre,
-      user.apellido,
-      user.codigo,
-      user.password,
-      user.role,
-      user.user_email,
-      user.telefono,
-      user.direccion,
-      user.celular,
-      user.user_status,
-      user.caja_id,
-      user.tienda_id,
-      user.allow_multi_tienda,
-      user.max_descuento,
-      user.close_caja,
-      user.lastlogindatetime,
-      user.lastloginip,
-      user.user_ip,
-      user.user_account_email,
-      user.user_account_email_passw,
-      user.comision_porciento,
-      user.default_portalid,
-      user.nuevocampo,
-      user.encargadoId,
-      user.passwchanged,
-      user.valido,
-    );
-  }
-
-  async create(userData: Partial<UserWrite>): Promise<UserWrite> {
-    const user = this.userWriteRepository.create(userData);
-    const savedUser = await this.userWriteRepository.save(user);
-
-    return new UserWrite(
-      savedUser.id,
-      savedUser.cedula,
-      savedUser.nombre,
-      savedUser.apellido,
-      savedUser.codigo,
-      savedUser.password,
-      savedUser.role,
-      savedUser.user_email,
-      savedUser.telefono,
-      savedUser.direccion,
-      savedUser.celular,
-      savedUser.user_status,
-      savedUser.caja_id,
-      savedUser.tienda_id,
-      savedUser.allow_multi_tienda,
-      savedUser.max_descuento,
-      savedUser.close_caja,
-      savedUser.lastlogindatetime,
-      savedUser.lastloginip,
-      savedUser.user_ip,
-      savedUser.user_account_email,
-      savedUser.user_account_email_passw,
-      savedUser.comision_porciento,
-      savedUser.default_portalid,
-      savedUser.nuevocampo,
-      savedUser.encargadoId,
-      savedUser.passwchanged,
-      savedUser.valido,
-    );
-  }
-
-  async update(id: number, userData: Partial<UserWrite>): Promise<UserWrite> {
+  /**
+   * Actualiza un usuario existente
+   */
+  async update(id: number, userData: any): Promise<User> {
     await this.userWriteRepository.update(id, userData);
-    const updatedUser = await this.userWriteRepository.findOne({
-      where: { id },
-    });
-
-    if (!updatedUser) {
-      throw new Error(`Usuario con ID ${id} no encontrado`);
-    }
-
-    return new UserWrite(
-      updatedUser.id,
-      updatedUser.cedula,
-      updatedUser.nombre,
-      updatedUser.apellido,
-      updatedUser.codigo,
-      updatedUser.password,
-      updatedUser.role,
-      updatedUser.user_email,
-      updatedUser.telefono,
-      updatedUser.direccion,
-      updatedUser.celular,
-      updatedUser.user_status,
-      updatedUser.caja_id,
-      updatedUser.tienda_id,
-      updatedUser.allow_multi_tienda,
-      updatedUser.max_descuento,
-      updatedUser.close_caja,
-      updatedUser.lastlogindatetime,
-      updatedUser.lastloginip,
-      updatedUser.user_ip,
-      updatedUser.user_account_email,
-      updatedUser.user_account_email_passw,
-      updatedUser.comision_porciento,
-      updatedUser.default_portalid,
-      updatedUser.nuevocampo,
-      updatedUser.encargadoId,
-      updatedUser.passwchanged,
-      updatedUser.valido,
-    );
+    
+    // Obtener el usuario actualizado desde la vista de lectura
+    const updatedUser = await this.userReadRepository.findOne({ where: { id } });
+    return this.mapToDomain(updatedUser!);
   }
 
+  /**
+   * Elimina un usuario (soft delete)
+   */
   async delete(id: number): Promise<void> {
-    const user = await this.userWriteRepository.findOne({
-      where: { id },
+    await this.userWriteRepository.update(id, { valido: '0' });
+  }
+
+  /**
+   * Restaura un usuario eliminado
+   */
+  async restore(id: number): Promise<User> {
+    await this.userWriteRepository.update(id, { valido: '1' });
+    
+    const restoredUser = await this.userReadRepository.findOne({ where: { id } });
+    return this.mapToDomain(restoredUser!);
+  }
+
+  /**
+   * Encuentra usuarios eliminados
+   */
+  async findDeleted(): Promise<User[]> {
+    const users = await this.userReadRepository.find({ where: { valido: '0' } });
+    return users.map(user => this.mapToDomain(user));
+  }
+
+  /**
+   * Verifica si existe un usuario con la cédula dada
+   */
+  async exists(cedula: string): Promise<boolean> {
+    const user = await this.userWriteRepository.findOne({ where: { cedula } });
+    return !!user;
+  }
+
+  /**
+   * Obtiene estadísticas de usuarios
+   */
+  async getStats(): Promise<IUserStats> {
+    const total = await this.userReadRepository.count();
+    const active = await this.userReadRepository.count({ where: { valido: '1' } });
+    const inactive = await this.userReadRepository.count({ where: { valido: '0' } });
+
+    // Estadísticas por rol
+    const roleStats = await this.userReadRepository
+      .createQueryBuilder('user')
+      .select('user.role', 'role')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('user.role')
+      .getRawMany();
+
+    const byRole: Record<UserRole, number> = {
+      Admin: 0,
+      Usuario: 0,
+      Supervisor: 0,
+      Manager: 0,
+      Administrator: 0,
+    };
+
+    roleStats.forEach(stat => {
+      byRole[stat.role as UserRole] = parseInt(stat.count);
     });
 
-    if (!user) {
-      throw new Error(`Usuario con ID ${id} no encontrado`);
+    // Estadísticas por división
+    const divisionStats = await this.userReadRepository
+      .createQueryBuilder('user')
+      .select('user.division', 'division')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('user.division')
+      .getRawMany();
+
+    const byDivision: Record<string, number> = {};
+    divisionStats.forEach(stat => {
+      byDivision[stat.division] = parseInt(stat.count);
+    });
+
+    return {
+      total,
+      active,
+      inactive,
+      byRole,
+      byDivision,
+    };
+  }
+
+  /**
+   * Actualiza el teléfono de un usuario
+   */
+  async updatePhone(cedula: string, telefono: string): Promise<User> {
+    await this.userWriteRepository.update({ cedula }, { telefono });
+    
+    const updatedUser = await this.userReadRepository.findOne({ where: { cedula } });
+    return this.mapToDomain(updatedUser!);
+  }
+
+  /**
+   * Valida las credenciales de un usuario (cédula y contraseña hasheada)
+   */
+  async validateCredentials(cedula: string, hashedPassword: string): Promise<boolean> {
+    try {
+      // Buscar usuario en la tabla de escritura para obtener la contraseña
+      const userWrite = await this.userWriteRepository.findOne({
+        where: { cedula, valido: '1' },
+      });
+
+      if (!userWrite) {
+        return false;
+      }
+
+      // Comparar la contraseña hasheada proporcionada con la almacenada
+      return userWrite.password === hashedPassword;
+    } catch (error) {
+      return false;
     }
-
-    await this.userWriteRepository.remove(user);
-  }
-
-  async findAll(): Promise<UserWrite[]> {
-    const users = await this.userWriteRepository.find({
-      order: { id: 'DESC' },
-    });
-
-    return users.map(user => new UserWrite(
-      user.id,
-      user.cedula,
-      user.nombre,
-      user.apellido,
-      user.codigo,
-      user.password,
-      user.role,
-      user.user_email,
-      user.telefono,
-      user.direccion,
-      user.celular,
-      user.user_status,
-      user.caja_id,
-      user.tienda_id,
-      user.allow_multi_tienda,
-      user.max_descuento,
-      user.close_caja,
-      user.lastlogindatetime,
-      user.lastloginip,
-      user.user_ip,
-      user.user_account_email,
-      user.user_account_email_passw,
-      user.comision_porciento,
-      user.default_portalid,
-      user.nuevocampo,
-      user.encargadoId,
-      user.passwchanged,
-      user.valido,
-    ));
-  }
-
-  async findByValido(valido: string): Promise<UserWrite[]> {
-    const users = await this.userWriteRepository.find({
-      where: { valido },
-      order: { id: 'DESC' },
-    });
-
-    return users.map(user => new UserWrite(
-      user.id,
-      user.cedula,
-      user.nombre,
-      user.apellido,
-      user.codigo,
-      user.password,
-      user.role,
-      user.user_email,
-      user.telefono,
-      user.direccion,
-      user.celular,
-      user.user_status,
-      user.caja_id,
-      user.tienda_id,
-      user.allow_multi_tienda,
-      user.max_descuento,
-      user.close_caja,
-      user.lastlogindatetime,
-      user.lastloginip,
-      user.user_ip,
-      user.user_account_email,
-      user.user_account_email_passw,
-      user.comision_porciento,
-      user.default_portalid,
-      user.nuevocampo,
-      user.encargadoId,
-      user.passwchanged,
-      user.valido,
-    ));
   }
 } 

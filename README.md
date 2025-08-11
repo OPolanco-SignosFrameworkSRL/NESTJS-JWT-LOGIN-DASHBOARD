@@ -325,14 +325,14 @@ curl -X POST http://localhost:3000/users \
 
 ### Funcionalidades por Roles a nivel de creacion y registro
 
-      |   Funcionalidad    | Admin | Supervisor | Manager | Usuario |
-      |--------------------|-------|------------|---------|---------|
-      |   Ver usuarios     |  ✅  |     ✅     |   ✅   |   ❌    |
-      |   Crear usuarios   |  ✅  |     ✅     |   ❌   |   ❌    |
-      | Editar usuarios    |  ✅  |     ✅     |   ✅   |   ❌    |
-      | Eliminar usuarios  |  ✅  |     ❌     |   ❌   |   ❌    |
-      | Ver estadísticas   |  ✅  |     ✅     |   ❌   |   ❌    |
-      | Restaurar usuarios |  ✅  |     ❌     |   ❌   |   ❌    |
+| Funcionalidad | Admin | Supervisor | Manager | Usuario |
+|---------------|-------|------------|---------|---------|
+| Ver usuarios |  ✅  |     ✅     |   ✅   |   ❌    |
+| Crear usuarios |  ✅  |     ✅     |   ❌   |   ❌    |
+| Editar usuarios |  ✅  |     ✅     |   ✅   |   ❌    |
+| Eliminar usuarios |  ✅  |     ❌     |   ❌   |   ❌    |
+| Ver estadísticas |  ✅  |     ✅     |   ❌   |   ❌    |
+
 
 ### Soft Delete
 

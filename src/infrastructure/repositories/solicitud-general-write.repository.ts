@@ -81,20 +81,21 @@ export class SolicitudGeneralWriteRepository {
     return count > 0;
   }
 
-  async getNextSolicitudNumber(): Promise<string> {
-    const currentYear = new Date().getFullYear();
-    const lastSolicitud = await this.solicitudGeneralRepository
-      .createQueryBuilder('solicitud')
-      .where('solicitud.solicitud_numero LIKE :pattern', { pattern: `${currentYear}-%` })
-      .orderBy('solicitud.solicitud_numero', 'DESC')
+  private async getNextSolicitudNumber(manager = this.solicitudGeneralRepository.manager): Promise<string> {
+    const year = new Date().getFullYear();
+
+    const last = await manager
+      .getRepository(SolicitudGeneralEntity)
+      .createQueryBuilder('r')
+      .where('r.solicitud_numero LIKE :pattern', { pattern: `${year}-%` })
+      .andWhere('r.solicitud_numero IS NOT NULL')
+      .orderBy('r.solicitud_numero', 'DESC')
+      .limit(1)
       .getOne();
 
-    if (!lastSolicitud || !lastSolicitud.solicitud_numero) {
-      return `${currentYear}-00001`;
-    }
+      if (!last?.solicitud_numero) return `${year}-00001`;
 
-    const lastNumber = parseInt(lastSolicitud.solicitud_numero.split('-')[1]);
-    const nextNumber = lastNumber + 1;
-    return `${currentYear}-${nextNumber.toString().padStart(5, '0')}`;
-  }
+      const lastNumber = parseInt(last.solicitud_numero.split('-')[1], 10) || 0;
+      return `${year}-${(lastNumber + 1).toString().padStart(5, '0')}`;
+    }
 } 

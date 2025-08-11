@@ -2,50 +2,32 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CashRequestController } from '../controllers/cash-request.controller';
 import { CashRequestService } from '../../core/domain/services/cash-request.service';
+import { CashRequestRepository } from '../../infrastructure/repositories/cash-request.repository';
+import { CASH_REQUEST_REPOSITORY } from '../../core/application/tokens';
 import { CashRequestEntity } from '../../infrastructure/database/entities/cash-request.entity';
 import { CashRequestWriteEntity } from '../../infrastructure/database/entities/cash-request-write.entity';
-import { SolicitudGeneralEntity } from '../../infrastructure/database/entities/solicitud-general.entity';
-import { CashRequestRepository, CashRequestWriteRepository } from '../../infrastructure/repositories/cash-request.repository';
-import { SolicitudGeneralWriteRepository } from '../../infrastructure/repositories/solicitud-general-write.repository';
-import { UserEntity } from '../../infrastructure/database/entities/user.entity';
-import { UserRepository } from '../../infrastructure/repositories/user.repository';
+import { ApplicationModule } from '../../core/application/application.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      CashRequestEntity,
-      CashRequestWriteEntity,
-      SolicitudGeneralEntity,
-      UserEntity,
-    ]),
+    TypeOrmModule.forFeature([CashRequestEntity, CashRequestWriteEntity]),
+    ApplicationModule,
   ],
   controllers: [CashRequestController],
   providers: [
-    CashRequestService,
+    // Servicio expuesto bajo el token que consume el controlador
     {
       provide: 'ICashRequestService',
       useClass: CashRequestService,
     },
     {
-      provide: 'ICashRequestRepository',
+      provide: CASH_REQUEST_REPOSITORY,
       useClass: CashRequestRepository,
     },
-    {
-      provide: 'ICashRequestWriteRepository',
-      useClass: CashRequestWriteRepository,
-    },
-    {
-      provide: 'IUserRepository',
-      useClass: UserRepository,
-    },
-    SolicitudGeneralWriteRepository,
   ],
   exports: [
-    CashRequestService,
-    {
-      provide: 'ICashRequestService',
-      useClass: CashRequestService,
-    },
+    'ICashRequestService',
+    CASH_REQUEST_REPOSITORY,
   ],
 })
 export class CashRequestModule {} 

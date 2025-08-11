@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateCol
 import { ApiProperty } from '@nestjs/swagger';
 import { CashRequestStatus, CashRequestType, PaymentType, Division } from '../../../core/domain/cash-request.interface';
 
-@Entity('vsolicitud_generales')
+@Entity('vsolicitud_desembolso_web')
 export class CashRequestEntity {
   @ApiProperty({
     description: 'ID único de la solicitud',
