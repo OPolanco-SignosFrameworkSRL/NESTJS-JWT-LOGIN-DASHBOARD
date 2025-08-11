@@ -308,14 +308,12 @@ export class CashRequestService implements ICashRequestService {
         return 'Pendiente';
       case CashRequestStatus.APROBADA:
         return 'Aprobada';
+      case CashRequestStatus.AUTORIZADO:
+        return 'Autorizado';
       case CashRequestStatus.RECHAZADA:
         return 'Rechazada';
-      case CashRequestStatus.LIQUIDADA:
-        return 'Liquidada';
-      case CashRequestStatus.EN_PROCESO:
-        return 'En Proceso';
-      case CashRequestStatus.DEFINITIVO:
-        return 'Definitivo';
+      case CashRequestStatus.DESEMBOLSADO:
+        return 'Desembolsado';
       default:
         return 'Desconocido';
     }
@@ -327,12 +325,8 @@ export class CashRequestService implements ICashRequestService {
         return '✅';
       case CashRequestStatus.RECHAZADA:
         return '❌';
-      case CashRequestStatus.LIQUIDADA:
+      case CashRequestStatus.DESEMBOLSADO:
         return '💰';
-      case CashRequestStatus.EN_PROCESO:
-        return '🔄';
-      case CashRequestStatus.DEFINITIVO:
-        return '🏁';
       case CashRequestStatus.PENDIENTE:
         return '⏳';
       default:
