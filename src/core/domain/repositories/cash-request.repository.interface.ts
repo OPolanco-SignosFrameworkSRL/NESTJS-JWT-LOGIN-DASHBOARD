@@ -52,15 +52,19 @@ export interface ICashRequestRepository {
    */
   update(id: number, cashRequestData: any): Promise<CashRequest>;
 
-  /**
-   * Aprobar una solicitud
-   */
-  approve(id: number, autorizado_porid: number): Promise<CashRequest>;
+  // Métodos removidos - ahora se usa updateStatus para todas las acciones
 
   /**
-   * Rechazar una solicitud
+   * Actualizar el estado de una solicitud (método genérico para admin)
    */
-  reject(id: number, autorizado_porid: number, razon_rechazon: string): Promise<CashRequest>;
+  updateStatus(
+    id: number, 
+    newStatus: number, 
+    adminUserId: number, 
+    action: string, 
+    comment?: string, 
+    actionDate?: Date
+  ): Promise<CashRequest>;
 
   /**
    * Liquidar una solicitud

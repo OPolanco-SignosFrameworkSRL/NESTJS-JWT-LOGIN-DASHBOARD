@@ -172,20 +172,54 @@ export class CashRequestRepository implements ICashRequestRepository {
    * Crea una nueva solicitud
    */
   async create(cashRequestData: any): Promise<CashRequest> {
-    const newCashRequest = this.cashRequestWriteRepository.create(cashRequestData);
-    await this.cashRequestWriteRepository.save(newCashRequest);
+    // Establecer valores por defecto según los campos requeridos
+    const requestData = {
+      ...cashRequestData,
+      solicitud_status: 1, // PENDIENTE por defecto
+      fechacreada: new Date(),
+      // Campos opcionales que pueden ser null
+      autorizado_porid: null,
+      fecha_orden_prod: null,
+      num_orden_prod: null,
+      num_ticket_prod: null,
+      nombre_cliente: null,
+      solicitud_numero: null,
+      fecha_rechazada: null,
+      razon_rechazon: null,
+      fecha_aprobada: null,
+      verificada_porid: null,
+      cedula_autoriza: null,
+    };
     
-    // Obtener la solicitud creada desde la vista de lectura usando los datos originales
-    const createdCashRequest = await this.cashRequestReadRepository.findOne({ 
-      where: { 
-        solicitada_porid: cashRequestData.solicitada_porid,
-        monto_solicitado: cashRequestData.monto_solicitado,
-        concepto: cashRequestData.concepto
-      },
-      order: { id: 'DESC' }
-    });
+    const newCashRequest = this.cashRequestWriteRepository.create(requestData);
+    const savedRequest = await this.cashRequestWriteRepository.save(newCashRequest);
     
-    return this.mapToDomain(createdCashRequest!);
+    // Asegurar que tenemos un objeto, no un array
+    const request = Array.isArray(savedRequest) ? savedRequest[0] : savedRequest;
+    
+    // Crear una entidad de dominio básica con los datos guardados
+    return new CashRequest(
+      request.id,
+      request.fechacreada,
+      request.solicitada_porid,
+      request.solicitud_tipo as any,
+      request.solicitud_status as any,
+      request.monto_solicitado,
+      request.concepto || '',
+      request.divicionid,
+      request.tipo_pago as any,
+      request.autorizado_porid,
+      request.fecha_requerida,
+      request.departamento,
+      request.fecha_orden_prod,
+      request.num_orden_prod,
+      request.num_ticket_prod,
+      request.nombre_cliente,
+      request.solicitud_numero,
+      request.fecha_rechazada,
+      request.razon_rechazon,
+      // request.produccion === 1, // Campo comentado porque no existe en la tabla
+    );
   }
 
   /**
@@ -198,33 +232,7 @@ export class CashRequestRepository implements ICashRequestRepository {
     return this.mapToDomain(updatedCashRequest!);
   }
 
-  /**
-   * Aprobar una solicitud
-   */
-  async approve(id: number, autorizado_porid: number): Promise<CashRequest> {
-    await this.cashRequestWriteRepository.update(id, { 
-      solicitud_status: CashRequestStatus.APROBADA,
-      autorizado_porid 
-    });
-    
-    const approvedCashRequest = await this.cashRequestReadRepository.findOne({ where: { id } });
-    return this.mapToDomain(approvedCashRequest!);
-  }
-
-  /**
-   * Rechazar una solicitud
-   */
-  async reject(id: number, autorizado_porid: number, razon_rechazon: string): Promise<CashRequest> {
-    await this.cashRequestWriteRepository.update(id, { 
-      solicitud_status: CashRequestStatus.RECHAZADA,
-      autorizado_porid,
-      fecha_rechazada: new Date(),
-      razon_rechazon 
-    });
-    
-    const rejectedCashRequest = await this.cashRequestReadRepository.findOne({ where: { id } });
-    return this.mapToDomain(rejectedCashRequest!);
-  }
+  // Métodos removidos - ahora se usa updateStatus para todas las acciones
 
   /**
    * Liquidar una solicitud
@@ -398,4 +406,54 @@ export class CashRequestRepository implements ICashRequestRepository {
 
     return cashRequests.map(cashRequest => this.mapToDomain(cashRequest));
   }
-} 
+
+  /**
+   * Actualiza el estado de una solicitud (método genérico para admin)
+   */
+  async updateStatus(
+    id: number, 
+    newStatus: number, 
+    adminUserId: number, 
+    action: string, 
+    comment?: string, 
+    actionDate?: Date
+  ): Promise<CashRequest> {
+    // Obtener la solicitud actual
+    const currentRequest = await this.cashRequestWriteRepository.findOne({ where: { id } });
+    if (!currentRequest) {
+      throw new Error(`Solicitud con ID ${id} no encontrada`);
+    }
+
+    // Actualizar el estado
+    currentRequest.solicitud_status = newStatus;
+
+    // Actualizar campos según la acción
+    switch (action) {
+      case 'approve':
+        currentRequest.fecha_aprobada = actionDate || new Date();
+        currentRequest.verificada_porid = adminUserId;
+        break;
+      
+      case 'authorize':
+        currentRequest.autorizado_porid = adminUserId;
+        currentRequest.cedula_autoriza = adminUserId.toString(); // Temporal, se puede mejorar
+        break;
+      
+      case 'reject':
+        currentRequest.fecha_rechazada = actionDate || new Date();
+        currentRequest.razon_rechazon = comment || 'Rechazada por administrador';
+        break;
+    }
+
+    // Guardar los cambios
+    const updatedRequest = await this.cashRequestWriteRepository.save(currentRequest);
+    
+    // Retornar la entidad de dominio actualizada
+    const updatedReadRequest = await this.cashRequestReadRepository.findOne({ where: { id } });
+    if (!updatedReadRequest) {
+      throw new Error('Error al obtener la solicitud actualizada');
+    }
+    
+    return this.mapToDomain(updatedReadRequest);
+  }
+}

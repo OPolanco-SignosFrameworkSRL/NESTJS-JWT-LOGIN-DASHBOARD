@@ -3,57 +3,66 @@ import { AppModule } from '../app.module';
 import { CashRequestService } from '../core/domain/services/cash-request.service';
 
 async function testCreateRequest() {
-  console.log('🧪 Probando creación de solicitud...');
-  
-  const app = await NestFactory.create(AppModule);
-  const cashRequestService = app.get(CashRequestService);
+  const app = await NestFactory.createApplicationContext(AppModule);
   
   try {
-    console.log('✅ Servicio obtenido correctamente');
+    console.log('🔍 Probando Creación de Solicitud\n');
+
+    // Obtener el servicio usando el token correcto
+    const cashRequestService = app.get('ICashRequestService');
     
-    const testData = {
+    // Simular un usuario
+    const currentUser = {
+      sub: 30, // Usuario que ya existe
+      role: 'User' as any
+    };
+    
+    // Datos de la solicitud (según los campos requeridos del usuario)
+    const requestData = {
       monto_solicitado: 3500,
-      solicitud_tipo: 3, // Compra de Materiales (aparece en la vista)
+      solicitud_tipo: 3,
       divicionid: 1,
       tipo_pago: 1,
-      concepto: 'Materiales para mantenimiento de equipos'
+      concepto: 'Materiales para mantenimiento de equipos',
+      fecha_requerida: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 días
+      departamento: 'Administración',
+      nombre_cliente: 'Cliente ABC',
+      num_orden_prod: 'OP-001',
+      num_ticket_prod: 'TK-001',
     };
     
-    const currentUser = {
-      sub: 62233,
-      role: 'Admin' as any
-    };
+    console.log(`📋 Datos de la solicitud:`);
+    console.log(`   Monto: ${requestData.monto_solicitado}`);
+    console.log(`   Concepto: ${requestData.concepto}`);
+    console.log(`   División: ${requestData.divicionid}`);
+    console.log(`   Tipo de pago: ${requestData.tipo_pago}`);
+    console.log(`   Fecha requerida: ${requestData.fecha_requerida}`);
     
-    console.log('📝 Datos de prueba:', testData);
-    console.log('👤 Usuario actual:', currentUser);
+    console.log(`\n📋 Creando solicitud...`);
     
-    const result = await cashRequestService.create(testData, currentUser);
-    
-    console.log('✅ Solicitud creada exitosamente:');
-    console.log(JSON.stringify(result, null, 2));
-    
-    // Verificar la solicitud creada directamente en la tabla base
-    const dataSource = app.get('DataSource');
-    const createdSolicitud = await dataSource.query(`
-      SELECT TOP 1 * FROM solicitud_desembolso_web 
-      WHERE solicitada_porid = ${currentUser.sub} 
-      ORDER BY id DESC
-    `);
-    
-    console.log('📊 Solicitud creada en tabla base:');
-    console.log(JSON.stringify(createdSolicitud[0], null, 2));
-    
-  } catch (error) {
-    console.error('❌ Error al crear solicitud:');
-    console.error('Mensaje:', error.message);
-    console.error('Stack:', error.stack);
-    
-    if (error.response) {
-      console.error('Response:', error.response);
+    try {
+      const result = await cashRequestService.create(requestData, currentUser);
+      
+      console.log(`✅ Solicitud creada exitosamente:`);
+      console.log(`   ID: ${result.id}`);
+      console.log(`   Estado: ${result.solicitud_status}`);
+      console.log(`   Usuario: ${result.usuarionombre}`);
+      console.log(`   Monto: ${result.monto_solicitado}`);
+      console.log(`   Concepto: ${result.concepto}`);
+      console.log(`   Fecha creada: ${result.fechacreada}`);
+      
+    } catch (error) {
+      console.log(`❌ Error creando solicitud: ${error.message}`);
+      if (error.stack) {
+        console.log(`   Stack: ${error.stack}`);
+      }
     }
+
+  } catch (error) {
+    console.error('❌ Error durante la prueba:', error);
   } finally {
     await app.close();
   }
 }
 
-testCreateRequest(); 
+testCreateRequest().catch(console.error); 
