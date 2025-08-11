@@ -239,4 +239,25 @@ export class UserRepository implements IUserRepository {
     const updatedUser = await this.userReadRepository.findOne({ where: { cedula } });
     return this.mapToDomain(updatedUser!);
   }
+
+  /**
+   * Valida las credenciales de un usuario (cédula y contraseña hasheada)
+   */
+  async validateCredentials(cedula: string, hashedPassword: string): Promise<boolean> {
+    try {
+      // Buscar usuario en la tabla de escritura para obtener la contraseña
+      const userWrite = await this.userWriteRepository.findOne({
+        where: { cedula, valido: '1' },
+      });
+
+      if (!userWrite) {
+        return false;
+      }
+
+      // Comparar la contraseña hasheada proporcionada con la almacenada
+      return userWrite.password === hashedPassword;
+    } catch (error) {
+      return false;
+    }
+  }
 } 

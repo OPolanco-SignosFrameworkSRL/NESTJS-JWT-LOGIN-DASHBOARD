@@ -6,6 +6,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { AuthController } from '../controllers/auth.controller';
 import { JwtStrategy } from '../strategies/jwt.strategy';
+import { AuthService } from '../../core/domain/services/auth.service';
+import { CryptoService } from '../../infrastructure/services/crypto.service';
 
 // Entidades de base de datos
 import { UserEntity } from '../../infrastructure/database/entities/user.entity';
@@ -40,7 +42,7 @@ import { ApplicationModule } from '../../core/application/application.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [JwtStrategy],
-  exports: [ApplicationModule],
+  providers: [AuthService, JwtStrategy, CryptoService],
+  exports: [ApplicationModule, AuthService],
 })
 export class AuthModule {}

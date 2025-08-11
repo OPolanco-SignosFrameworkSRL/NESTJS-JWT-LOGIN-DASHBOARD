@@ -2,7 +2,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import { IUserRepository } from '../../domain/repositories/user.repository.interface';
 import { ICryptoService } from '../../domain/crypto.service.interface';
 import { IUser } from '../../domain/interfaces/user.interface';
-import { USER_REPOSITORY, CRYPTO_SERVICE } from '../application.module';
+import { USER_REPOSITORY, CRYPTO_SERVICE } from '../tokens';
 
 /**
  * Caso de uso: Autenticar Usuario
@@ -41,8 +41,7 @@ export class AuthenticateUserUseCase {
       // Verificar contraseña
       const hashedPassword = this.cryptoService.calculateSHA256(cedula + password);
       
-      // Aquí necesitarías obtener el hash de la contraseña del repositorio
-      // Por ahora, asumimos que la validación se hace en el repositorio
+      // Validar la contraseña usando el repositorio
       const isValidPassword = await this.validatePassword(cedula, hashedPassword);
       
       if (!isValidPassword) {
@@ -50,7 +49,7 @@ export class AuthenticateUserUseCase {
       }
 
       // Retornar usuario autenticado
-      return {
+      const userData: any = {
         id: user.id,
         cedula: user.cedula,
         nombre: user.nombre,
@@ -58,7 +57,6 @@ export class AuthenticateUserUseCase {
         fullname: user.getFullName(),
         role: user.role,
         user_email: user.user_email,
-        telefono: user.telefono,
         valido: user.valido,
         division: user.division,
         cargo: user.cargo,
@@ -67,6 +65,13 @@ export class AuthenticateUserUseCase {
         estado: user.estado,
       };
 
+      // Agregar telefono solo si existe
+      if ('telefono' in user && user.telefono) {
+        userData.telefono = user.telefono;
+      }
+
+      return userData;
+
     } catch (error) {
       return null;
     }
@@ -74,18 +79,14 @@ export class AuthenticateUserUseCase {
 
   /**
    * Valida la contraseña del usuario
-   * Esta implementación dependerá de cómo se almacena la contraseña en el repositorio
+   * Esta implementación ahora valida correctamente la contraseña
    */
   private async validatePassword(cedula: string, hashedPassword: string): Promise<boolean> {
-    // Esta es una implementación simplificada
-    // En la práctica, necesitarías obtener el hash almacenado del repositorio
-    // y compararlo con el hash proporcionado
-    
-    // Por ahora, retornamos true para que funcione con la implementación actual
-    // En una implementación real, harías algo como:
-    // const storedUser = await this.userRepository.findByCedula(cedula);
-    // return storedUser && storedUser.password === hashedPassword;
-    
-    return true;
+    try {
+      // Usar el método del repositorio para validar las credenciales
+      return await this.userRepository.validateCredentials(cedula, hashedPassword);
+    } catch (error) {
+      return false;
+    }
   }
 }

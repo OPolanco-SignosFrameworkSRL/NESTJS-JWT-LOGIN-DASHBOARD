@@ -76,4 +76,9 @@ export interface IUserRepository {
    * Actualiza el teléfono de un usuario
    */
   updatePhone(cedula: string, telefono: string): Promise<User>;
+
+  /**
+   * Valida las credenciales de un usuario (cédula y contraseña hasheada)
+   */
+  validateCredentials(cedula: string, hashedPassword: string): Promise<boolean>;
 } 
