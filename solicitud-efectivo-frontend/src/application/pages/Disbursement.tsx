@@ -1,45 +1,27 @@
 import ButtonForms from "@/application/ui/ButtonForm/ButtonForms";
-import { useState } from "react"
-import { CiUser } from "react-icons/ci";
+
 import { useForm } from "react-hook-form"
-import BasicInformationForm from "@/application/components/newRequest/BasicInformationForm";
-import ProductionDataForm from "@/application/components/newRequest/ProductionDataForm";
-import MembersForm from "@/application/components/newRequest/MembersForm";
 import Select from "../ui/Select/Select";
 import Input from "../ui/Input/Input";
+import { IoDocumentTextOutline } from "react-icons/io5";
+import { FiUser } from "react-icons/fi";
+import { LuBuilding2 } from "react-icons/lu";
+import { MdOutlinePayment } from "react-icons/md";
+import { MdAttachMoney } from "react-icons/md";
+import { CiChat1 } from "react-icons/ci";
+
+
+
+
+
+
 
 
 
 const Disbursement = () => {
 
-  const navItems = [
-    {label: "Información Básica"},
-    {label: "Datos Producción"},
-    {label: "Integrantes"}
-  ]
 
-  const [activeItem, setActiveItem] = useState(navItems[0]);
-
-  const handleClickNext = () => {
-
-    const currentIndex = navItems.findIndex(item => activeItem.label === item.label);
-    
-    if (currentIndex < navItems.length - 1) {
-      setActiveItem(navItems[currentIndex + 1]);
-    }
-  }
-
-  const handleClickPrevious = () => {
-
-    const currentIndex = navItems.findIndex(item => activeItem.label === item.label)
-
-    if(currentIndex > 0) {
-      setActiveItem(navItems[currentIndex - 1])
-    }
-
-  }
-
-  const {register, reset, handleSubmit, control, formState: {errors}, watch} = useForm({
+  const {register, reset, handleSubmit, formState: {errors}} = useForm({
     defaultValues: {
       formDataBasicInformation: [{ amount: '', requestType: '', division: '', paymentType: '' }], 
       formDataProduction: [{ orderDate: '', orderNumber: '', clientName: '', ticketNumber: '', requestConcept: '' }],
@@ -94,7 +76,8 @@ const Disbursement = () => {
 
                 <div className="mb-2">
 
-                    <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium">
+                    <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium flex items-center gap-2">
+                        <IoDocumentTextOutline className="w-5 h-5 text-blue-600" />
                         Solicitud
                         <span className="text-red-500 ml-1.5">*</span>
                     </label>
@@ -116,7 +99,8 @@ const Disbursement = () => {
 
                     <div className="mb-2">
 
-                        <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium">
+                        <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium flex items-center gap-2">
+                            <FiUser className="w-5 h-5 text-blue-600" />
                             Responsable
                             <span className="text-red-500 ml-1.5">*</span>
                         </label>
@@ -132,7 +116,8 @@ const Disbursement = () => {
                 <div className="w-1/2">
                     <div className="mb-2">
 
-                    <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium">
+                    <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium flex items-center gap-2">
+                        <FiUser className="w-5 h-5 text-orange-600" />
                         Cedula de Identidad
                         <span className="text-red-500 ml-1.5">*</span>
                     </label>
@@ -156,7 +141,8 @@ const Disbursement = () => {
 
                     <div className="mb-2">
 
-                        <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium">
+                        <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium flex items-center gap-2">
+                            <LuBuilding2 className="w-5 h-5 text-blue-600" />
                             Division
                             <span className="text-red-500 ml-1.5">*</span>
                         </label>
@@ -172,7 +158,8 @@ const Disbursement = () => {
                 <div className="w-1/2">
                     <div className="mb-2">
 
-                    <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium">
+                    <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium flex items-center gap-2">
+                        <MdOutlinePayment className="w-5 h-5 text-orange-600" />
                         Método de Pago
                         <span className="text-red-500 ml-1.5">*</span>
                     </label>
@@ -195,7 +182,8 @@ const Disbursement = () => {
 
                     <div className="mb-2">
 
-                        <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium">
+                        <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium flex items-center gap-2">
+                            <MdAttachMoney className="w-5 h-5 text-green-600" />
                             Monto Solicitado
                             <span className="text-red-500 ml-1.5">*</span>
                         </label>
@@ -211,7 +199,8 @@ const Disbursement = () => {
                 <div className="w-1/2">
                     <div className="mb-2">
 
-                    <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium">
+                    <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium flex items-center gap-2">
+                        <MdAttachMoney className="w-5 h-5 text-green-600" />
                         Monto de Desembolso
                         <span className="text-red-500 ml-1.5">*</span>
                     </label>
@@ -236,8 +225,9 @@ const Disbursement = () => {
 
                     <div className="mb-2">
 
-                        <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium">
-                            N¿ de Cheque
+                        <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" className="lucide lucide-hash h-5 w-5 text-green-600"><line x1="4" x2="20" y1="9" y2="9"></line><line x1="4" x2="20" y1="15" y2="15"></line><line x1="10" x2="8" y1="3" y2="21"></line><line x1="16" x2="14" y1="3" y2="21"></line></svg> 
+                            N° de Cheque
                             <span className="text-red-500 ml-1.5">*</span>
                         </label>
 
@@ -252,7 +242,8 @@ const Disbursement = () => {
                 <div className="w-1/2">
                     <div className="mb-2">
 
-                    <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium">
+                    <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium flex items-center gap-2">
+                        <IoDocumentTextOutline className="w-5 h-5 text-black-600" />
                         Referencia
                         <span className="text-red-500 ml-1.5">*</span>
                     </label>
@@ -275,7 +266,8 @@ const Disbursement = () => {
 
                 <div className="mb-2">
 
-                    <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium">
+                    <label htmlFor="amount" className="text-sm sm:text-base text-gray-700 font-medium flex items-center gap-2">
+                        <CiChat1 className="w-5 h-5 text-black" />
                         Observaciones
                         <span className="text-red-500 ml-1.5">*</span>
                     </label>
@@ -296,7 +288,7 @@ const Disbursement = () => {
             <ButtonForms 
               label="Anterior" 
               border={true}
-              onClick={handleClickPrevious}
+              onClick={() => {}}
               className="bg-red-500"
             />
 

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import CardSection1 from "@/application/components/Home/CardSection1";
 import CardSection2 from "@/application/components/Home/CardSection2";
-import HomeTable from "@/application/components/Home/HomeTable";
+import RequestTable from "@/application/components/RequestTable";
 
 
 const Home = () => {
@@ -48,7 +48,7 @@ const Home = () => {
 
       <section>
         
-        <HomeTable/>
+        <RequestTable/>
         
       </section>
 
