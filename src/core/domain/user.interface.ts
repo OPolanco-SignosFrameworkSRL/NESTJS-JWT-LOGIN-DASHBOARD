@@ -22,8 +22,9 @@ export interface IUser {
 }
 
 export interface IUserPayload {
+  id: number;        // ID del usuario (alias de sub)
   username: string;
-  sub: number;
+  sub: number;       // ID del usuario (JWT standard)
   fullname: string;
   role: UserRole;
 }

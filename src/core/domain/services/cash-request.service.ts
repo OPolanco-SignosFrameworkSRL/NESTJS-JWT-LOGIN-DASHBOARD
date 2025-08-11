@@ -4,8 +4,8 @@ import { ICashRequestResponse, ICashRequestFilters, ICashRequestStats, CashReque
 import { UserRole } from '../interfaces/user.interface';
 import { ICashRequestRepository } from '../repositories/cash-request.repository.interface';
 import { IUserRepository } from '../repositories/user.repository.interface';
+import { USER_REPOSITORY, CASH_REQUEST_REPOSITORY } from '../../application/tokens';
 import { CashRequest } from '../entities/cash-request.entity';
-import { CASH_REQUEST_REPOSITORY, USER_REPOSITORY } from '../../application/application.module';
 
 @Injectable()
 export class CashRequestService implements ICashRequestService {

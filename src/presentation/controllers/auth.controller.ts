@@ -15,7 +15,8 @@ import { CreateUserUseCase } from '../../core/application/use-cases/create-user.
 import { AuthenticateUserUseCase } from '../../core/application/use-cases/authenticate-user.use-case';
 import { LoginDto } from '../../core/application/dto/login.dto';
 import { RegisterDto } from '../../core/application/dto/register.dto';
-import { IUserPayload } from '../../core/domain/interfaces/user.interface';
+import { IUserPayload, IUser } from '../../core/domain/interfaces/user.interface';
+import { AuthService } from '../../core/domain/services/auth.service';
 
 /**
  * Controlador de Autenticación
@@ -29,6 +30,7 @@ export class AuthController {
     private readonly createUserUseCase: CreateUserUseCase,
     private readonly authenticateUserUseCase: AuthenticateUserUseCase,
     private readonly jwtService: JwtService,
+    private readonly authService: AuthService,
   ) {}
 
   /**
@@ -75,7 +77,8 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Login exitoso' })
   @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
   async login(@Body() loginDto: LoginDto) {
-    const user = await this.authenticateUserUseCase.execute(
+    // Usar AuthService.validateUser en lugar del caso de uso defectuoso
+    const user = await this.authService.validateUser(
       loginDto.cedula,
       loginDto.password,
     );
@@ -92,36 +95,37 @@ export class AuthController {
       };
     }
 
-    const payload: IUserPayload = {
-      username: user.cedula,
-      sub: user.id,
+    // Generar token JWT usando AuthService.login
+    const loginResponse = await this.authService.login(user);
+
+    // Crear objeto de usuario de manera segura
+    const userData: any = {
+      id: user.id,
+      cedula: user.cedula,
+      nombre: user.nombre,
+      apellido: user.apellido,
       fullname: user.fullname,
       role: user.role,
+      user_email: user.user_email,
+      valido: user.valido,
+      division: user.division,
+      cargo: user.cargo,
+      dependencia: user.dependencia,
+      recinto: user.recinto,
+      estado: user.estado,
     };
 
-    const access_token = this.jwtService.sign(payload);
+    // Agregar telefono solo si existe
+    if ('telefono' in user && user.telefono) {
+      userData.telefono = user.telefono;
+    }
 
     return {
       data: {
         success: true,
-        access_token,
-        user: {
-          id: user.id,
-          cedula: user.cedula,
-          nombre: user.nombre,
-          apellido: user.apellido,
-          fullname: user.fullname,
-          role: user.role,
-          user_email: user.user_email,
-          telefono: user.telefono,
-          valido: user.valido,
-          division: user.division,
-          cargo: user.cargo,
-          dependencia: user.dependencia,
-          recinto: user.recinto,
-          estado: user.estado,
-        },
-        expires_in: 86400, // 24 horas
+        access_token: loginResponse.access_token,
+        user: userData,
+        expires_in: loginResponse.expires_in,
       },
       statusCode: 200,
       message: 'Operación exitosa',

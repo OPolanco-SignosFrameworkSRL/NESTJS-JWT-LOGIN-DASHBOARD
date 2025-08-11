@@ -3,7 +3,7 @@ import { IUserRepository } from '../../domain/repositories/user.repository.inter
 import { ICryptoService } from '../../domain/crypto.service.interface';
 import { IUserCreateData } from '../../domain/interfaces/user.interface';
 import { User } from '../../domain/entities/user.entity';
-import { USER_REPOSITORY, CRYPTO_SERVICE } from '../application.module';
+import { USER_REPOSITORY, CRYPTO_SERVICE } from '../../application/tokens';
 
 /**
  * Caso de uso: Crear Usuario

@@ -5,6 +5,7 @@ import { AuthModule } from './presentation/modules/auth.module';
 import { UsersModule } from './presentation/modules/users.module';
 import { CashRequestModule } from './presentation/modules/cash-request.module';
 import { SolicitudGeneralModule } from './presentation/modules/solicitud-general.module';
+import { CommentModule } from './presentation/modules/comment.module';
 import { AppController } from './app.controller';
 import { getDatabaseConfig } from './config/database.config';
 import { appConfig } from './config/app.config';
@@ -26,6 +27,7 @@ import { appConfig } from './config/app.config';
     UsersModule,
     CashRequestModule,
     SolicitudGeneralModule,
+    CommentModule,
   ],
   controllers: [AppController],
   providers: [],
