@@ -6,6 +6,7 @@ import { UsersModule } from './presentation/modules/users.module';
 import { CashRequestModule } from './presentation/modules/cash-request.module';
 import { SolicitudGeneralModule } from './presentation/modules/solicitud-general.module';
 import { CommentModule } from './presentation/modules/comment.module';
+import { DesembolsoModule } from './presentation/modules/desembolso.module';
 import { AdminRequestModule } from './presentation/modules/admin-request.module';
 import { AppController } from './app.controller';
 import { getDatabaseConfig } from './config/database.config';
@@ -29,6 +30,7 @@ import { appConfig } from './config/app.config';
     CashRequestModule,
     SolicitudGeneralModule,
     CommentModule,
+    DesembolsoModule,
     AdminRequestModule,
   ],
   controllers: [AppController],

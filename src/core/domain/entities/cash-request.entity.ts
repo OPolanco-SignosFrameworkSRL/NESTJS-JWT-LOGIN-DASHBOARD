@@ -54,7 +54,7 @@ export class CashRequest {
    * Verifica si la solicitud está liquidada
    */
   isLiquidated(): boolean {
-    return this.solicitud_status === CashRequestStatus.LIQUIDADA;
+    return this.solicitud_status === CashRequestStatus.DESEMBOLSADO;
   }
 
   /**
@@ -162,7 +162,7 @@ export class CashRequest {
       this.fechacreada,
       this.solicitada_porid,
       this.solicitud_tipo,
-      CashRequestStatus.LIQUIDADA,
+      CashRequestStatus.DESEMBOLSADO,
       this.monto_solicitado,
       this.concepto,
       this.divicionid,
@@ -192,8 +192,8 @@ export class CashRequest {
         return 'APROBADA';
       case CashRequestStatus.RECHAZADA:
         return 'RECHAZADA';
-      case CashRequestStatus.LIQUIDADA:
-        return 'LIQUIDADA';
+      case CashRequestStatus.DESEMBOLSADO:
+        return 'DESEMBOLSADO';
       default:
         return 'DESCONOCIDO';
     }

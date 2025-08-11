@@ -239,7 +239,7 @@ export class CashRequestRepository implements ICashRequestRepository {
    */
   async liquidate(id: number): Promise<CashRequest> {
     await this.cashRequestWriteRepository.update(id, { 
-      solicitud_status: CashRequestStatus.LIQUIDADA 
+      solicitud_status: CashRequestStatus.DESEMBOLSADO 
     });
     
     const liquidatedCashRequest = await this.cashRequestReadRepository.findOne({ where: { id } });
@@ -286,7 +286,7 @@ export class CashRequestRepository implements ICashRequestRepository {
       where: { solicitud_status: CashRequestStatus.RECHAZADA } 
     });
     const liquidated = await this.cashRequestReadRepository.count({ 
-      where: { solicitud_status: CashRequestStatus.LIQUIDADA } 
+      where: { solicitud_status: CashRequestStatus.DESEMBOLSADO } 
     });
 
     // Calcular montos totales
@@ -309,10 +309,9 @@ export class CashRequestRepository implements ICashRequestRepository {
     const byStatus: Record<CashRequestStatus, number> = {
       [CashRequestStatus.PENDIENTE]: 0,
       [CashRequestStatus.APROBADA]: 0,
+      [CashRequestStatus.AUTORIZADO]: 0,
       [CashRequestStatus.RECHAZADA]: 0,
-      [CashRequestStatus.LIQUIDADA]: 0,
-      [CashRequestStatus.EN_PROCESO]: 0,
-      [CashRequestStatus.DEFINITIVO]: 0,
+      [CashRequestStatus.DESEMBOLSADO]: 0,
     };
 
     statusStats.forEach(stat => {
