@@ -146,8 +146,14 @@ export class CashRequestService implements ICashRequestService {
       throw new ForbiddenException('No puedes aprobar tu propia solicitud de efectivo');
     }
 
-    // Aprobar la solicitud
-    const approvedCashRequest = await this.cashRequestRepository.approve(id, currentUser.sub);
+    // Aprobar la solicitud usando el nuevo método updateStatus
+    const approvedCashRequest = await this.cashRequestRepository.updateStatus(
+      id, 
+      2, // APROBADA
+      currentUser.sub, 
+      'approve', 
+      notes
+    );
     const enrichedRequests = await this.enrichWithUserData([approvedCashRequest]);
     return enrichedRequests[0];
   }
@@ -182,8 +188,14 @@ export class CashRequestService implements ICashRequestService {
       throw new BadRequestException('Es obligatorio proporcionar una razón para rechazar la solicitud');
     }
 
-    // Rechazar la solicitud
-    const rejectedCashRequest = await this.cashRequestRepository.reject(id, currentUser.sub, notes);
+    // Rechazar la solicitud usando el nuevo método updateStatus
+    const rejectedCashRequest = await this.cashRequestRepository.updateStatus(
+      id, 
+      4, // RECHAZADA
+      currentUser.sub, 
+      'reject', 
+      notes
+    );
     const enrichedRequests = await this.enrichWithUserData([rejectedCashRequest]);
     return enrichedRequests[0];
   }
