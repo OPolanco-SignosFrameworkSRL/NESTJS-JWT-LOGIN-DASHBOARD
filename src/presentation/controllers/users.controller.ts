@@ -71,7 +71,7 @@ export class UsersController {
   }
 
   // ❌ ENDPOINT DESHABILITADO - Obtener todos los usuarios
-  /*
+  
   @Get()
   @ApiOperation({ summary: 'Obtener todos los usuarios' })
   @ApiQuery({ name: 'role', required: false, enum: UserRole })
@@ -86,7 +86,7 @@ export class UsersController {
   async findAll(@Query() filters: UserFiltersDto) {
     return await this.usersService.findAll(filters);
   }
-  */
+  
   // ❌ ENDPOINT DESHABILITADO - Estadísticas de usuarios
   /* 
     @Get('stats')
