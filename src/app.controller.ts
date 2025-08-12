@@ -1,9 +1,12 @@
-import { Controller, Get } from '@nestjs/common';
+ import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Aplicación')
 @Controller()
 export class AppController {
+  
+  // ❌ ENDPOINT DESHABILITADO - Obtener información de la aplicación
+  /*
   @Get()
   @ApiOperation({
     summary: 'Información de la aplicación',
@@ -43,7 +46,10 @@ export class AppController {
       timestamp: new Date().toISOString(),
     };
   }
+  */
 
+  // ❌ ENDPOINT DESHABILITADO - Estado de salud de la aplicación
+  /*
   @Get('health')
   @ApiOperation({
     summary: 'Estado de salud de la aplicación',
@@ -60,4 +66,6 @@ export class AppController {
       uptime: process.uptime(),
     };
   }
+  */
 }
+ 

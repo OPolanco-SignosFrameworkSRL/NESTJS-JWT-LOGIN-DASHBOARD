@@ -99,6 +99,7 @@ export interface IUserPayload {
   sub: number;
   fullname: string;
   role: UserRole;
+  email?: string;
 }
 
 /**
