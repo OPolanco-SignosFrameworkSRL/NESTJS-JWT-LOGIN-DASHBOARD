@@ -27,6 +27,7 @@ export interface IUserPayload {
   sub: number;       // ID del usuario (JWT standard)
   fullname: string;
   role: UserRole;
+  email?: string;
 }
 
 export interface ILoginResponse {
