@@ -215,7 +215,7 @@ export class AuthService {
   async login(user: IUser): Promise<ILoginResponse> {
     const payload: IUserPayload = {
       id: user.id,        // Agregar el campo id
-      username: user.cedula,
+      cedula: user.cedula,
       sub: user.id,
       fullname: user.fullname,
       role: user.role,

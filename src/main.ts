@@ -12,6 +12,9 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get(ConfigService);
 
+  // Configurar prefijo global /api para todos los endpoints
+  app.setGlobalPrefix('api');
+
   // Configuración global de validación
   app.useGlobalPipes(
     new ValidationPipe({

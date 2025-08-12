@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 export interface Response<T> {
-  data: T;
+  Token: T;
   statusCode: number;
   message: string;
   timestamp: string;
@@ -25,8 +25,8 @@ export class ResponseInterceptor<T>
     const response = ctx.getResponse();
 
     return next.handle().pipe(
-      map((data) => ({
-        data,
+      map((Token) => ({
+        Token,
         statusCode: response.statusCode,
         message: 'Operación exitosa',
         timestamp: new Date().toISOString(),
