@@ -42,7 +42,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
-  ) {}
+  ) { }
 
   @Post()
   @Roles(UserRole.Admin)
@@ -70,6 +70,8 @@ export class UsersController {
     return await this.authService.createUser(registerDto);
   }
 
+  // ❌ ENDPOINT DESHABILITADO - Obtener todos los usuarios
+  /*
   @Get()
   @ApiOperation({ summary: 'Obtener todos los usuarios' })
   @ApiQuery({ name: 'role', required: false, enum: UserRole })
@@ -84,56 +86,60 @@ export class UsersController {
   async findAll(@Query() filters: UserFiltersDto) {
     return await this.usersService.findAll(filters);
   }
-
-  @Get('stats')
-  @Roles(UserRole.Admin, UserRole.Supervisor)
-  @ApiOperation({ summary: 'Obtener estadísticas de usuarios' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Estadísticas obtenidas exitosamente',
-    schema: {
-      type: 'object',
-      properties: {
-        totalUsers: { type: 'number', example: 150 },
-        usersByRole: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              role: { type: 'string', example: 'Usuario' },
-              count: { type: 'number', example: 120 },
+  */
+  // ❌ ENDPOINT DESHABILITADO - Estadísticas de usuarios
+  /* 
+    @Get('stats')
+    @Roles(UserRole.Admin, UserRole.Supervisor)
+    @ApiOperation({ summary: 'Obtener estadísticas de usuarios' })
+    @ApiResponse({
+      status: HttpStatus.OK,
+      description: 'Estadísticas obtenidas exitosamente',
+      schema: {
+        type: 'object',
+        properties: {
+          totalUsers: { type: 'number', example: 150 },
+          usersByRole: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                role: { type: 'string', example: 'Usuario' },
+                count: { type: 'number', example: 120 },
+              },
             },
           },
-        },
-        usersByDivision: {
-          type: 'array',
-          items: {
-            type: 'object',
-            properties: {
-              division: { type: 'string', example: 'TI' },
-              count: { type: 'number', example: 45 },
+          usersByDivision: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                division: { type: 'string', example: 'TI' },
+                count: { type: 'number', example: 45 },
+              },
             },
           },
         },
       },
-    },
-  })
-  async getStats() {
-    return await this.usersService.getStats();
-  }
-
-  @Get('search')
-  @ApiOperation({ summary: 'Buscar usuarios por término' })
-  @ApiQuery({ name: 'term', required: true, type: String })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Usuarios encontrados exitosamente',
-    type: [Object],
-  })
-  async searchByTerm(@Query('term') term: string) {
-    return await this.usersService.searchByTerm(term);
-  }
-
+    })
+    async getStats() {
+      return await this.usersService.getStats();
+    } 
+   // ❌ ENDPOINT DESHABILITADO - Buscar usuarios por término
+    @Get('search')
+    @ApiOperation({ summary: 'Buscar usuarios por término' })
+    @ApiQuery({ name: 'term', required: true, type: String })
+    @ApiResponse({
+      status: HttpStatus.OK,
+      description: 'Usuarios encontrados exitosamente',
+      type: [Object],
+    })
+    async searchByTerm(@Query('term') term: string) {
+      return await this.usersService.searchByTerm(term);
+    }
+  */
+  // ❌ ENDPOINT DESHABILITADO - Obtener usuarios por rol
+  /*
   @Get('role/:role')
   @ApiOperation({ summary: 'Obtener usuarios por rol' })
   @ApiParam({ name: 'role', enum: UserRole })
@@ -145,35 +151,39 @@ export class UsersController {
   async findByRole(@Param('role') role: UserRole) {
     return await this.usersService.findByRole(role);
   }
-
-  @Get('division/:division')
-  @ApiOperation({ summary: 'Obtener usuarios por división' })
-  @ApiParam({ name: 'division', type: String })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Usuarios por división obtenidos exitosamente',
-    type: [Object],
-  })
-  async findByDivision(@Param('division') division: string) {
-    return await this.usersService.findByDivision(division);
-  }
-
-  @Get(':id')
-  @ApiOperation({ summary: 'Obtener un usuario por ID' })
-  @ApiParam({ name: 'id', type: Number })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Usuario obtenido exitosamente',
-    type: Object,
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Usuario no encontrado',
-  })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    return await this.usersService.findOne(id);
-  }
-
+*/
+  // ❌ ENDPOINT DESHABILITADO - Obtener usuarios por división
+  /*
+    @Get('division/:division')
+    @ApiOperation({ summary: 'Obtener usuarios por división' })
+    @ApiParam({ name: 'division', type: String })
+    @ApiResponse({
+      status: HttpStatus.OK,
+      description: 'Usuarios por división obtenidos exitosamente',
+      type: [Object],
+    })
+    async findByDivision(@Param('division') division: string) {
+      return await this.usersService.findByDivision(division);
+    }
+  */
+  // ❌ ENDPOINT DESHABILITADO - Obtener un usuario por ID
+  /*
+    @Get(':id')
+    @ApiOperation({ summary: 'Obtener un usuario por ID' })
+    @ApiParam({ name: 'id', type: Number })
+    @ApiResponse({
+      status: HttpStatus.OK,
+      description: 'Usuario obtenido exitosamente',
+      type: Object,
+    })
+    @ApiResponse({
+      status: HttpStatus.NOT_FOUND,
+      description: 'Usuario no encontrado',
+    })
+    async findOne(@Param('id', ParseIntPipe) id: number) {
+      return await this.usersService.findOne(id);
+    }
+  */
   @Get('cedula/:cedula')
   @ApiOperation({ summary: 'Obtener un usuario por cédula' })
   @ApiParam({ name: 'cedula', type: String })
@@ -189,6 +199,7 @@ export class UsersController {
   async findByCedula(@Param('cedula') cedula: string) {
     return await this.usersService.findByCedula(cedula);
   }
+
 
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
@@ -218,7 +229,7 @@ export class UsersController {
 
   @Delete(':id')
   @Roles(UserRole.Admin)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Eliminar un usuario (soft delete por defecto, eliminación física con confirmación)',
     description: 'Por defecto realiza soft delete. Para eliminación física permanente, enviar confirmPermanentDelete: true y confirmText: "SI, ELIMINAR PERMANENTEMENTE"'
   })
@@ -257,7 +268,7 @@ export class UsersController {
     @Request() req
   ) {
     const currentUser = req.user;
-    
+
     // Validar confirmación para eliminación permanente
     if (deleteUserDto.confirmPermanentDelete) {
       if (deleteUserDto.confirmText !== 'SI, ELIMINAR PERMANENTEMENTE') {
@@ -266,9 +277,9 @@ export class UsersController {
     }
 
     return await this.usersService.remove(
-      id, 
-      currentUser, 
-      deleteUserDto.confirmPermanentDelete, 
+      id,
+      currentUser,
+      deleteUserDto.confirmPermanentDelete,
       deleteUserDto.reason
     );
   }
@@ -308,59 +319,59 @@ export class UsersController {
     const currentUser = req.user;
     return await this.usersService.restore(id, currentUser);
   }
-
-  @Get('deleted/list')
-  @Roles(UserRole.Admin)
-  @ApiOperation({ summary: 'Obtener lista de usuarios eliminados (soft delete)' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Lista de usuarios eliminados obtenida exitosamente',
-    type: [Object],
-  })
-  async findDeleted() {
-    return await this.usersService.findDeleted();
-  }
-
-
-
-
-
-  @Post('update-phone')
-  @ApiOperation({ summary: 'Actualizar teléfono del usuario' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Teléfono actualizado exitosamente',
-    schema: {
-      type: 'object',
-      properties: {
-        success: { type: 'boolean', example: true },
-        message: { type: 'string', example: 'Teléfono actualizado exitosamente' },
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'number', example: 1 },
-            cedula: { type: 'string', example: '40245980129' },
-            nombre: { type: 'string', example: 'Raul' },
-            apellido: { type: 'string', example: 'Vargas' },
-            telefono: { type: 'string', example: '8091234567' },
+  // ❌ ENDPOINT DESHABILITADO - Obtener lista de usuarios eliminados (soft delete)
+  /*
+    @Get('deleted/list')
+    @Roles(UserRole.Admin)
+    @ApiOperation({ summary: 'Obtener lista de usuarios eliminados (soft delete)' })
+    @ApiResponse({
+      status: HttpStatus.OK,
+      description: 'Lista de usuarios eliminados obtenida exitosamente',
+      type: [Object],
+    })
+    async findDeleted() {
+      return await this.usersService.findDeleted();
+    }
+  */
+  // ❌ ENDPOINT DESHABILITADO - Actualizar teléfono del usuario
+  /*
+    @Post('update-phone')
+    @ApiOperation({ summary: 'Actualizar teléfono del usuario' })
+    @ApiResponse({
+      status: HttpStatus.OK,
+      description: 'Teléfono actualizado exitosamente',
+      schema: {
+        type: 'object',
+        properties: {
+          success: { type: 'boolean', example: true },
+          message: { type: 'string', example: 'Teléfono actualizado exitosamente' },
+          user: {
+            type: 'object',
+            properties: {
+              id: { type: 'number', example: 1 },
+              cedula: { type: 'string', example: '40245980129' },
+              nombre: { type: 'string', example: 'Raul' },
+              apellido: { type: 'string', example: 'Vargas' },
+              telefono: { type: 'string', example: '8091234567' },
+            },
           },
         },
       },
-    },
-  })
-  @ApiResponse({
-    status: HttpStatus.UNAUTHORIZED,
-    description: 'Credenciales inválidas',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Datos de entrada inválidos',
-  })
-  async updatePhone(@Body() updatePhoneDto: UpdatePhoneDto) {
-    return await this.usersService.updateUserPhone(
-      updatePhoneDto.cedula,
-      updatePhoneDto.clave,
-      updatePhoneDto.telefono,
-    );
-  }
+    })
+    @ApiResponse({
+      status: HttpStatus.UNAUTHORIZED,
+      description: 'Credenciales inválidas',
+    })
+    @ApiResponse({
+      status: HttpStatus.BAD_REQUEST,
+      description: 'Datos de entrada inválidos',
+    })
+    async updatePhone(@Body() updatePhoneDto: UpdatePhoneDto) {
+      return await this.usersService.updateUserPhone(
+        updatePhoneDto.cedula,
+        updatePhoneDto.clave,
+        updatePhoneDto.telefono,
+      );
+    }
+  */
 }
