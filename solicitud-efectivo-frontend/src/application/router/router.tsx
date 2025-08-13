@@ -1,7 +1,7 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
-import { ProtectedRoute } from '../layout/AuthLayout';
-import Layout from '../layout/Layout';
+import { Suspense } from 'react';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+//import { ProtectedRoute } from '../layout/AuthLayout';
+
 import Home from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import SolicitudGastos from '../pages/SolicitudGastos';
@@ -9,11 +9,12 @@ import AdminDashboard from '../pages/Admin/AdminDashboard';
 import CreateEmployee from '../pages/Admin/CreateEmployee';
 import NewRequest from '../pages/Request/NewRequest';
 import Disbursement from '../pages/Disbursement';
+import { ProtectedRoute } from '@/application/layout/ProtectedRoute';
 
 
 const RouterComponent = () => {
 
-  const [isLoading, setIsLoading] = useState(true);
+  //const [isLoading, setIsLoading] = useState(true);
     
   const router = createBrowserRouter([
 
@@ -27,10 +28,10 @@ const RouterComponent = () => {
       element: <LoginPage />,
     },
     {
-      element: <Layout />,
+      path: '/',
+      element: <ProtectedRoute />,
       children: [
         {
-          index: true,
           path: '/home',
           element: <Home />,
         },
@@ -56,17 +57,7 @@ const RouterComponent = () => {
         }
       ],
     },
-    {/*
 
-        {
-          path: '/',
-          element: <ProtectedRoute />,
-          children: [
-            
-          ],
-        },
-
-    */}
   ]);
 
   return (

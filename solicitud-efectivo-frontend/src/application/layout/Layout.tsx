@@ -15,6 +15,7 @@ const Layout = () => {
 
   const [isOpen, setIsOpen] = useState(false) 
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(true) 
+
   const handleOpen = () => {
     setIsOpen(!isOpen)
   }
@@ -22,6 +23,12 @@ const Layout = () => {
   const handleTouchStart = () => {
     setIsOpen(false) 
   }
+
+  const getInfoUsers = useAppStore(state => state.GetUserFromToken)
+
+  useEffect(() => {
+    getInfoUsers()
+  }, [])
 
   useEffect(() => {
 

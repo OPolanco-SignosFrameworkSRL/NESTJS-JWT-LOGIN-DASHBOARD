@@ -2,7 +2,6 @@ import { type FieldErrors, type UseFormRegister, type FieldValues, type Control,
 
 import Input from "@/application/ui/Input/Input"
 import Select from "@/application/ui/Select/Select";
-import { useEffect } from "react";
 
 type BasicInformationFormProps = {
   register: UseFormRegister<FieldValues>
@@ -10,7 +9,7 @@ type BasicInformationFormProps = {
   control: Control<FieldValues>
 }
 
-const BasicInformationForm = ({register, errors, control}: BasicInformationFormProps) => {
+const BasicInformationForm = ({register, control}: BasicInformationFormProps) => {
 
   const formDataItems = [
     {label: "Tipo de Solicitud",  register: "requestType", options:["Test", "Test2", "Test3"]},

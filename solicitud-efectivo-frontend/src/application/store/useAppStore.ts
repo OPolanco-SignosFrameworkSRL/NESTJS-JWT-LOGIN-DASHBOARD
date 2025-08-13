@@ -1,8 +1,10 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { createModalSlice, type ModalSliceProps } from "./ModalSlice";
+import { createModalSlice, type ModalSliceProps } from "./modalSlice";
+import { createAuthSlice, type AuthSliceProps } from "./authSlice";
 
 
-export const useAppStore = create<ModalSliceProps>()(devtools((...a) => ({
-  ...createModalSlice(...a)
+export const useAppStore = create<ModalSliceProps & AuthSliceProps>()(devtools((...a) => ({
+  ...createModalSlice(...a),
+  ...createAuthSlice(...a)
 })))

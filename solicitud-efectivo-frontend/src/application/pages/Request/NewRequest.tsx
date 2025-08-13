@@ -37,7 +37,7 @@ const NewRequest = () => {
 
   }
 
-  const {register, reset, handleSubmit, control, formState: {errors}, watch} = useForm({
+  const {register, handleSubmit, control, formState: {errors}, watch} = useForm({
     defaultValues: {
       formDataBasicInformation: [{ amount: '', requestType: '', division: '', paymentType: '' }], 
       formDataProduction: [{ orderDate: '', orderNumber: '', clientName: '', ticketNumber: '', requestConcept: '' }],

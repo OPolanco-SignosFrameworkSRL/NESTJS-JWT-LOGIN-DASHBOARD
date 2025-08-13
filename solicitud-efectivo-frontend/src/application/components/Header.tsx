@@ -10,6 +10,10 @@ const Header = ({ handleOpen }: HeaderProps) => {
 
   const handleShowModal = useAppStore(state => state.handleShowModal)
 
+  const { decodedToken } = useAppStore()
+
+  const initials = decodedToken?.fullname?.split(' ').map(name => name[0]).join('')
+
   return (
 
     <>
@@ -31,7 +35,7 @@ const Header = ({ handleOpen }: HeaderProps) => {
             <span
               onClick={() => handleShowModal()}
               className="text-white bg-blue-500 rounded-full w-10 h-10 flex items-center justify-center font-medium cursor-pointer">
-              FJ
+              {initials}
             </span>
 
           </Container>

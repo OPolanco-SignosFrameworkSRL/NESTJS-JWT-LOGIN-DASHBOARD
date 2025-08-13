@@ -14,6 +14,7 @@ import { CiMoneyBill } from "react-icons/ci";
 
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
+import React from "react";
 
 const Nav = () => {
 
@@ -60,10 +61,10 @@ const Nav = () => {
             <nav>
                 <ul className="space-y-5 w-full flex flex-col">
                     {navItems.map((item, index) => (
+                        
+                        <React.Fragment key={index}>
 
-                        <>
-
-                            <Link to={item.path} key={index} className={`w-full p-2 rounded-lg ${isActive === item.path ? 'bg-gray-100' : ''} hover:bg-gray-100 transition-colors duration-200`}
+                            <Link to={item.path} className={`w-full p-2 rounded-lg ${isActive === item.path ? 'bg-gray-100' : ''} hover:bg-gray-100 transition-colors duration-200`}
                                 onClick={item.children ? handleOpenChild : undefined}
                             >
 
@@ -73,7 +74,7 @@ const Nav = () => {
                                         {item.icon}
                                     </div>
 
-                                    <div className="flex flex-col items-center justify-center w-full">
+                                    <div className="flex flex-col justify-center w-full">
 
                                         <span className="text-sm sm:text-base md:text-lg text-black font-semibold">
                                             {item.label}
@@ -87,15 +88,17 @@ const Nav = () => {
                                     )}
 
                                 </li>
+
                             </Link>
+
                             <div className="ml-8">
                                 
                                 {isOpenChild && item.children && (
                                     <ul className="flex flex-col gap-2 mt-2">
-                                        {item.children.map((child, index) => (
+                                        {item.children.map((child, childIndex) => (
                                             <Link 
                                                 to={child.path} 
-                                                key={index} 
+                                                key={childIndex} 
                                                 className="p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200 flex items-center gap-3"
                                             >
                                                 <div>{child.icon}</div>
@@ -106,7 +109,7 @@ const Nav = () => {
                                 )}
                             </div>
 
-                        </>
+                        </React.Fragment>
                         
                     ))}
                     

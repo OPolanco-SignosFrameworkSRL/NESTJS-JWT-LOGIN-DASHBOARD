@@ -1,15 +1,49 @@
+import Container from '@/application/ui/Container/Container'
+
 import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+
+import type { LoginFormSchema } from '@/infrastructure/schemas/auth/auth';
 
 import { GoPersonFill } from "react-icons/go";
+import Input from '../ui/Input/Input';
+import { hashPassword } from '@/shared/utilts/convertToSha256';
+import { useLogin } from '../hooks/auth';
+import { useEffect } from 'react';
 
-import Container from '@/application/ui/Container/Container'
+
 
 const LoginPage = () => {
 
+  const loginMutation = useLogin()
+
   const navigate = useNavigate()
 
-  const handleSubmit = () => {
-    navigate('/home')
+  const { register, handleSubmit, formState: {errors}} = useForm<LoginFormSchema>({
+    defaultValues: {
+      cedula: '',
+      password: ''
+    }
+  })
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if(token){
+      navigate("/home")
+    }
+
+  }, []);
+
+  const onSubmit = async (data: LoginFormSchema) => {
+
+    const hashedPassword =  await hashPassword(data.cedula, data.password);
+
+    loginMutation.mutate({
+      cedula: data.cedula,
+      password: hashedPassword
+    })
+ 
   }
 
   return (
@@ -28,17 +62,40 @@ const LoginPage = () => {
 
         <form
           noValidate
+          onSubmit={handleSubmit(onSubmit)}
         >
 
           <Container className='space-y-4'>
             
             <Container className='flex flex-col space-y-2'>
               <label htmlFor='cedula' className='font-bold text-sm sm:text-base'>Cedula</label>
-              <input 
-                type='text' 
-                placeholder='Cedula' 
-                className='w-full p-3 rounded-md border border-green-400 bg-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-400' 
+              <Input
+                type='text'
+                placeholder='312-0103815-9'
+                {...register('cedula', {
+                  minLength: {
+                    value: 11,
+                    message: 'La cedula debe tener 11 digitos'
+                  },
+                  maxLength: {
+                    value: 11,
+                    message: 'La cedula debe tener 11 digitos'
+                  },
+                  required: {
+                    value: true,
+                    message: 'La cedula es requerida'
+                  },
+                  pattern: {
+                    value: /^[0-9]+$/,
+                    message: 'La cedula debe contener solo numeros'
+                  }
+                })}
               />
+
+              {errors.cedula && (
+                <p className='text-red-500 text-sm'>{errors.cedula.message}</p>
+              )}
+              
             </Container>
 
             <Container className='flex flex-col space-y-2'>
@@ -47,7 +104,23 @@ const LoginPage = () => {
                 type='password' 
                 placeholder='Contraseña' 
                 className='w-full p-3 rounded-md border border-green-400 bg-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-400' 
+                {...register('password', {
+                    required: {
+                      value: true,
+                      message: 'La contraseña es requerida'
+                    },
+                    minLength: {
+                      value: 8,
+                      message: 'La contraseña debe tener al menos 8 caracteres'
+                    }
+                  }
+                )}
               />
+
+              {errors.password && (
+                <p className='text-red-500 text-sm'>{errors.password.message}</p>
+              )}
+
             </Container>
 
           </Container>
@@ -72,7 +145,7 @@ const LoginPage = () => {
               <button
               type='submit'
               className='w-full p-3 rounded-md bg-green-400 text-white font-bold cursor-pointer hover:bg-green-500 transition-all duration-300 text-sm sm:text-base'
-              onClick={ () => handleSubmit()}
+              onClick={ () => {}}
               >
                   Iniciar sesión
               </button>

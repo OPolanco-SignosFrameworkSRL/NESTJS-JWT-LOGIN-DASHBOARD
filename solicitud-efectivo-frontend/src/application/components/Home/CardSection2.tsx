@@ -12,7 +12,7 @@ const CardSection2 = () => {
     {label: "Pendientes", count: "33", textColorHeader: "tracking-tight font-medium text-amber-700", color: "text-card-foreground bg-amber-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$156,500,00", footer:"Solicitudes en espera"},
     {label: "Aprobadas", count: "1", textColorHeader: "tracking-tight font-medium text-emerald-700", color: "text-card-foreground bg-emerald-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$1,000.00", footer:"Listas para desembolso"},
     {label: "Verificadas", count: "84", textColorHeader: "tracking-tight font-medium text-blue-700", color:"text-card-foreground bg-blue-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$420,000.00", footer:"Documentación completa"},
-    {label: "Provisionales", count: "7", textColorHeader: "font-bold text-purple-700", color: "text-card-foreground bg-purple-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$$35,000.00", footer:"Pendiente documentos"},
+    {label: "Provisionales", count: "7", textColorHeader: "font-bold text-purple-700", color: "text-card-foreground bg-purple-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$35,000.00", footer:"Pendiente documentos"},
     {label: "Liquidadas", count: "1,106", textColorHeader: "font-bold text-slate-700", color: "text-card-foreground bg-slate-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$5,530,000.00", footer:"Efectivo desembolsado"},
     {label: "Rechazadas", count: "193", textColorHeader: "font-bold text-red-700", color: "text-card-foreground bg-red-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$965,000.00", footer:"No aprobadas"},
   ]
@@ -46,7 +46,7 @@ const CardSection2 = () => {
 
                         {iconsItems.map((iconsItem, indexItems) => (
                         
-                        <div>
+                        <div key={indexItems}>
                                 {indexItems === index && (
                                     <div className={`p-2 rounded-lg text-white shadow-md ${iconsItem.colors}`}>
                                         {iconsItem.item}

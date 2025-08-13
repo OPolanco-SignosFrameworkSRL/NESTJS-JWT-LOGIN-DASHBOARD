@@ -9,7 +9,7 @@ type ProductionDataFormProps = {
     control: Control<FieldValues>
 }
 
-const ProductionDataForm = ({register, errors, control}: ProductionDataFormProps) => {
+const ProductionDataForm = ({register, control}: ProductionDataFormProps) => {
 
     const formDataItems = [
         {label:"Fecha de Orden", placeholder:"dd/mm/yyyy", register:"orderDate", type:"date"},

@@ -5,7 +5,6 @@ import ButtonForms from "@/application/ui/ButtonForm/ButtonForms";
 import Select from "@/application/ui/Select/Select";
 import Input from "@/application/ui/Input/Input";
 import { useFieldArray, type Control, type FieldErrors, type FieldValues, type UseFormRegister, type UseFormWatch } from "react-hook-form";
-import { useEffect } from "react";
 
 type MembersFormProps = {
   register: UseFormRegister<FieldValues>
@@ -14,7 +13,7 @@ type MembersFormProps = {
   control: Control<FieldValues>
 }
 
-const MembersForm = ({register, errors, control}: MembersFormProps) => {
+const MembersForm = ({register, control}: MembersFormProps) => {
 
     const cardItems = [
         {icon: <GiCash/>, className: "bg-blue-50 border border-blue-200 rounded-lg p-4", textColor: "text-blue-900 font-bold", textColor2: "text-blue-700", label: "Monto Solicitado", value: "$3,500.00"},

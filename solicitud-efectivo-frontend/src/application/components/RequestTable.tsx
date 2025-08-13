@@ -2,6 +2,8 @@ import { RiArrowRightSLine } from "react-icons/ri";
 import { RiArrowLeftSLine } from "react-icons/ri";
 import Input from "../ui/Input/Input";
 import Select from "../ui/Select/Select";
+import { twMerge } from 'tailwind-merge'
+
 
 const RequestTable = () => {
 
@@ -31,24 +33,27 @@ const RequestTable = () => {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3 px-10 py-5">
+                <div className="flex flex-col md:flex-row gap-3 md:gap-5 px-10 py-5 w-full">
 
-                    <div className="flex items-center gap-2 w-full">
+                    <div className="flex items-center gap-2 w-full md:flex-grow">
+
                         <span className="text-sm sm:text-base text-gray-800 font-semibold">Buscar:</span>
                         <Input
                             type="text"
                             placeholder="Buscar"
+                            twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300 h-11")}
                         />
 
                     </div>
 
-                    <div className="flex items-center gap-2 w-full">
+                    <div className="flex items-center gap-2 w-full md:w-auto">
 
-                        <span className="text-sm sm:text-base text-gray-800 font-semibold">Estado:</span>
+                        <span className="text-sm sm:text-base text-gray-800 font-semibold whitespace-nowrap">Estado:</span>
 
                         <Select
                             options={[]}
                             placeholder="Buscar"
+                            twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300 flex-1 min-w-[210px] md:flex-none md:min-w-[200px]")}
                         />
 
                     </div>
@@ -62,12 +67,13 @@ const RequestTable = () => {
                         <table className="w-full caption-bottom text-sm">
                             <thead className="[&_tr]:border-b bg-gradient-to-r from-emerald-50 to-green-50">
                                 <tr className=" border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <th className={tableCssHeader}>Solicitud</th>
+                                    <th className={tableCssHeader}>N° Solicitud</th>
                                     <th className={tableCssHeader}>Fecha</th>
-                                    <th className={tableCssHeader}>División</th>
                                     <th className={tableCssHeader}>Solicitante</th>
+                                    <th className={tableCssHeader}>Division</th>
                                     <th className={tableCssHeader}>Monto</th>
                                     <th className={tableCssHeader}>Tipo de Pago</th>
+                                    <th className={tableCssHeader}>Estado</th>
                                     <th className={tableCssHeader}>Acciones</th>
                                 </tr>
                             </thead>
@@ -75,91 +81,21 @@ const RequestTable = () => {
                                 <tr className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                                     <td className={tableCss}>2025-01431</td>
                                     <td className={tableCss}>2025-07-30</td>
-                                    <td className={tableCss}>Administración</td>
                                     <td className={tableCss}>Frandy Jeffry Cepeda</td>
+                                    <td className={tableCss}>Administración</td>
                                     <td className={tableCss}>5,000,000</td>
                                     <td className={tableCss}>Cheque</td>
+                                    <td className={tableCss}>Pendiente</td>
                                     <td className={tableCss}>Iconos</td>
                                 </tr>
                                 <tr className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                                     <td className={tableCss}>2025-01431</td>
                                     <td className={tableCss}>2025-07-30</td>
-                                    <td className={tableCss}>Administración</td>
                                     <td className={tableCss}>Frandy Jeffry Cepeda</td>
+                                    <td className={tableCss}>Administración</td>
                                     <td className={tableCss}>5,000,000</td>
                                     <td className={tableCss}>Cheque</td>
-                                    <td className={tableCss}>Iconos</td>
-                                </tr>
-                                <tr className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <td className={tableCss}>2025-01431</td>
-                                    <td className={tableCss}>2025-07-30</td>
-                                    <td className={tableCss}>Administración</td>
-                                    <td className={tableCss}>Frandy Jeffry Cepeda</td>
-                                    <td className={tableCss}>5,000,000</td>
-                                    <td className={tableCss}>Cheque</td>
-                                    <td className={tableCss}>Iconos</td>
-                                </tr>
-                                <tr className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <td className={tableCss}>2025-01431</td>
-                                    <td className={tableCss}>2025-07-30</td>
-                                    <td className={tableCss}>Administración</td>
-                                    <td className={tableCss}>Frandy Jeffry Cepeda</td>
-                                    <td className={tableCss}>5,000,000</td>
-                                    <td className={tableCss}>Cheque</td>
-                                    <td className={tableCss}>Iconos</td>
-                                </tr>
-                                <tr className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <td className={tableCss}>2025-01431</td>
-                                    <td className={tableCss}>2025-07-30</td>
-                                    <td className={tableCss}>Administración</td>
-                                    <td className={tableCss}>Frandy Jeffry Cepeda</td>
-                                    <td className={tableCss}>5,000,000</td>
-                                    <td className={tableCss}>Cheque</td>
-                                    <td className={tableCss}>Iconos</td>
-                                </tr>
-                                <tr className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <td className={tableCss}>2025-01431</td>
-                                    <td className={tableCss}>2025-07-30</td>
-                                    <td className={tableCss}>Administración</td>
-                                    <td className={tableCss}>Frandy Jeffry Cepeda</td>
-                                    <td className={tableCss}>5,000,000</td>
-                                    <td className={tableCss}>Cheque</td>
-                                    <td className={tableCss}>Iconos</td>
-                                </tr>
-                                <tr className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <td className={tableCss}>2025-01431</td>
-                                    <td className={tableCss}>2025-07-30</td>
-                                    <td className={tableCss}>Administración</td>
-                                    <td className={tableCss}>Frandy Jeffry Cepeda</td>
-                                    <td className={tableCss}>5,000,000</td>
-                                    <td className={tableCss}>Cheque</td>
-                                    <td className={tableCss}>Iconos</td>
-                                </tr>
-                                <tr className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <td className={tableCss}>2025-01431</td>
-                                    <td className={tableCss}>2025-07-30</td>
-                                    <td className={tableCss}>Administración</td>
-                                    <td className={tableCss}>Frandy Jeffry Cepeda</td>
-                                    <td className={tableCss}>5,000,000</td>
-                                    <td className={tableCss}>Cheque</td>
-                                    <td className={tableCss}>Iconos</td>
-                                </tr>
-                                <tr className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <td className={tableCss}>2025-01431</td>
-                                    <td className={tableCss}>2025-07-30</td>
-                                    <td className={tableCss}>Administración</td>
-                                    <td className={tableCss}>Frandy Jeffry Cepeda</td>
-                                    <td className={tableCss}>5,000,000</td>
-                                    <td className={tableCss}>Cheque</td>
-                                    <td className={tableCss}>Iconos</td>
-                                </tr>
-                                <tr className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                                    <td className={tableCss}>2025-01431</td>
-                                    <td className={tableCss}>2025-07-30</td>
-                                    <td className={tableCss}>Administración</td>
-                                    <td className={tableCss}>Frandy Jeffry Cepeda</td>
-                                    <td className={tableCss}>5,000,000</td>
-                                    <td className={tableCss}>Cheque</td>
+                                    <td className={tableCss}>Aprobado</td>
                                     <td className={tableCss}>Iconos</td>
                                 </tr>
                             </tbody>
@@ -181,8 +117,8 @@ const RequestTable = () => {
 
                 <div className="flex gap-2">
 
-                    {numerosItems.map((item) => (
-                        <span className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center bg-white gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-background hover:text-accent-foreground border w-8 h-8 border-emerald-200 hover:bg-emerald-50 cursor-pointer">
+                    {numerosItems.map((item, index) => (
+                        <span key={index} className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center bg-white gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-background hover:text-accent-foreground border w-8 h-8 border-emerald-200 hover:bg-emerald-50 cursor-pointer">
                             {item.number}
                         </span>
                     ))}

@@ -5,6 +5,7 @@ import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { MdOutlineLogout } from "react-icons/md";
 import { useAppStore } from "@/application/store/useAppStore";
 import { Link } from "react-router-dom";
+import { useLogout } from "@/application/hooks/auth";
 
 const ModalProfile = () => {
 
@@ -14,8 +15,11 @@ const ModalProfile = () => {
         {icon: <IoMdSettings size={24}/>, label: "Configuración", path: "/configuracion"}
     ]
 
-
     const show = useAppStore(state => state.show)
+
+    const { decodedToken } = useAppStore()
+
+    const handleLogout = useLogout()
 
   return (
 
@@ -27,8 +31,8 @@ const ModalProfile = () => {
                 <div className="bg-white w-72 h-60 rounded-md shadow-lg flex flex-col">
 
                     <div className="flex flex-col space-y-1">
-                        <span className="text-sm sm:text-base mx-2 mt-2 font-medium">Frandy Jeffry Cepeda</span>
-                        <span className="text-xs sm:text-sm mx-2 no-underline leading-none text-muted-foreground text-gray-400">FrandyJeffryCepeda@gmail.com</span>
+                        <span className="text-sm sm:text-base mx-2 mt-2 font-medium">{decodedToken?.fullname}</span>
+                        <span className="text-xs sm:text-sm mx-2 no-underline leading-none text-muted-foreground text-gray-400">{decodedToken?.email}</span>
                     </div>
 
                     <hr className="mt-5 text-gray-400" />
@@ -37,21 +41,20 @@ const ModalProfile = () => {
                         
                         {modalItems.map((item, index) => (
 
-                            <>
+                          
 
-                                <div className="flex mx-2 items-center mt-2.5">
-                                    
-                                    <div className="cursor-pointer">
-                                        {item.icon}
-                                    </div>
-
-                                    <Link to={item.path} key={index} className="flex flex-col mx-2 font-medium cursor-pointer">
-                                        {item.label}
-                                    </Link>
-
+                            <div className="flex mx-2 items-center mt-2.5" key={index}>
+                                
+                                <div className="cursor-pointer">
+                                    {item.icon}
                                 </div>
 
-                            </>
+                                <Link to={item.path} key={index} className="flex flex-col mx-2 font-medium cursor-pointer">
+                                    {item.label}
+                                </Link>
+
+                            </div>
+
 
 
                         ))}
@@ -63,9 +66,11 @@ const ModalProfile = () => {
 
                         <MdOutlineLogout size={24} className="cursor-pointer"/>
 
-                        <Link to="/login" className="cursor-pointer">
-                            Cerrar Sesión
-                        </Link>
+                        <button onClick={handleLogout} className="cursor-pointer">
+                            <Link to="/login" className="cursor-pointer">
+                                Cerrar Sesión
+                            </Link>
+                        </button>
 
                     </div>
 
