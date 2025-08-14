@@ -60,18 +60,16 @@ export default function Dashboard() {
               </thead>
               <tbody className="[&_tr:last-child]:border-0 bg-white">
                  
-                {data.Token.map((data) => (
-                  <tr className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                {data.Token.map((data, index) => (
+                  <tr key={index} className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                       <td className={tableCss}> {data.fullname}</td>
                       <td className={tableCss}> {data.cedula}</td>
                       <td className={tableCss}> {data.role}</td>
                       <td className={tableCss}> {data.user_email}</td>
-
-                      <div className="flex items-center">
-                        <td className={tableCss}><TbEdit size={24} className="text-blue-500"/></td>
-                        <td className={tableCss}><FaRegTrashAlt size={20} className="text-red-500"/></td>
-                      </div>
-
+                      <td className={`${tableCss} flex items-center space-x-2`}>
+                        <TbEdit size={24} className="text-blue-500 cursor-pointer hover:text-blue-700"/>
+                        <FaRegTrashAlt size={20} className="text-red-500 cursor-pointer hover:text-red-700"/>
+                      </td>
                     </tr>
                 ))}
               </tbody>

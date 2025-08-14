@@ -9,6 +9,7 @@ import { LuBuilding2 } from "react-icons/lu";
 import { MdOutlinePayment } from "react-icons/md";
 import { MdAttachMoney } from "react-icons/md";
 import { CiChat1 } from "react-icons/ci";
+import Title from "../ui/Text/Title";
 
 
 
@@ -38,12 +39,11 @@ const Disbursement = () => {
     <>
     
       <div className="flex flex-col bg-gradient-to-r from-green-600 to-emerald-600 p-6">
-          <span className="text-xs sm:text-base md:text-xl text-white font-bold">
-            $ Desembolso
-          </span>
-          <p className="text-xs sm:text-base text-gray-300">
-            Registro de desembolso de efectivo
-          </p>
+
+          <Title text="$ Desembolso" isTitle={true} className="text-white"/>
+
+          <Title text="Registro de desembolso de efectivo" isTitle={false} className="!text-gray-300"/>
+
       </div>
 
       <div className="bg-white p-5 rounded-bl-lg rounded-br-lg">

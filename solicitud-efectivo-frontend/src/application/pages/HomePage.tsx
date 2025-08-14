@@ -1,63 +1,61 @@
 import { FaPlus } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
+import Title from "@/application/ui/Text/Title";
+
 import CardSection1 from "@/application/components/Home/CardSection1";
 import CardSection2 from "@/application/components/Home/CardSection2";
 import RequestTable from "@/application/components/RequestTable";
+import Container from "../ui/Container/Container";
 
 
 const Home = () => {
 
   return (
 
-    <div>
+    <>
 
-      <div className="flex justify-between">
+        <Container className="flex justify-between">
 
-        <div className="">
-          <span className="text-sm sm:text-base md:text-xl text-emerald-500 font-bold">
-            Listado de Solicitudes
-          </span>
-          <p className="text-sm sm:text-base text-gray-500">
-            Gestiona y visualiza todas las solicitudes de efectivo.
-          </p>
-        </div>
+          <Container>
 
-        <div>
-          <Link to="/new-request" className="flex items-center gap-2 text-sm sm:text-base bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold px-4 py-2 rounded-lg cursor-pointer  ">
-            <span>
-              <FaPlus size={18}/>
-            </span>
-            Nueva Solicitud
-          </Link>
-        </div>
+            <Title text="Listado de Solicitudes"/>
 
-      </div>
+            <Title text="Gestiona y visualiza todas las solicitudes de efectivo" isTitle={false}/>
 
-      <section>
+          </Container>
 
-        <CardSection1/>
+          <Container>
+            <Link to="/new-request" className="flex items-center gap-2 text-sm sm:text-base bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold px-4 py-2 rounded-lg cursor-pointer  ">
+              <span>
+                <FaPlus size={18}/>
+              </span>
+              Nueva Solicitud
+            </Link>
+          </Container>
 
-      </section>
+        </Container>
 
-      <section>
+        <section>
 
-        <CardSection2/>
-        
-      </section>
+          <CardSection1/>
 
-      <section>
-        
-        <RequestTable/>
-        
-      </section>
+        </section>
 
+        <section>
 
+          <CardSection2/>
+          
+        </section>
 
+        <section>
+          
+          <RequestTable/>
+          
+        </section>
+    
+    </>
 
-
-
-    </div>
 
   )
 }

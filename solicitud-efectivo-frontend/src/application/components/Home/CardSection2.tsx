@@ -5,16 +5,18 @@ import { FaCheckSquare } from "react-icons/fa";
 import { BsFillQuestionSquareFill } from "react-icons/bs";
 import { FaMoneyBill } from "react-icons/fa";
 import { FaCircleXmark } from "react-icons/fa6";
+import Container from "@/application/ui/Container/Container";
+import Text from "@/application/ui/Text/Text";
 
 const CardSection2 = () => {
 
   const cardItems = [
-    {label: "Pendientes", count: "33", textColorHeader: "tracking-tight font-medium text-amber-700", color: "text-card-foreground bg-amber-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$156,500,00", footer:"Solicitudes en espera"},
-    {label: "Aprobadas", count: "1", textColorHeader: "tracking-tight font-medium text-emerald-700", color: "text-card-foreground bg-emerald-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$1,000.00", footer:"Listas para desembolso"},
-    {label: "Verificadas", count: "84", textColorHeader: "tracking-tight font-medium text-blue-700", color:"text-card-foreground bg-blue-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$420,000.00", footer:"Documentación completa"},
-    {label: "Provisionales", count: "7", textColorHeader: "font-bold text-purple-700", color: "text-card-foreground bg-purple-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$35,000.00", footer:"Pendiente documentos"},
-    {label: "Liquidadas", count: "1,106", textColorHeader: "font-bold text-slate-700", color: "text-card-foreground bg-slate-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$5,530,000.00", footer:"Efectivo desembolsado"},
-    {label: "Rechazadas", count: "193", textColorHeader: "font-bold text-red-700", color: "text-card-foreground bg-red-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$965,000.00", footer:"No aprobadas"},
+    {text: "Pendientes", count: "33", textColorHeader: "tracking-tight font-medium !text-amber-700", color: "text-card-foreground bg-amber-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$156,500,00", footer:"Solicitudes en espera"},
+    {text: "Aprobadas", count: "1", textColorHeader: "tracking-tight font-medium !text-emerald-700", color: "text-card-foreground bg-emerald-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$1,000.00", footer:"Listas para desembolso"},
+    {text: "Verificadas", count: "84", textColorHeader: "tracking-tight font-medium !text-blue-700", color:"text-card-foreground bg-blue-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$420,000.00", footer:"Documentación completa"},
+    {text: "Provisionales", count: "7", textColorHeader: "font-bold !text-purple-700", color: "text-card-foreground bg-purple-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$35,000.00", footer:"Pendiente documentos"},
+    {text: "Liquidadas", count: "1,106", textColorHeader: "font-bold !text-slate-700", color: "text-card-foreground bg-slate-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$5,530,000.00", footer:"Efectivo desembolsado"},
+    {text: "Rechazadas", count: "193", textColorHeader: "font-bold !text-red-700", color: "text-card-foreground bg-red-50 border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105", money: "$965,000.00", footer:"No aprobadas"},
   ]
 
   const iconsItems = [
@@ -37,39 +39,30 @@ const CardSection2 = () => {
 
                 <div className={`flex flex-col ${item.color} text-sm sm:text-base w-full shadow-xl p-5 rounded-lg`} key={index}>
 
-                    <span className={`${item.textColorHeader} flex items-center`}>
+                    <Container className="flex items-center">
 
-                        <div className="flex w-full">
-                            {item.label}
-                        </div>
+                        <Text text={item.text} variant="title" className={`${item.textColorHeader} w-full`}/>
                         
 
                         {iconsItems.map((iconsItem, indexItems) => (
                         
-                        <div key={indexItems}>
+                        <Container key={indexItems}>
                                 {indexItems === index && (
-                                    <div className={`p-2 rounded-lg text-white shadow-md ${iconsItem.colors}`}>
+                                    <Container className={`p-2 rounded-lg text-white shadow-md ${iconsItem.colors}`}>
                                         {iconsItem.item}
-                                    </div>
+                                    </Container>
                                 )}
-                        </div>
+                        </Container>
                             
                         ))}
 
-                    </span>
+                    </Container>
 
-                    <span className={`mt-5 text-3xl ${item.textColorHeader}`}>
-                        {item.count}
-                    </span>
+                    <Text text={item.count} variant='subtitle' className={`mt-5 ${item.textColorHeader}`}/>
 
-                    <span className="mt-2 text-black text-xl">
-                        {item.money}
-                    </span>
+                    <Text text={item.money} variant='body' className={`mt-2 !text-black text-xl`}/>
 
-                    <span className="flex flex-row items-center text-sm text-muted-foreground opacity-80 gap-1">
-
-                        {item.footer}
-                    </span>
+                    <Text text={item.footer} variant='footer'/>
 
                 </div>
             ))}

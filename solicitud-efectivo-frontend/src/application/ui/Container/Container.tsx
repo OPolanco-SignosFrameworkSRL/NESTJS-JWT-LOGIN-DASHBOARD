@@ -3,13 +3,14 @@ import React from 'react'
 type ContainerProps = {
     children?: React.ReactNode,
     className?: string,
-    onTouchStart?: () => void,
 }
 
-const Container = ({ children, className, onTouchStart }: ContainerProps) => {
-
+const Container: React.FC<ContainerProps> = ({
+  children,
+  className = '',
+}) => {
   return (
-    <div className={`${className}`} onTouchStart={onTouchStart}>
+    <div className={`${className}`}>
         {children}
     </div>
   )

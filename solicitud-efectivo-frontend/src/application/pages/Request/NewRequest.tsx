@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form"
 import BasicInformationForm from "@/application/components/newRequest/BasicInformationForm";
 import ProductionDataForm from "@/application/components/newRequest/ProductionDataForm";
 import MembersForm from "@/application/components/newRequest/MembersForm";
+import Title from "@/application/ui/Text/Title";
 
 
 
@@ -54,12 +55,11 @@ const NewRequest = () => {
     <>
     
       <div className="flex flex-col bg-gradient-to-r from-green-600 to-emerald-600 p-6">
-          <span className="text-sm sm:text-base md:text-xl text-white font-bold">
-            $ Nueva Solicitud de Efectivo
-          </span>
-          <p className="text-sm sm:text-base text-gray-300">
-            Sistema de Gestión de Flujo de Efectivo
-          </p>
+
+          <Title text="$ Nueva Solicitud de Efectivo" isTitle={true} className="text-white"/>
+
+          <Title text="Sistema de Gestión de Flujo de Efectivo" isTitle={false} className="!text-gray-300"/>
+
       </div>
 
       <div className="bg-white p-5 rounded-bl-lg rounded-br-lg">
