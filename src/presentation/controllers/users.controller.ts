@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
   Query,
@@ -32,6 +32,7 @@ import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
 import { UserRole } from '../../core/domain/user.interface';
+import { PaginationDto, PaginatedResponseDto } from '../../core/application/dto/pagination.dto';
 //import { ApiPaginatedResponse } from '../../common/decorators/api-paginated-response.decorator';
 
 @ApiTags('Usuarios')
@@ -78,10 +79,23 @@ export class UsersController {
   @ApiQuery({ name: 'division', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'active', required: false, type: Boolean })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Lista de usuarios obtenida exitosamente',
-    type: [Object],
+    schema: {
+      type: 'object',
+      properties: {
+        data: { type: 'array', items: { type: 'object' } },
+        total: { type: 'number', example: 150 },
+        page: { type: 'number', example: 1 },
+        limit: { type: 'number', example: 10 },
+        totalPages: { type: 'number', example: 15 },
+        hasNext: { type: 'boolean', example: true },
+        hasPrev: { type: 'boolean', example: false }
+      }
+    }
   })
   async findAll(@Query() filters: UserFiltersDto) {
     return await this.usersService.findAll(filters);
@@ -166,24 +180,22 @@ export class UsersController {
       return await this.usersService.findByDivision(division);
     }
   */
-  // ❌ ENDPOINT DESHABILITADO - Obtener un usuario por ID
-  /*
-    @Get(':id')
-    @ApiOperation({ summary: 'Obtener un usuario por ID' })
-    @ApiParam({ name: 'id', type: Number })
-    @ApiResponse({
-      status: HttpStatus.OK,
-      description: 'Usuario obtenido exitosamente',
-      type: Object,
-    })
-    @ApiResponse({
-      status: HttpStatus.NOT_FOUND,
-      description: 'Usuario no encontrado',
-    })
-    async findOne(@Param('id', ParseIntPipe) id: number) {
-      return await this.usersService.findOne(id);
-    }
-  */
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({ summary: 'Obtener un usuario por ID' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Usuario obtenido exitosamente',
+    type: Object,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Usuario no encontrado',
+  })
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    return await this.usersService.findOne(id);
+  }
   @Get('cedula/:cedula')
   @ApiOperation({ summary: 'Obtener un usuario por cédula' })
   @ApiParam({ name: 'cedula', type: String })
@@ -201,7 +213,7 @@ export class UsersController {
   }
 
 
-  @Patch(':id')
+  @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Actualizar un usuario (Admin puede actualizar cualquier usuario, Usuario solo puede actualizar sus propios datos)' })
   @ApiParam({ name: 'id', type: Number })
@@ -284,7 +296,7 @@ export class UsersController {
     );
   }
 
-  @Patch(':id/restore')
+  @Put(':id/restore')
   @Roles(UserRole.Admin)
   @ApiOperation({ summary: 'Restaurar un usuario eliminado (soft delete)' })
   @ApiParam({ name: 'id', type: Number })

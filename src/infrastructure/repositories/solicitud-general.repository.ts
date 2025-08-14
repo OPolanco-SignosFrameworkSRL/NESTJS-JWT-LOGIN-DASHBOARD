@@ -192,9 +192,47 @@ export class SolicitudGeneralRepository implements ISolicitudGeneralRepository {
   }
 
   async exists(id: number): Promise<boolean> {
-    const count = await this.solicitudGeneralRepository.count({
-      where: { id }
-    });
+    const count = await this.solicitudGeneralRepository.count({ where: { id } });
     return count > 0;
+  }
+
+  async findAllWithPagination(filters?: ISolicitudGeneralFilters & { skip?: number; take?: number }): Promise<[any[], number]> {
+    const query = this.solicitudGeneralRepository.createQueryBuilder('solicitud');
+
+    // Aplicar filtros existentes
+    if (filters?.solicitada_porid) {
+      query.andWhere('solicitud.solicitada_porid = :solicitada_porid', { solicitada_porid: filters.solicitada_porid });
+    }
+    if (filters?.solicitud_tipo) {
+      query.andWhere('solicitud.solicitud_tipo = :solicitud_tipo', { solicitud_tipo: filters.solicitud_tipo });
+    }
+    if (filters?.solicitud_status) {
+      query.andWhere('solicitud.solicitud_status = :solicitud_status', { solicitud_status: filters.solicitud_status });
+    }
+    if (filters?.departamento) {
+      query.andWhere('solicitud.departamento = :departamento', { departamento: filters.departamento });
+    }
+    if (filters?.startDate) {
+      query.andWhere('solicitud.fechacreada >= :startDate', { startDate: filters.startDate });
+    }
+    if (filters?.endDate) {
+      query.andWhere('solicitud.fechacreada <= :endDate', { endDate: filters.endDate });
+    }
+    if (filters?.minAmount) {
+      query.andWhere('solicitud.monto_solicitado >= :minAmount', { minAmount: filters.minAmount });
+    }
+    if (filters?.maxAmount) {
+      query.andWhere('solicitud.monto_solicitado <= :maxAmount', { maxAmount: filters.maxAmount });
+    }
+
+    // Aplicar paginación
+    if (filters?.skip !== undefined) {
+      query.skip(filters.skip);
+    }
+    if (filters?.take !== undefined) {
+      query.take(filters.take);
+    }
+
+    return await query.getManyAndCount();
   }
 } 

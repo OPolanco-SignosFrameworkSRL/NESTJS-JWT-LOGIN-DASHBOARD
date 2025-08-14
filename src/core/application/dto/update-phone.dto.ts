@@ -24,6 +24,6 @@ export class UpdatePhoneDto {
   })
   @IsString({ message: 'El teléfono debe ser una cadena de texto' })
   @IsNotEmpty({ message: 'El teléfono es requerido' })
-  @Length(10, 20, { message: 'El teléfono debe tener entre 10 y 20 caracteres' })
+  @Length(10, 20, { message: 'El teléfono debe tener entre 9 y 20 caracteres' })
   telefono: string;
 } 

@@ -159,6 +159,7 @@ export class AuthService {
         cedula: data.cedula,
         nombre: data.nombre,
         apellido: data.apellido,
+        // fullname no es un campo válido en UserWriteEntity, así que lo eliminamos para evitar el error de tipado
         codigo: codigoHash,
         password: hashedPassword, // Usar hashedPassword, no codigoHash
         role: data.role || 'Usuario',
@@ -189,7 +190,7 @@ export class AuthService {
       return {
         success: true,
         message: 'Usuario creado exitosamente',
-        userId: savedUser.id,
+        userId: savedUser.id,  // ← Usar savedUser.id directamente
       };
     } catch (error) {
       this.logger.error(`Error creando usuario ${data.cedula}:`, error);
@@ -219,7 +220,8 @@ export class AuthService {
       sub: user.id,
       fullname: user.fullname,
       role: user.role,
-      email: user.user_email,
+      email: user.user_email,  // ← Agregar esta línea
+      valido: user.valido,
     };
 
     const token = this.jwtService.sign(payload);
@@ -236,10 +238,11 @@ export class AuthService {
         apellido: user.apellido,
         role: user.role,
         user_email: user.user_email,
-        division: user.division,
-        cargo: user.cargo,
-        dependencia: user.dependencia,
-        recinto: user.recinto,
+        valido: user.valido,
+        //division: user.division,
+        //cargo: user.cargo,
+        //dependencia: user.dependencia,
+        //recinto: user.recinto,
       },
       expires_in: this.parseExpiresIn(expiresIn),
     };
