@@ -1,101 +1,194 @@
 
 
+import Input from "@/application/ui/Input/Input";
+import { createEmployee } from "@/infrastructure/api/Admin/admin";
+import type { CreateEmployee } from "@/infrastructure/schemas/admin/admin";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 
 export default function Register() {
+
+  const { register, handleSubmit, formState: { errors } } = useForm<CreateEmployee>()
+
+  const queryClient = useQueryClient()
+
+  const { mutate } = useMutation({
+
+    mutationFn: createEmployee,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['employees'] })
+    },
+    onError: (error) => {
+      console.log(error)
+    }
+  })
+
+  const onSubmit = (data: CreateEmployee) => {
+
+    data.fullname = `${data.nombre} ${data.apellido}`
+    data.clave = "MiClaveSecreta2024"
+    data.user_status = 1
+    data.caja_id = "1"
+    data.tienda_id = "1"
+    data.allow_multi_tienda = "0"
+    data.max_descuento = "10.5"
+    data.close_caja = "0"
+    data.user_account_email = "pedro@gmail.com"
+    data.user_account_email_passw = "MiClaveSecreta2024"
+    data.comision_porciento = "5.5"
+    data.default_portalid = "1"
+    data.nuevocampo = "valor"
+    data.encargadoId = "1"
+
+    mutate(data)
+
+    
+  }
 
   return (
     <>
       <div className="mt-10 p-6 sm:p-10 bg-white shadow-lg">
 
         <div className="flex items-center justify-between">
-          <h2 className="text-base sm:text-2xl lg:text-4xl font-black text-slate-700">
+
+          <h2 className="text-xs sm:text-base md:text-xl text-emerald-500 font-bold">
             Registrar Empleado
           </h2>
+
           <Link
             to="/admin-dashboard"
-            className="rounded-md bg-indigo-600 px-3 py-2 sm:px-4 sm:py-2 text-sm sm:text-base font-bold text-white shadow-sm hover:bg-indigo-500 flex-shrink-0"
-          >
+            className="rounded-md bg-gradient-to-r from-green-600 to-emerald-600 p-2 sm:p-3 text-sm font-bold text-white shadow-sm hover:from-green-700 hover:to-emerald-700"
+            >
             Volver a Dashboard
           </Link>
+
         </div>
 
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
-          <div className="mb-4">
-            <label className="text-gray-800" htmlFor="fullName">Nombre completo:</label>
-            <input 
-              id="fullName"
-              type="text"
-              className="mt-2 block w-full p-3 bg-gray-50 border border-gray-300 rounded"
-              placeholder="Pedro Enriquez Jímenez"
-            />
-          </div>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+        >
 
-          <div className="mb-4">
-            <label className="text-gray-800" htmlFor="userName">Username:</label>
-            <input 
-              id="userName"
-              type="text"
-              className="mt-2 block w-full p-3 bg-gray-50 border border-gray-300 rounded"
-              placeholder="Pedro"
-            />
-          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
 
-          <div className="mb-4">
-            <label className="text-gray-800" htmlFor="email">Email:</label>
-            <input
-              id="email"
-              type="email"
-              className="mt-2 block w-full p-3 bg-gray-50 border border-gray-300 rounded"
-              placeholder="user@example.com"
-            />
-          </div>
+            <div>
+              <label className="text-gray-800" htmlFor="name">Nombre:</label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Pedro"
+                className="mt-2"
+                {...register("nombre", { required: "El nombre es requerido" })}
+              />
+              {errors.nombre && <p className="text-red-500">{errors.nombre.message}</p>}
+            </div>
 
-          <div className="mb-4">
-            <label className="text-gray-800" htmlFor="password">Contraseña:</label>
-            <input
-              id="password"
-              type="password"
-              className="mt-2 block w-full p-3 bg-gray-50 border border-gray-300 rounded"
-              placeholder="Contraseña"
-       
-            />
-          </div>
+            <div>
+              <label className="text-gray-800" htmlFor="lastName">Apellido:</label>
+              <Input
+                id="lastName"
+                type="text"
+                placeholder="Enriquez"
+                className="mt-2"
+                {...register("apellido", { required: "El apellido es requerido" })}
+              />
+              {errors.apellido && <p className="text-red-500">{errors.apellido.message}</p>}
+            </div>
 
-          <div className="mb-4 relative">
-            <label className="text-gray-800" htmlFor="role">Rol:</label>
-            <select
-              id="role"
-              className="mt-2 block w-full p-3 pr-8 bg-gray-50 border border-gray-300 rounded appearance-none"
-            >
-              <option value="">Selecciona un rol</option>
-              <option value="Admin">Admin</option>
-              <option value="Employee">Empleado</option>
-            </select>
-            <div className="absolute inset-y-0 right-2 flex items-center pointer-events-none mt-8">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-              </svg>
+            <div>
+              <label className="text-gray-800" htmlFor="cedula">Cedula:</label>
+              <Input
+                id="cedula"
+                type="text"
+                className="mt-2"
+                placeholder="40245980129"
+                {...register("cedula", { required: "La cedula es requerida" })}
+              />
+              {errors.cedula && <p className="text-red-500">{errors.cedula.message}</p>}
+            </div>
+
+            <div>
+              <label className="text-gray-800" htmlFor="password">Contraseña:</label>
+              <Input
+                id="password"
+                type="password"
+                className="mt-2"
+                placeholder="Contraseña"
+                {...register("password", { required: "La contraseña es requerida" })}
+              />
+              {errors.password && <p className="text-red-500">{errors.password.message}</p>}
+            </div>
+
+            <div>
+              <label className="text-gray-800" htmlFor="rol">Role:</label>
+              <Input
+                id="rol"
+                type="text"
+                className="mt-2"
+                placeholder="pedro@gmail.com"
+                {...register("role", { required: "El role es requerido" })}
+              />
+              {errors.role && <p className="text-red-500">{errors.role.message}</p>}
+            </div>
+
+            <div>
+              <label className="text-gray-800" htmlFor="email">Email:</label>
+              <Input
+                id="email"
+                type="text"
+                className="mt-2"
+                placeholder="pedro@gmail.com"
+                {...register("user_email", { required: "El email es requerido" })}
+              />
+              {errors.user_email && <p className="text-red-500">{errors.user_email.message}</p>}
+            </div>
+
+            <div>
+              <label className="text-gray-800" htmlFor="telefono">Telefono:</label>
+              <Input
+                id="telefono"
+                type="text"
+                className="mt-2"
+                placeholder="04145980129"
+                {...register("telefono", { required: "El telefono es requerido" })}
+              />
+              {errors.telefono && <p className="text-red-500">{errors.telefono.message}</p>}
+            </div>
+
+            <div>
+              <label className="text-gray-800" htmlFor="celular">Celular:</label>
+              <Input
+                id="celular"
+                type="text"
+                className="mt-2"
+                placeholder="04145980129"
+                {...register("celular", { required: "El celular es requerido" })}
+              />
+              {errors.celular && <p className="text-red-500">{errors.celular.message}</p>}
             </div>
           </div>
 
-          <div className="mb-4">
-            <label className="text-gray-800" htmlFor="departamento">Departamento:</label>
-            <input
-              id="departamento"
-              type="text"
-              className="mt-2 block w-full p-3 bg-gray-50 border border-gray-300 rounded"
-              placeholder="IT, Finanzas, etc."
+          <div className="mt-2 mb-4">
+            <label className="text-gray-800" htmlFor="direccion">Direccion:</label>
+            <Input
+              id="direccion"
+              type="textarea"
+              className="mt-2"
+              placeholder="04145980129"
+              {...register("direccion", { required: "La direccion es requerida" })}
             />
+            {errors.direccion && <p className="text-red-500">{errors.direccion.message}</p>}
           </div>
 
           <div className="md:col-span-2">
-            <input
+            <Input
               type="submit"
-              className="w-full flex justify-center bg-indigo-700 hover:bg-indigo-800 p-3 text-white font-bold text-lg cursor-pointer rounded"
+              className="h-14 flex justify-center bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-lg cursor-pointer rounded"
               value="Registrar Empleado"
             />
           </div>
+
         </form>
       </div>
     </>
