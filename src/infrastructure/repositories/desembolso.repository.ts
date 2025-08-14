@@ -61,4 +61,29 @@ export class DesembolsoRepository implements IDesembolsoRepository {
   async delete(id: number): Promise<void> {
     await this.desembolsoRepository.delete(id);
   }
+
+  async findAllWithPagination(filters?: any & { skip?: number; take?: number }): Promise<[any[], number]> {
+    const query = this.desembolsoRepository.createQueryBuilder('desembolso');
+
+    // Aplicar filtros si existen
+    if (filters?.estado) {
+      query.andWhere('desembolso.estado = :estado', { estado: filters.estado });
+    }
+    if (filters?.startDate) {
+      query.andWhere('desembolso.fecha_registro >= :startDate', { startDate: filters.startDate });
+    }
+    if (filters?.endDate) {
+      query.andWhere('desembolso.fecha_registro <= :endDate', { endDate: filters.endDate });
+    }
+
+    // Aplicar paginación
+    if (filters?.skip !== undefined) {
+      query.skip(filters.skip);
+    }
+    if (filters?.take !== undefined) {
+      query.take(filters.take);
+    }
+
+    return await query.getManyAndCount();
+  }
 }

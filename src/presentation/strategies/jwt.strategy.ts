@@ -21,6 +21,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       sub: payload.sub,
       fullname: payload.fullname,
       role: payload.role,
+      email: payload.email,  // ← Agregar esta línea
+      valido: payload.valido,
     };
   }
 } 

@@ -13,11 +13,13 @@ export interface IUser {
   fullname: string;
   role: UserRole;
   user_email: string;
+  /*
   division: string;
   cargo: string;
   dependencia: string;
   recinto: string;
-  estado: string;
+  estado: string; 
+  */
   valido: string;
 }
 
@@ -27,7 +29,8 @@ export interface IUserPayload {
   sub: number;       // ID del usuario (JWT standard)
   fullname: string;
   role: UserRole;
-  email?: string;
+  email: string;  // ← Agregar esta línea
+  valido: string;
 }
 
 export interface ILoginResponse {
@@ -39,10 +42,11 @@ export interface ILoginResponse {
     apellido: string;
     role: UserRole;
     user_email: string;
-    division: string;
-    cargo: string;
-    dependencia: string;
-    recinto: string;
+    //division: string;
+    //cargo: string;
+    //dependencia: string;
+    //recinto: string;
+    valido: string;
   };
   expires_in: number;
 }
@@ -51,6 +55,7 @@ export interface IUserCreateData {
   cedula: string;
   nombre: string;
   apellido: string;
+  fullname: string;
   password: string;
   clave: string;
   role?: UserRole;
@@ -98,28 +103,10 @@ export interface IUserUpdateData {
 export interface IUserResponse {
   id: number;
   cedula: string;
-  nombre: string;
-  apellido: string;
   fullname: string;
   role: UserRole;
   user_email: string;
-  telefono: string;
-  direccion: string;
-  celular: string;
-  user_status: number;
-  caja_id: string;
-  tienda_id: string;
-  allow_multi_tienda: string;
-  max_descuento: string;
-  close_caja: string;
-  user_account_email: string;
-  comision_porciento: string;
-  default_portalid: string;
-  nuevocampo: string;
-  encargadoId: string;
   valido: string;
-  deleted_at?: Date;
-  deleted_by?: number;
 }
 
 export interface IUserFilters {
@@ -127,6 +114,8 @@ export interface IUserFilters {
   division?: string;
   search?: string;
   active?: boolean;
+  page?: number;
+  limit?: number;
 }
 
 export interface IUserStats {

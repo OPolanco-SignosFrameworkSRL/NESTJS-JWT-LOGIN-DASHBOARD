@@ -20,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { ISolicitudGeneralService } from '../../core/domain/solicitud-general.service.interface';
 import { SolicitudGeneralFiltersDto } from '../../core/application/dto/solicitud-general-filters.dto';
+import { PaginatedResponseDto } from '../../core/application/dto/pagination.dto';
 import { ApproveSolicitudGeneralDto } from '../../core/application/dto/approve-solicitud-general.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
@@ -40,14 +41,21 @@ export class SolicitudGeneralController {
   @Get()
   @ApiOperation({
     summary: 'Obtener todas las solicitudes generales',
-    description: 'Retorna una lista de todas las solicitudes generales',
+    description: 'Retorna una lista paginada de todas las solicitudes generales',
   })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({
     status: 200,
     description: 'Lista de solicitudes generales obtenida exitosamente',
   })
-  async findAll(): Promise<ISolicitudGeneralResponse[]> {
-    return await this.solicitudGeneralService.findAll();
+  async findAll(@Query() filters: SolicitudGeneralFiltersDto): Promise<PaginatedResponseDto<ISolicitudGeneralResponse>> {
+    const convertedFilters = {
+      ...filters,
+      startDate: filters.startDate ? new Date(filters.startDate) : undefined,
+      endDate: filters.endDate ? new Date(filters.endDate) : undefined,
+    };
+    return await this.solicitudGeneralService.findAll(convertedFilters);
   }
 
   @Get('my-requests')
@@ -167,4 +175,6 @@ export class SolicitudGeneralController {
   ): Promise<ISolicitudGeneralResponse> {
     return await this.solicitudGeneralService.reject(id, req.user, approveSolicitudDto.notes);
   }
+
+  
 } 

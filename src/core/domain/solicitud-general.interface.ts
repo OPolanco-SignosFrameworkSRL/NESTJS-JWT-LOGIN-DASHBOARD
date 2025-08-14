@@ -36,6 +36,8 @@ export interface ISolicitudGeneralFilters {
   minAmount?: number;
   maxAmount?: number;
   usuarionombre?: string;
+  page?: number;
+  limit?: number;
 }
 
 export interface ISolicitudGeneralStats {

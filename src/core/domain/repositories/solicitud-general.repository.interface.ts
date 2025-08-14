@@ -10,4 +10,5 @@ export interface ISolicitudGeneralRepository {
   findByFilters(filters: ISolicitudGeneralFilters): Promise<SolicitudGeneral[]>;
   getStats(): Promise<ISolicitudGeneralStats>;
   exists(id: number): Promise<boolean>;
+  findAllWithPagination(filters?: ISolicitudGeneralFilters & { skip?: number; take?: number }): Promise<[any[], number]>;
 } 

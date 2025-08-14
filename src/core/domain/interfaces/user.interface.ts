@@ -15,6 +15,8 @@ export interface IUserResponse {
   role: UserRole;
   user_email?: string;
   telefono?: string;
+  celular?: string;
+  direccion?: string;
   valido: boolean;
   division?: string;
   cargo?: string;
@@ -30,6 +32,7 @@ export interface IUserCreateData {
   cedula: string;
   nombre: string;
   apellido: string;
+  fullname: string;
   password: string;
   clave: string;
   role?: UserRole;
@@ -57,16 +60,21 @@ export interface IUserCreateData {
 export interface IUserUpdateData {
   nombre?: string;
   apellido?: string;
-  role?: UserRole;
+  //role?: UserRole;
+  cedula?: string;
+  password?: string; // Campo opcional para contraseña
+  role?: string;
   user_email?: string;
   telefono?: string;
   direccion?: string;
   celular?: string;
+  /* 
   division?: string;
   cargo?: string;
   dependencia?: string;
   recinto?: string;
-  estado?: string;
+  */
+  estado?: string; 
 }
 
 /**
@@ -76,6 +84,8 @@ export interface IUserFilters {
   role?: UserRole;
   division?: string;
   search?: string;
+  active?: boolean;
+  page?: number;
   limit?: number;
   offset?: number;
 }

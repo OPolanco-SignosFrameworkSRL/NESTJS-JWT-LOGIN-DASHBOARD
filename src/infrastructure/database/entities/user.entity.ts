@@ -72,6 +72,22 @@ export class UserEntity {
   telefono: string;
 
   @ApiProperty({
+    description: 'Número de celular del usuario',
+    example: '8091234567',
+    maxLength: 20,
+  })
+  @Column({ length: 20, nullable: true })
+  celular: string;
+
+  @ApiProperty({
+    description: 'Dirección del usuario',
+    example: 'Calle Principal #123',
+    maxLength: 255,
+  })
+  @Column({ length: 255, nullable: true })
+  direccion: string;
+
+  @ApiProperty({
     description: 'Indica si el usuario está activo',
     example: '1',
     maxLength: 1,

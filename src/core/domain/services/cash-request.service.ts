@@ -6,6 +6,7 @@ import { ICashRequestRepository } from '../repositories/cash-request.repository.
 import { IUserRepository } from '../repositories/user.repository.interface';
 import { USER_REPOSITORY, CASH_REQUEST_REPOSITORY } from '../../application/tokens';
 import { CashRequest } from '../entities/cash-request.entity';
+import { PaginationDto, PaginatedResponseDto } from '../../application/dto/pagination.dto';
 
 @Injectable()
 export class CashRequestService implements ICashRequestService {
@@ -16,12 +17,32 @@ export class CashRequestService implements ICashRequestService {
     private readonly userRepository: IUserRepository,
   ) {}
 
-  async findAll(): Promise<ICashRequestResponse[]> {
+  async findAll(filters?: ICashRequestFilters): Promise<PaginatedResponseDto<ICashRequestResponse>> {
     try {
+      const { page = 1, limit = 10, ...otherFilters } = filters || {};
+      const skip = (page - 1) * limit;
+
       console.log('Iniciando findAll en CashRequestService');
-      const cashRequests = await this.cashRequestRepository.findAll();
-      console.log(`Encontradas ${cashRequests.length} solicitudes de efectivo`);
-      return await this.enrichWithUserData(cashRequests);
+      
+      // Obtener solicitudes con paginación
+      const [cashRequests, total] = await this.cashRequestRepository.findAllWithPagination(
+        { ...otherFilters, skip, take: limit }
+      );
+      
+      console.log(`Encontradas ${cashRequests.length} solicitudes de efectivo de ${total} total`);
+      
+      const enrichedRequests = await this.enrichWithUserData(cashRequests);
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        data: enrichedRequests,
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      };
     } catch (error) {
       console.error('Error en findAll:', error);
       throw error;

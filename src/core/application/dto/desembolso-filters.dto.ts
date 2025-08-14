@@ -1,46 +1,35 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsEnum, IsString, IsBoolean, IsInt, Min, Max } from 'class-validator';
-import { UserRole } from '../../domain/user.interface';
+import { IsOptional, IsString, IsDateString, IsInt, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 
-export class UserFiltersDto {
+export class DesembolsoFiltersDto {
   @ApiProperty({
-    description: 'Filtrar por rol',
-    enum: UserRole,
+    description: 'Estado del desembolso',
+    example: 'PENDIENTE',
     required: false,
   })
   @IsOptional()
-  @IsEnum(UserRole, { message: 'El rol debe ser válido' })
-  role?: UserRole;
+  @IsString()
+  estado?: string;
 
   @ApiProperty({
-    description: 'Filtrar por división',
-    example: 'TI',
+    description: 'Fecha de inicio',
+    example: '2024-01-01T00:00:00.000Z',
     required: false,
   })
   @IsOptional()
-  @IsString({ message: 'La división debe ser una cadena de texto' })
-  division?: string;
+  @IsDateString()
+  startDate?: string;
 
   @ApiProperty({
-    description: 'Buscar por término (nombre, apellido o cédula)',
-    example: 'Raul',
+    description: 'Fecha de fin',
+    example: '2024-12-31T23:59:59.999Z',
     required: false,
   })
   @IsOptional()
-  @IsString({ message: 'El término de búsqueda debe ser una cadena de texto' })
-  search?: string;
+  @IsDateString()
+  endDate?: string;
 
-  @ApiProperty({
-    description: 'Filtrar solo usuarios activos',
-    example: true,
-    required: false,
-  })
-  @IsOptional()
-  @IsBoolean({ message: 'El campo active debe ser un booleano' })
-  active?: boolean;
-
-  // Campos de paginación
   @ApiProperty({
     description: 'Número de página',
     example: 1,
@@ -68,4 +57,4 @@ export class UserFiltersDto {
   @Max(100, { message: 'El límite no puede ser mayor a 100' })
   @Type(() => Number)
   limit?: number = 10;
-} 
+}

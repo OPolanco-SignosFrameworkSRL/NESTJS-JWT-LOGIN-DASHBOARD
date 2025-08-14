@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsNumber, IsString, IsDateString, Min, Max } from 'class-validator';
+import { IsOptional, IsNumber, IsString, IsDateString, Min, Max, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 import { SolicitudStatus, SolicitudTipo } from '../../domain/solicitud-general.interface';
 
@@ -93,4 +93,33 @@ export class SolicitudGeneralFiltersDto {
   @IsOptional()
   @IsString()
   usuarionombre?: string;
+
+  // Campos de paginación
+  @ApiProperty({
+    description: 'Número de página',
+    example: 1,
+    minimum: 1,
+    required: false,
+    default: 1,
+  })
+  @IsOptional()
+  @IsInt({ message: 'La página debe ser un número entero' })
+  @Min(1, { message: 'La página debe ser mayor o igual a 1' })
+  @Type(() => Number)
+  page?: number = 1;
+
+  @ApiProperty({
+    description: 'Cantidad de elementos por página',
+    example: 10,
+    minimum: 1,
+    maximum: 100,
+    required: false,
+    default: 10,
+  })
+  @IsOptional()
+  @IsInt({ message: 'El límite debe ser un número entero' })
+  @Min(1, { message: 'El límite debe ser mayor o igual a 1' })
+  @Max(100, { message: 'El límite no puede ser mayor a 100' })
+  @Type(() => Number)
+  limit?: number = 10;
 } 

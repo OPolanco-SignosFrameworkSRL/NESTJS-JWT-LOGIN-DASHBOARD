@@ -3,6 +3,7 @@ import { ISolicitudGeneralService } from '../solicitud-general.service.interface
 import { ISolicitudGeneralResponse, ISolicitudGeneralFilters, ISolicitudGeneralStats, SolicitudStatus } from '../solicitud-general.interface';
 import { UserRole } from '../user.interface';
 import { ISolicitudGeneralRepository } from '../repositories/solicitud-general.repository.interface';
+import { PaginationDto, PaginatedResponseDto } from '../../application/dto/pagination.dto';
 
 @Injectable()
 export class SolicitudGeneralService implements ISolicitudGeneralService {
@@ -11,9 +12,25 @@ export class SolicitudGeneralService implements ISolicitudGeneralService {
     private readonly solicitudGeneralRepository: ISolicitudGeneralRepository,
   ) {}
 
-  async findAll(): Promise<ISolicitudGeneralResponse[]> {
-    const solicitudes = await this.solicitudGeneralRepository.findAll();
-    return this.mapToResponse(solicitudes);
+  async findAll(filters?: ISolicitudGeneralFilters): Promise<PaginatedResponseDto<ISolicitudGeneralResponse>> {
+    const { page = 1, limit = 10, ...otherFilters } = filters || {};
+    const skip = (page - 1) * limit;
+
+    const [solicitudes, total] = await this.solicitudGeneralRepository.findAllWithPagination(
+      { ...otherFilters, skip, take: limit }
+    );
+    
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: this.mapToResponse(solicitudes),
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1
+    };
   }
 
   async findById(id: number): Promise<ISolicitudGeneralResponse | null> {

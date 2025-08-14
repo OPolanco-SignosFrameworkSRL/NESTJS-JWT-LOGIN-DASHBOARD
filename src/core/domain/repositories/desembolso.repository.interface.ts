@@ -40,4 +40,6 @@ export interface IDesembolsoRepository {
    * Elimina un desembolso (soft delete)
    */
   delete(id: number): Promise<void>;
+
+  findAllWithPagination(filters?: any & { skip?: number; take?: number }): Promise<[any[], number]>;
 }

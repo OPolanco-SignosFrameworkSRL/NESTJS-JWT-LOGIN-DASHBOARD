@@ -110,7 +110,55 @@ export class CashRequestRepository implements ICashRequestRepository {
    */
   async findById(id: number): Promise<CashRequest | null> {
     const cashRequest = await this.cashRequestReadRepository.findOne({ where: { id } });
-    return cashRequest ? this.mapToDomain(cashRequest) : null;
+    if (!cashRequest) return null;
+    return this.mapToDomain(cashRequest);
+  }
+
+  async findAllWithPagination(filters?: ICashRequestFilters & { skip?: number; take?: number }): Promise<[CashRequest[], number]> {
+    const query = this.cashRequestReadRepository.createQueryBuilder('cashRequest');
+
+    // Aplicar filtros existentes
+    if (filters?.status) {
+      query.andWhere('cashRequest.solicitud_status = :status', { status: filters.status });
+    }
+    if (filters?.type) {
+      query.andWhere('cashRequest.solicitud_tipo = :type', { type: filters.type });
+    }
+    if (filters?.division) {
+      query.andWhere('cashRequest.divicionid = :division', { division: filters.division });
+    }
+    if (filters?.paymentType) {
+      query.andWhere('cashRequest.tipo_pago = :paymentType', { paymentType: filters.paymentType });
+    }
+    if (filters?.startDate) {
+      query.andWhere('cashRequest.fechacreada >= :startDate', { startDate: filters.startDate });
+    }
+    if (filters?.endDate) {
+      query.andWhere('cashRequest.fechacreada <= :endDate', { endDate: filters.endDate });
+    }
+    if (filters?.minAmount) {
+      query.andWhere('cashRequest.monto_solicitado >= :minAmount', { minAmount: filters.minAmount });
+    }
+    if (filters?.maxAmount) {
+      query.andWhere('cashRequest.monto_solicitado <= :maxAmount', { maxAmount: filters.maxAmount });
+    }
+    if (filters?.search) {
+      query.andWhere(
+        '(cashRequest.concepto LIKE :search OR cashRequest.nombre_cliente LIKE :search)',
+        { search: `%${filters.search}%` }
+      );
+    }
+
+    // Aplicar paginación
+    if (filters?.skip !== undefined) {
+      query.skip(filters.skip);
+    }
+    if (filters?.take !== undefined) {
+      query.take(filters.take);
+    }
+
+    const [cashRequests, total] = await query.getManyAndCount();
+    return [cashRequests.map(cashRequest => this.mapToDomain(cashRequest)), total];
   }
 
   /**

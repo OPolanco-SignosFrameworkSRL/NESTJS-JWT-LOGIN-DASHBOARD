@@ -1,8 +1,9 @@
 import { ICashRequestResponse, ICashRequestFilters, ICashRequestStats } from './interfaces/cash-request.interface';
 import { UserRole } from './interfaces/user.interface';
+import { PaginatedResponseDto } from '../../core/application/dto/pagination.dto';
 
 export interface ICashRequestService {
-  findAll(): Promise<ICashRequestResponse[]>;
+  findAll(filters?: ICashRequestFilters): Promise<PaginatedResponseDto<ICashRequestResponse>>;
   findById(id: number): Promise<ICashRequestResponse | null>;
   findByUser(userId: number): Promise<ICashRequestResponse[]>;
   findByFilters(filters: ICashRequestFilters): Promise<ICashRequestResponse[]>;

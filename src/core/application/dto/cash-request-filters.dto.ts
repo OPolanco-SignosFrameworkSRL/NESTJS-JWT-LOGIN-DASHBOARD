@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString, IsNumber, IsDateString, IsEnum, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsNumber, IsDateString, IsEnum, Min, Max, IsInt } from 'class-validator';
 import { CashRequestStatus, CashRequestType, PaymentType, Division } from '../../domain/cash-request.interface';
 import { Type } from 'class-transformer';
 
@@ -86,4 +86,33 @@ export class CashRequestFiltersDto {
   @Min(0)
   @Type(() => Number)
   maxAmount?: number;
+
+  // Campos de paginación
+  @ApiProperty({
+    description: 'Número de página',
+    example: 1,
+    minimum: 1,
+    required: false,
+    default: 1,
+  })
+  @IsOptional()
+  @IsInt({ message: 'La página debe ser un número entero' })
+  @Min(1, { message: 'La página debe ser mayor o igual a 1' })
+  @Type(() => Number)
+  page?: number = 1;
+
+  @ApiProperty({
+    description: 'Cantidad de elementos por página',
+    example: 10,
+    minimum: 1,
+    maximum: 100,
+    required: false,
+    default: 10,
+  })
+  @IsOptional()
+  @IsInt({ message: 'El límite debe ser un número entero' })
+  @Min(1, { message: 'El límite debe ser mayor o igual a 1' })
+  @Max(100, { message: 'El límite no puede ser mayor a 100' })
+  @Type(() => Number)
+  limit?: number = 10;
 } 
