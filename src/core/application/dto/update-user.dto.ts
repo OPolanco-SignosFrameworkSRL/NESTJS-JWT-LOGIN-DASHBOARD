@@ -10,7 +10,7 @@ import {
 } from 'class-validator';
 import { UserRole } from '../../domain/user.interface';
 */
-import { IsOptional, IsString, IsEmail, MinLength, MaxLength, Matches } from 'class-validator';
+import { IsOptional, IsString, IsEmail, MinLength, MaxLength, Matches, ValidateIf } from 'class-validator';
 
 export class UpdateUserDto {
   @ApiProperty({
@@ -83,7 +83,9 @@ export class UpdateUserDto {
   @IsEmail({}, { message: 'El email debe tener un formato válido' })
   @Length(5, 255, { message: 'El email debe tener entre 5 y 255 caracteres' })
   user_email?: string;
-  */@IsString({ message: 'La contraseña debe ser una cadena de texto' })
+  */
+ @ValidateIf((o) => o.password && o.password.length > 0)
+ @IsString({ message: 'La contraseña debe ser una cadena de texto' })
   @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
   password?: string;
 

@@ -9,9 +9,9 @@ export type UserRole = 'Admin' | 'Usuario' | 'Supervisor' | 'Manager' | 'Adminis
 export interface IUserResponse {
   id: number;
   cedula: string;
-  nombre: string;
-  apellido: string;
-  fullname: string;
+  nombre?: string;  // Hacer opcional
+  apellido?: string; // Hacer opcional
+  fullname?: string;
   role: UserRole;
   user_email?: string;
   telefono?: string;

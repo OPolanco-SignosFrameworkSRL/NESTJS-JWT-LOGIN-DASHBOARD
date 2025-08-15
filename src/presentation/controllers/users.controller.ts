@@ -11,7 +11,7 @@ import {
   HttpStatus,
   ParseIntPipe,
   Request,
-  BadRequestException,
+  //BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -27,7 +27,7 @@ import { UpdateUserDto } from '../../core/application/dto/update-user.dto';
 import { RegisterDto } from '../../core/application/dto/register.dto';
 import { UserFiltersDto } from '../../core/application/dto/user-filters.dto';
 import { UpdatePhoneDto } from '../../core/application/dto/update-phone.dto';
-import { DeleteUserDto } from '../../core/application/dto/delete-user.dto';
+//import { DeleteUserDto } from '../../core/application/dto/delete-user.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
@@ -194,7 +194,14 @@ export class UsersController {
     description: 'Usuario no encontrado',
   })
   async findOne(@Param('id', ParseIntPipe) id: number) {
-    return await this.usersService.findOne(id);
+    const user = await this.usersService.findOne(id);
+
+    return {
+      data: user,
+      statusCode: 200,
+      message: 'Usuario obtenido exitosamente',
+      timestamp: new Date().toISOString(),
+    }
   }
   @Get('cedula/:cedula')
   @ApiOperation({ summary: 'Obtener un usuario por cédula' })
@@ -242,8 +249,11 @@ export class UsersController {
   @Delete(':id')
   @Roles(UserRole.Admin)
   @ApiOperation({
-    summary: 'Eliminar un usuario (soft delete por defecto, eliminación física con confirmación)',
+    /* summary: 'Eliminar un usuario (soft delete por defecto, eliminación física con confirmación)',
     description: 'Por defecto realiza soft delete. Para eliminación física permanente, enviar confirmPermanentDelete: true y confirmText: "SI, ELIMINAR PERMANENTEMENTE"'
+ */
+    summary: 'Eliminar un usuario (soft delete)',
+    description: 'Realiza soft delete del usuario. Solo requiere el ID en la URL.'
   })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({
@@ -252,8 +262,9 @@ export class UsersController {
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'Usuario marcado como eliminado (soft delete)' },
-        type: { type: 'string', enum: ['soft', 'permanent'], example: 'soft' },
+        /* message: { type: 'string', example: 'Usuario marcado como eliminado (soft delete)' },
+        type: { type: 'string', enum: ['soft', 'permanent'], example: 'soft' }, */
+        message: { type: 'string', example: 'Usuario marcado como eliminado exitosamente' },
         user: {
           type: 'object',
           properties: {
@@ -276,12 +287,11 @@ export class UsersController {
   })
   async remove(
     @Param('id', ParseIntPipe) id: number,
-    @Body() deleteUserDto: DeleteUserDto,
+    //@Body() deleteUserDto: DeleteUserDto,
     @Request() req
   ) {
     const currentUser = req.user;
-
-    // Validar confirmación para eliminación permanente
+    /* // Validar confirmación para eliminación permanente
     if (deleteUserDto.confirmPermanentDelete) {
       if (deleteUserDto.confirmText !== 'SI, ELIMINAR PERMANENTEMENTE') {
         throw new BadRequestException('Para eliminación permanente, debes escribir exactamente: "SI, ELIMINAR PERMANENTEMENTE"');
@@ -291,9 +301,10 @@ export class UsersController {
     return await this.usersService.remove(
       id,
       currentUser,
-      deleteUserDto.confirmPermanentDelete,
-      deleteUserDto.reason
-    );
+       deleteUserDto.confirmPermanentDelete,
+      deleteUserDto.reason 
+    ); */
+    return await this.usersService.remove(id, currentUser);
   }
 
   @Put(':id/restore')

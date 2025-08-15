@@ -29,6 +29,11 @@ import { map } from 'rxjs/operators';
               timestamp: new Date().toISOString(),
             };
           }
+
+          if (data && typeof data === 'object' && 'statusCode' in data && 'message' in data && 'timestamp' in data) {
+            return data;
+          }
+          
           return {
             Token: data,
             statusCode: 200,
