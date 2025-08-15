@@ -7,7 +7,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 
-export default function Register() {
+export default function EditEmployee() {
 
   const { register, handleSubmit, formState: { errors } } = useForm<CreateEmployee>()
 
@@ -53,7 +53,7 @@ export default function Register() {
         <div className="flex items-center justify-between">
 
           <h2 className="text-xs sm:text-base md:text-xl text-emerald-500 font-bold">
-            Registrar Empleado
+            Editar Empleado
           </h2>
 
           <Link
@@ -185,7 +185,7 @@ export default function Register() {
             <Input
               type="submit"
               className="h-14 flex justify-center bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-lg cursor-pointer rounded"
-              value="Registrar Empleado"
+              value="Editar Empleado"
             />
           </div>
 

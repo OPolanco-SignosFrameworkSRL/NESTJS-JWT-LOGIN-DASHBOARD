@@ -10,6 +10,7 @@ import CreateEmployee from '../pages/Admin/CreateEmployee';
 import NewRequest from '../pages/Request/NewRequest';
 import Disbursement from '../pages/Disbursement';
 import { ProtectedRoute } from '@/application/layout/ProtectedRoute';
+import EditEmployee from '../pages/Admin/EditEmployee';
 
 
 const RouterComponent = () => {
@@ -54,6 +55,10 @@ const RouterComponent = () => {
         {
           path: '/disbursement',
           element: <Disbursement/>
+        },
+        {
+          path: '/edit-employee',
+          element: <EditEmployee/>
         }
       ],
     },

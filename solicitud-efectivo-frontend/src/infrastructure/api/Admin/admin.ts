@@ -4,14 +4,19 @@ import api from "@/infrastructure/api"
 import { getAllEmployeesSchema, type CreateEmployee } from "@/infrastructure/schemas/admin/admin"
 
 
-export const getAllEmployees = async () => {
+type adminProps = {
+    page: number
+    limit: number
+}
+
+export const getAllEmployees = async ({page, limit}: adminProps) => {
 
     
     try {
         
-        const url = '/users'
+        const url = `/users?page=${page}&limit=${limit}`
 
-        const { data } = await api(url)
+        const { data } = await api.get(url)
 
         const result = getAllEmployeesSchema.safeParse(data)
 
@@ -39,6 +44,21 @@ export const createEmployee = async (formData: CreateEmployee) => {
         
     } catch (error) {
         if(isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error);
+        }
+    }
+}
+
+export const editEmployee = async (id: number, formData: CreateEmployee) => {
+    try {
+        const url = `/users/${id}`
+
+        const { data } = await api.put(url, formData)
+
+        return data
+        
+    } catch (error) {
+         if(isAxiosError(error) && error.response) {
             throw new Error(error.response.data.error);
         }
     }

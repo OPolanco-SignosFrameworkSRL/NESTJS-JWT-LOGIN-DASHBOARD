@@ -11,7 +11,7 @@ const ModalProfile = () => {
 
     const modalItems = [
         {icon: <FaUser size={24} />, label: "Perfil", path: "/perfil"},
-        {icon: <TbLayoutDashboardFilled size={24}/>, label: "Admin Dashboard", path: "/admin-dashboard"},
+        {icon: <TbLayoutDashboardFilled size={24}/>, label: "Admin Dashboard", path: "/admin-dashboard?pageNumber=1"},
         {icon: <IoMdSettings size={24}/>, label: "Configuración", path: "/configuracion"}
     ]
 

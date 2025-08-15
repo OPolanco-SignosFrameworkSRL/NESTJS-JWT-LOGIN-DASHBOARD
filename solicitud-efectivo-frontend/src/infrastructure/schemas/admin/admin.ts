@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const getAllEmployeesSchema = z.object({
-    Token: z.array(z.object({
+    data: z.array(z.object({
         id: z.number(),
         cedula: z.string(),
         fullname: z.string(),
@@ -9,9 +9,16 @@ export const getAllEmployeesSchema = z.object({
         user_email: z.string(),
         valido: z.number(),
     })),
-    message: z.string(),
+    total: z.number(),
+    page: z.number(),
+    limit: z.number(),
+    totalPages: z.number(),
+    hasNext: z.boolean(),
+    hasPrev: z.boolean(),
     statusCode: z.number(),
-    timestamp: z.string()
+    message: z.string(),
+    timestamp: z.string(),
+    
 })
 
 export const createEmployeeSchema = z.object({

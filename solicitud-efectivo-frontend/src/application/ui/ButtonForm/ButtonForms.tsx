@@ -1,7 +1,8 @@
 import { bColor, bgColor, txtColor, type IColor } from "@/application/ui/generalStyles"
 
 type ButtonFormProps = {
-    label: string
+    children?: React.ReactNode
+    label?: string
     borderColor?: keyof IColor
     backgroundColor?: keyof IColor
     textColor?: keyof IColor
@@ -11,7 +12,7 @@ type ButtonFormProps = {
     type?: "button" | "submit" | "reset"
 }
 
-const ButtonForms = ({label, border, borderColor="primary", backgroundColor="primary", textColor="primary", onClick, className, type="button"} : ButtonFormProps) => {
+const ButtonForms = ({children, label, border, borderColor="primary", backgroundColor="primary", textColor="primary", onClick, className, type="button"} : ButtonFormProps) => {
 
   return (
     <button 
@@ -24,6 +25,7 @@ const ButtonForms = ({label, border, borderColor="primary", backgroundColor="pri
       ${className}
     `
     }>
+      {children}
       {label}
     </button>
   )
