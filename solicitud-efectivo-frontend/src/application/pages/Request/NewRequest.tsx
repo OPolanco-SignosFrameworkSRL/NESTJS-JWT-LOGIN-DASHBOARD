@@ -14,7 +14,7 @@ const NewRequest = () => {
   const navItems = [
     {label: "Información Básica"},
     {label: "Datos Producción"},
-    {label: "Integrantes"}
+    {label: "Integrantes"},
   ]
 
   const [activeItem, setActiveItem] = useState(navItems[0]);

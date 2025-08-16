@@ -1,21 +1,33 @@
 
 
 import Input from "@/application/ui/Input/Input";
-import { createEmployee } from "@/infrastructure/api/Admin/admin";
+import { editEmployee, getEmployeeById } from "@/infrastructure/api/Admin/admin";
 import type { CreateEmployee } from "@/infrastructure/schemas/admin/admin";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { hashPassword } from "@/shared/utilts/convertToSha256";
+import { getUrlParams } from "@/shared/utilts/GetUrlParams";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 
 export default function EditEmployee() {
 
-  const { register, handleSubmit, formState: { errors } } = useForm<CreateEmployee>()
-
+  
   const queryClient = useQueryClient()
-
+  
+  const employeeId = getUrlParams('employeeId')
+  
+  const { data } = useQuery({
+    queryKey:['editEmployee', employeeId],
+    queryFn: () => getEmployeeById(Number(employeeId)),
+    staleTime: 2 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    enabled: !!employeeId
+  })
+  
   const { mutate } = useMutation({
 
-    mutationFn: createEmployee,
+    mutationFn: (data: CreateEmployee) => editEmployee(Number(employeeId), data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] })
     },
@@ -24,29 +36,43 @@ export default function EditEmployee() {
     }
   })
 
-  const onSubmit = (data: CreateEmployee) => {
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateEmployee>({})
 
-    data.fullname = `${data.nombre} ${data.apellido}`
-    data.clave = "MiClaveSecreta2024"
-    data.user_status = 1
-    data.caja_id = "1"
-    data.tienda_id = "1"
-    data.allow_multi_tienda = "0"
-    data.max_descuento = "10.5"
-    data.close_caja = "0"
-    data.user_account_email = "pedro@gmail.com"
-    data.user_account_email_passw = "MiClaveSecreta2024"
-    data.comision_porciento = "5.5"
-    data.default_portalid = "1"
-    data.nuevocampo = "valor"
-    data.encargadoId = "1"
+  const onSubmit = async (data: CreateEmployee) => {
 
+    if(data.password && data.password !== "") {
+      const hashedPassword = await hashPassword(data.cedula, data.password);
+      data.password = hashedPassword;
+      console.log("Contraseña hasheada:", data.password);
+
+    } else {
+      data.password = undefined;
+      console.log("Sin contraseña, enviando undefined");
+    }
+
+  
+    
     mutate(data)
-
     
   }
 
-  return (
+  useEffect(() => {
+    if(data) {
+      reset({
+        nombre: data.data.nombre,
+        apellido: data.data.apellido,
+        password: "",
+        cedula: data.data.cedula,
+        role: data.data.role,
+        user_email: data.data.user_email,
+        telefono: data.data.telefono,
+        direccion: data.data.direccion,
+        celular: data.data.celular,
+      })
+    }
+  }, [data, reset])
+
+  if(data) return (
     <>
       <div className="mt-10 p-6 sm:p-10 bg-white shadow-lg">
 
@@ -59,6 +85,7 @@ export default function EditEmployee() {
           <Link
             to="/admin-dashboard?pageNumber=1"
             className="rounded-md bg-gradient-to-r from-green-600 to-emerald-600 p-2 sm:p-3 text-sm font-bold text-white shadow-sm hover:from-green-700 hover:to-emerald-700"
+            //onClick={() => queryClient.invalidateQueries({ queryKey: ['employees', employeeId]})}
             >
             Volver a Dashboard
           </Link>
@@ -115,7 +142,9 @@ export default function EditEmployee() {
                 type="password"
                 className="mt-2"
                 placeholder="Contraseña"
-                {...register("password", { required: "La contraseña es requerida" })}
+                {...register("password", { 
+                  setValueAs: (value) => value === "" ? undefined : value 
+                })}
               />
               {errors.password && <p className="text-red-500">{errors.password.message}</p>}
             </div>

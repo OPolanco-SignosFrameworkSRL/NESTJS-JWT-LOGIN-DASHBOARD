@@ -8,6 +8,9 @@ import { TbEdit } from "react-icons/tb";
 import { FaRegTrashAlt } from "react-icons/fa";
 import Container from "@/application/ui/Container/Container";
 import Pagination from "@/application/components/Pagination";
+import Select from "@/application/ui/Select/Select";
+import Input from "@/application/ui/Input/Input";
+import { twMerge } from "tailwind-merge";
 
 
 export default function Dashboard() {
@@ -59,7 +62,35 @@ export default function Dashboard() {
       </Container>
 
 
+      <div className="flex flex-col md:flex-row gap-3 md:gap-5 py-5 w-full">
+
+        <div className="flex items-center gap-2 w-full md:flex-grow">
+
+            <span className="text-sm sm:text-base text-gray-800 font-semibold">Buscar:</span>
+            <Input
+                type="text"
+                placeholder="Buscar"
+                twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300 h-11")}
+            />
+
+        </div>
+
+        <div className="flex items-center gap-2 w-full md:w-auto">
+
+            <span className="text-sm sm:text-base text-gray-800 font-semibold whitespace-nowrap">Estado:</span>
+
+            <Select
+                options={[]}
+                placeholder="Buscar"
+                twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300 flex-1 min-w-[210px] md:flex-none md:min-w-[200px]")}
+            />
+
+        </div>
+
+      </div>
+
     <Container className="border border-green-300 overflow-hidden my-5">
+
 
       <Container className="relative w-full overflow-auto">
 

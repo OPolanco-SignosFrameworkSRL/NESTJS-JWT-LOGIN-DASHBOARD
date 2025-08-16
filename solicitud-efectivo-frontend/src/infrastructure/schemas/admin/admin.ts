@@ -1,32 +1,11 @@
 import z from "zod";
 
-export const getAllEmployeesSchema = z.object({
-    data: z.array(z.object({
-        id: z.number(),
-        cedula: z.string(),
-        fullname: z.string(),
-        role: z.string(),
-        user_email: z.string(),
-        valido: z.number(),
-    })),
-    total: z.number(),
-    page: z.number(),
-    limit: z.number(),
-    totalPages: z.number(),
-    hasNext: z.boolean(),
-    hasPrev: z.boolean(),
-    statusCode: z.number(),
-    message: z.string(),
-    timestamp: z.string(),
-    
-})
-
 export const createEmployeeSchema = z.object({
     cedula: z.string(),
     nombre: z.string(),
     apellido: z.string(),
     fullname: z.string(),
-    password: z.string(),
+    password: z.string().optional(),
     clave: z.string(),/* */
     role: z.string(),
     user_email: z.string().email(),
@@ -47,5 +26,41 @@ export const createEmployeeSchema = z.object({
     encargadoId: z.string()/* */
 })
 
+export const getAllEmployeesSchema = z.object({
+    data: z.array(z.object({
+        id: z.number(),
+        cedula: z.string(),
+        fullname: z.string(),
+        role: z.string(),
+        user_email: z.string(),
+        valido: z.boolean(),
+    })),
+    total: z.number(),
+    page: z.number(),
+    limit: z.number(),
+    totalPages: z.number(),
+    hasNext: z.boolean(),
+    hasPrev: z.boolean(),
+    statusCode: z.number(),
+    message: z.string(),
+    timestamp: z.string(),
+})
+
+export const getEmployeeByIdSchema = z.object({
+    data: (z.object({
+        id: z.number(),
+        cedula: z.string(),
+        nombre: z.string(),
+        apellido: z.string(),
+        role: z.string(),
+        telefono: z.string(),
+        direccion: z.string(),
+        celular: z.string(),
+        user_email: z.string(),
+        valido: z.boolean(),
+    })),
+})
+
 export type GetAllEmployees = z.infer<typeof getAllEmployeesSchema>
+export type EmployeeById = z.infer<typeof getEmployeeByIdSchema>
 export type CreateEmployee = z.infer<typeof createEmployeeSchema>

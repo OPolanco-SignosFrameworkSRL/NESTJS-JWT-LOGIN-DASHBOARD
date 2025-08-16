@@ -72,6 +72,7 @@ const LoginPage = () => {
               <Input
                 type='text'
                 placeholder='312-0103815-9'
+                autoComplete='cedula'
                 {...register('cedula', {
                   minLength: {
                     value: 11,
@@ -100,9 +101,10 @@ const LoginPage = () => {
 
             <Container className='flex flex-col space-y-2'>
               <label htmlFor='password' className='font-bold text-sm sm:text-base'>Contraseña</label>
-              <input 
+              <Input 
                 type='password' 
                 placeholder='Contraseña' 
+                autoComplete='current-password'
                 className='w-full p-3 rounded-md border border-green-400 bg-white text-sm sm:text-base focus:outline-none focus:ring-2 focus:ring-green-400' 
                 {...register('password', {
                     required: {
