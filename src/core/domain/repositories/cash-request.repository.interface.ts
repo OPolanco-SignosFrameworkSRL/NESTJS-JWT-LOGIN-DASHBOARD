@@ -100,4 +100,6 @@ export interface ICashRequestRepository {
    * Obtiene solicitudes por rango de montos
    */
   findByAmountRange(minAmount: number, maxAmount: number): Promise<CashRequest[]>;
+
+  findAllWithPagination(filters?: ICashRequestFilters & { skip?: number; take?: number }): Promise<[CashRequest[], number]>;
 } 

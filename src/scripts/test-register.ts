@@ -17,6 +17,7 @@ async function testRegister() {
       cedula: '40245980129',
       nombre: 'Raul',
       apellido: 'Vargas',
+      fullname: 'Raul Vargas',
       password: 'password123',
       clave: 'MiClaveSecreta2024',
       role: 'Usuario' as any,

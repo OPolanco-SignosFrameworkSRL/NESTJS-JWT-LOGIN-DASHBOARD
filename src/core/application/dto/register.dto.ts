@@ -253,4 +253,15 @@ export class RegisterDto {
   @IsString({ message: 'El ID del encargado debe ser una cadena de texto' })
   @Length(1, 50, { message: 'El ID del encargado debe tener entre 1 y 50 caracteres' })
   encargadoId?: string;
+
+  @ApiProperty({
+    description: 'Nombre completo del usuario',
+    example: 'Raul Vargas',
+    maxLength: 200,
+    required: false,
+  })
+  @IsString({ message: 'El nombre completo debe ser una cadena de texto' })
+  @IsNotEmpty({ message: 'El nombre completo es requerido' })
+  @Length(5, 200, { message: 'El nombre completo debe tener entre 5 y 200 caracteres' })
+  fullname: string;
 } 

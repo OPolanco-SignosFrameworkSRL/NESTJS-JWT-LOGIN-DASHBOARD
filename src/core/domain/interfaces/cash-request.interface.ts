@@ -117,11 +117,12 @@ export interface ICashRequestFilters {
   type?: CashRequestType;
   division?: Division;
   paymentType?: PaymentType;
-  startDate?: Date;
-  endDate?: Date;
+  startDate?: string;
+  endDate?: string;
   minAmount?: number;
   maxAmount?: number;
   search?: string;
+  page?: number;
   limit?: number;
   offset?: number;
 }

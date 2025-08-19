@@ -32,6 +32,7 @@ import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
 import { UserRole } from '../../core/domain/interfaces/user.interface';
 import { ICashRequestResponse, ICashRequestStats } from '../../core/domain/interfaces/cash-request.interface';
+import { PaginationDto, PaginatedResponseDto } from '../../core/application/dto/pagination.dto';
 
 @ApiTags('Solicitudes de Efectivo')
 @ApiBearerAuth()
@@ -46,40 +47,53 @@ export class CashRequestController {
   @Get()
   @ApiOperation({
     summary: 'Obtener todas las solicitudes de efectivo',
-    description: 'Retorna una lista de todas las solicitudes de efectivo activas',
+    description: 'Retorna una lista paginada de todas las solicitudes de efectivo activas',
   })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({
     status: 200,
     description: 'Lista de solicitudes de efectivo obtenida exitosamente',
     schema: {
-      type: 'array',
-      items: {
-        type: 'object',
-        properties: {
-          id: { type: 'number' },
-          requestedBy: { type: 'number' },
-          requestedByUser: {
+      type: 'object',
+      properties: {
+        data: {
+          type: 'array',
+          items: {
             type: 'object',
             properties: {
               id: { type: 'number' },
-              nombre: { type: 'string' },
-              apellido: { type: 'string' },
-              cedula: { type: 'string' },
+              requestedBy: { type: 'number' },
+              requestedByUser: {
+                type: 'object',
+                properties: {
+                  id: { type: 'number' },
+                  nombre: { type: 'string' },
+                  apellido: { type: 'string' },
+                  cedula: { type: 'string' },
+                },
+              },
+              requestedAmount: { type: 'number' },
+              requestType: { type: 'string' },
+              division: { type: 'string' },
+              paymentType: { type: 'string' },
+              status: { type: 'string' },
+              createdAt: { type: 'string', format: 'date-time' },
+              updatedAt: { type: 'string', format: 'date-time' },
             },
           },
-          requestedAmount: { type: 'number' },
-          requestType: { type: 'string' },
-          division: { type: 'string' },
-          paymentType: { type: 'string' },
-          status: { type: 'string' },
-          createdAt: { type: 'string', format: 'date-time' },
-          updatedAt: { type: 'string', format: 'date-time' },
         },
+        total: { type: 'number', example: 150 },
+        page: { type: 'number', example: 1 },
+        limit: { type: 'number', example: 10 },
+        totalPages: { type: 'number', example: 15 },
+        hasNext: { type: 'boolean', example: true },
+        hasPrev: { type: 'boolean', example: false }
       },
     },
   })
-  async findAll(): Promise<ICashRequestResponse[]> {
-    return await this.cashRequestService.findAll();
+  async findAll(@Query() filters: CashRequestFiltersDto): Promise<PaginatedResponseDto<ICashRequestResponse>> {
+    return await this.cashRequestService.findAll(filters);
   }
 
   @Get('my-requests')
@@ -115,8 +129,12 @@ export class CashRequestController {
   async findByFilters(@Query() filters: CashRequestFiltersDto): Promise<ICashRequestResponse[]> {
     const convertedFilters = {
       ...filters,
+      /*
       startDate: filters.startDate ? new Date(filters.startDate) : undefined,
       endDate: filters.endDate ? new Date(filters.endDate) : undefined,
+      */
+      startDate: filters.startDate ? filters.startDate : undefined, // Mantener como string
+      endDate: filters.endDate ? filters.endDate : undefined,       // Mantener como string
     };
     return await this.cashRequestService.findByFilters(convertedFilters);
   }

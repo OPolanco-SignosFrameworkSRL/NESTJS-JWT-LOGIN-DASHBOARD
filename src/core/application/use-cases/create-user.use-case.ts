@@ -33,7 +33,7 @@ export class CreateUserUseCase {
       }
 
       // Validar datos requeridos
-      if (!userData.cedula || !userData.nombre || !userData.apellido || !userData.password || !userData.clave) {
+      if (!userData.cedula || !userData.fullname || !userData.nombre || !userData.apellido || !userData.password || !userData.clave) {
         return {
           success: false,
           error: 'Todos los campos requeridos deben estar presentes',
@@ -61,6 +61,7 @@ export class CreateUserUseCase {
         cedula: userData.cedula,
         nombre: userData.nombre,
         apellido: userData.apellido,
+        fullname: userData.fullname,
         password: this.cryptoService.calculateSHA256(userData.cedula + userData.password),
         codigo: this.cryptoService.calculateSHA256(userData.cedula + userData.clave),
         role: userData.role || 'Usuario',

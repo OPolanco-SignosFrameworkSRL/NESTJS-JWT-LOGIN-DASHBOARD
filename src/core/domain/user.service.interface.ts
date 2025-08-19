@@ -12,10 +12,12 @@ export interface IUserService {
   ): Promise<IUserResponse>;
   remove(
     id: number, 
-    currentUser?: { id: number; role: UserRole },
+    /* currentUser?: { id: number; role: UserRole },
     confirmPermanentDelete?: boolean,
     reason?: string
-  ): Promise<{ message: string; type: 'soft' | 'permanent'; user: any }>;
+  ): Promise<{ message: string; type: 'soft' | 'permanent'; user: any }>; */
+    currentUser?: { id: number; role: UserRole }
+  ): Promise<{ message: string; user: any }>;
   restore(
     id: number, 
     currentUser?: { id: number; role: UserRole }

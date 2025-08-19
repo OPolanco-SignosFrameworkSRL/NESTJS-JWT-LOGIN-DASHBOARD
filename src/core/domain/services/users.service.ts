@@ -10,7 +10,9 @@ import {
   IUserFilters,
   IUserUpdateData,
   UserRole,
-} from '../user.interface';
+  //} from '../user.interface';
+} from '../interfaces/user.interface';
+import { PaginationDto, PaginatedResponseDto } from '../../application/dto/pagination.dto';
 
 @Injectable()
 export class UsersService {
@@ -23,16 +25,56 @@ export class UsersService {
     private readonly userWriteRepository: Repository<UserWriteEntity>,
     private readonly dataSource: DataSource,
     private readonly cryptoService: CryptoService,
-  ) {}
+  ) { }
 
   /**
-   * Obtiene todos los usuarios activos
+   * Obtiene todos los usuarios activos con paginación
    */
-  async findAll(filters?: IUserFilters): Promise<IUserResponse[]> {
+  async findAll(filters?: IUserFilters): Promise<PaginatedResponseDto<IUserResponse>> {
     try {
-      const queryBuilder = this.createQueryBuilder(filters);
-      const users = await queryBuilder.getMany();
-      return users.map(user => this.mapToUserResponse(user));
+      const { page = 1, limit = 10, ...otherFilters } = filters || {};
+      const skip = (page - 1) * limit;
+
+      const queryBuilder = this.userRepository
+        .createQueryBuilder('user')
+        .where('user.valido = :valido', { valido: '1' });
+
+      if (otherFilters?.role) {
+        queryBuilder.andWhere('user.role = :role', { role: otherFilters.role });
+      }
+
+      if (otherFilters?.division) {
+        queryBuilder.andWhere('user.division = :division', { division: otherFilters.division });
+      }
+
+      if (otherFilters?.search) {
+        queryBuilder.andWhere(
+          '(user.nombre LIKE :search OR user.apellido LIKE :search OR user.cedula LIKE :search)',
+          { search: `%${otherFilters.search}%` }
+        );
+      }
+
+      // Obtener total de registros
+      const total = await queryBuilder.getCount();
+
+      // Aplicar paginación
+      const users = await queryBuilder
+        .orderBy('user.nombre', 'DESC')
+        .skip(skip)
+        .take(limit)
+        .getMany();
+
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        data: users.map(user => this.mapToUserResponse(user)),
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1
+      };
     } catch (error) {
       this.logger.error('Error obteniendo usuarios:', error);
       throw error;
@@ -52,7 +94,7 @@ export class UsersService {
         throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
       }
 
-      return this.mapToUserResponse(user);
+      return this.mapToUserResponseWithNames(user);
     } catch (error) {
       this.logger.error(`Error obteniendo usuario ${id}:`, error);
       throw error;
@@ -89,7 +131,8 @@ export class UsersService {
    */
   async update(
     id: number,
-    updateData: IUserUpdateData,
+     //updateData: IUserUpdateData,
+    updateData: any,
     currentUser?: { id: number; role: UserRole },
   ): Promise<IUserResponse> {
     try {
@@ -103,17 +146,21 @@ export class UsersService {
       }
 
       // Verificar permisos: Admin puede actualizar cualquier usuario, Usuario solo puede actualizar sus propios datos
-      if (currentUser && currentUser.role !== UserRole.Admin && currentUser.id !== id) {
+      //if (currentUser && currentUser.role !== UserRole.Admin && currentUser.id !== id) {
+      if (currentUser && currentUser.role !== 'Admin' && currentUser.id !== id) {
         throw new UnauthorizedException('No tienes permisos para actualizar este usuario');
       }
 
       // Actualizar campos permitidos
       if (updateData.nombre) userWrite.nombre = updateData.nombre;
       if (updateData.apellido) userWrite.apellido = updateData.apellido;
+      if (updateData.cedula) userWrite.cedula = updateData.cedula;
       if (updateData.role) userWrite.role = updateData.role;
       if (updateData.user_email) userWrite.user_email = updateData.user_email;
       if (updateData.telefono) userWrite.telefono = updateData.telefono;
+      if (updateData.celular) userWrite.celular = updateData.celular;
       if (updateData.direccion) userWrite.direccion = updateData.direccion;
+      /*
       if (updateData.celular) userWrite.celular = updateData.celular;
       if (updateData.user_status) userWrite.user_status = updateData.user_status;
       if (updateData.caja_id !== undefined) userWrite.caja_id = updateData.caja_id;
@@ -128,6 +175,63 @@ export class UsersService {
       if (updateData.nuevocampo) userWrite.nuevocampo = updateData.nuevocampo;
       if (updateData.encargadoId !== undefined) userWrite.encargadoId = updateData.encargadoId;
       if (updateData.valido !== undefined) userWrite.valido = updateData.valido;
+      
+      // Manejar cedula y password de manera coordinada
+      if (updateData.cedula) {
+        const oldCedula = userWrite.cedula;
+        userWrite.cedula = updateData.cedula;
+        
+        // Si se cambió la cédula pero NO se proporcionó nueva contraseña,
+        // necesitamos regenerar el hash con la nueva cédula
+        if (!updateData.password) {
+          // Aquí necesitaríamos la contraseña original, pero no la tenemos
+          // Por seguridad, requerimos que cuando se cambie la cédula, también se proporcione la contraseña
+          throw new BadRequestException('Cuando se actualiza la cédula, se debe proporcionar también la contraseña');
+        }
+      }
+      // Actualizar contraseña solo si se proporciona
+      if (updateData.password) {
+
+      // Actualizar contraseña solo si se proporciona y no está vacía
+      if (updateData.password && updateData.password.trim() !== '') {
+        // Generar hash de la contraseña (cedula + clave)
+        const passwordHash = this.cryptoService.calculateSHA256(userWrite.cedula + updateData.password);
+        userWrite.password = passwordHash;
+      }
+      */
+/*  // Actualizar contraseña solo si se proporciona y no está vacía
+ if (updateData.password && updateData.password.trim() !== '') {
+  let passwordHash;
+  
+  // Si ya es un hash (64 caracteres hexadecimales), usarlo directamente
+  if (/^[a-f0-9]{64}$/i.test(updateData.password)) {
+    passwordHash = updateData.password;
+  } else {
+    // Si es texto plano, generar el hash
+    passwordHash = this.cryptoService.calculateSHA256(userWrite.cedula + updateData.password);
+  }
+  
+  userWrite.password = passwordHash;
+}
+      
+      // Actualizar contraseña solo si se proporciona y no está vacía
+      if (updateData.password && updateData.password.trim() !== '') {
+        // Generar hash de la contraseña (cedula + clave)
+        const passwordHash = this.cryptoService.calculateSHA256(userWrite.cedula + updateData.password); */
+      // VERSIÓN FUNCIONAL - Actualizar contraseña solo si se proporciona y no está vacía
+      if (updateData.password && updateData.password.trim() !== '') {
+        let passwordHash;
+        
+        // Si ya es un hash (64 caracteres hexadecimales), usarlo directamente
+        if (/^[a-f0-9]{64}$/i.test(updateData.password)) {
+          passwordHash = updateData.password;
+        } else {
+          // Si es texto plano, generar el hash
+          passwordHash = this.cryptoService.calculateSHA256(userWrite.cedula + updateData.password);
+        }
+        
+        userWrite.password = passwordHash;
+      }
 
       // Guardar cambios
       await this.userWriteRepository.save(userWrite);
@@ -150,14 +254,16 @@ export class UsersService {
   }
 
   /**
-   * Elimina un usuario (soft delete por defecto, eliminación física con confirmación)
+   * Elimina un usuario (solo soft delete)
    */
   async remove(
-    id: number, 
-    currentUser?: { id: number; role: UserRole },
+    id: number,
+    /*  currentUser?: { id: number; role: UserRole },
     confirmPermanentDelete: boolean = false,
     reason?: string
-  ): Promise<{ message: string; type: 'soft' | 'permanent'; user: any }> {
+  ): Promise<{ message: string; type: 'soft' | 'permanent'; user: any }> { */
+    currentUser?: { id: number; role: UserRole }
+  ): Promise<{ message: string; user: any }> {
     try {
       // Buscar usuario en la tabla real
       const userWrite = await this.userWriteRepository.findOne({
@@ -171,32 +277,24 @@ export class UsersService {
       // Validaciones antes de eliminar
       await this.validateUserDeletion(userWrite, currentUser);
 
-      if (confirmPermanentDelete) {
-        // Eliminación física permanente
-        await this.userWriteRepository.remove(userWrite);
-        this.logger.log(`Usuario ${id} eliminado permanentemente por ${currentUser?.id || 'sistema'}. Razón: ${reason || 'No especificada'}`);
-        
-        return {
-          message: 'Usuario eliminado permanentemente de la base de datos',
-          type: 'permanent',
-          user: { id: userWrite.id, cedula: userWrite.cedula, nombre: userWrite.nombre, apellido: userWrite.apellido }
-        };
-      } else {
-        // Soft delete
-        userWrite.valido = '0';
-        userWrite.deleted_at = new Date();
-        userWrite.deleted_by = currentUser?.id || null;
-        
-        await this.userWriteRepository.save(userWrite);
-        
-        this.logger.log(`Usuario ${id} marcado como eliminado (soft delete) por ${currentUser?.id || 'sistema'}. Razón: ${reason || 'No especificada'}`);
-        
-        return {
-          message: 'Usuario marcado como eliminado (soft delete)',
-          type: 'soft',
-          user: { id: userWrite.id, cedula: userWrite.cedula, nombre: userWrite.nombre, apellido: userWrite.apellido }
-        };
-      }
+      // Soft delete (solo marcar como eliminado)
+      userWrite.valido = '0';
+      userWrite.deleted_at = new Date();
+      userWrite.deleted_by = currentUser?.id || null;
+
+      await this.userWriteRepository.save(userWrite);
+
+      this.logger.log(`Usuario ${id} marcado como eliminado (soft delete) por ${currentUser?.id || 'sistema'}`);
+
+      return {
+        message: 'Usuario marcado como eliminado exitosamente',
+        user: { 
+          id: userWrite.id, 
+          cedula: userWrite.cedula, 
+          nombre: userWrite.nombre, 
+          apellido: userWrite.apellido 
+        }
+      };
     } catch (error) {
       this.logger.error(`Error eliminando usuario ${id}:`, error);
       throw error;
@@ -212,7 +310,7 @@ export class UsersService {
       const adminCount = await this.userWriteRepository.count({
         where: { role: 'Admin', valido: '1' }
       });
-      
+
       if (adminCount <= 1) {
         throw new Error('No se puede eliminar el último administrador del sistema');
       }
@@ -250,11 +348,11 @@ export class UsersService {
       userWrite.valido = '1';
       userWrite.deleted_at = null;
       userWrite.deleted_by = null;
-      
+
       await this.userWriteRepository.save(userWrite);
-      
+
       this.logger.log(`Usuario ${id} restaurado por ${currentUser?.id || 'sistema'}`);
-      
+
       return {
         message: 'Usuario restaurado exitosamente',
         user: { id: userWrite.id, cedula: userWrite.cedula, nombre: userWrite.nombre, apellido: userWrite.apellido }
@@ -286,6 +384,7 @@ export class UsersService {
         telefono: user.telefono,
         direccion: user.direccion,
         celular: user.celular,
+        /*
         user_status: user.user_status,
         caja_id: user.caja_id,
         tienda_id: user.tienda_id,
@@ -300,6 +399,8 @@ export class UsersService {
         valido: user.valido,
         deleted_at: user.deleted_at,
         deleted_by: user.deleted_by
+        */
+        valido: user.valido === '1'
       }));
     } catch (error) {
       this.logger.error('Error obteniendo usuarios eliminados:', error);
@@ -323,7 +424,7 @@ export class UsersService {
           '(user.nombre LIKE :term OR user.apellido LIKE :term OR user.cedula LIKE :term)',
           { term: `%${term}%` },
         )
-        .orderBy('user.nombre', 'ASC')
+        .orderBy('user.nombre', 'DESC')
         .getMany();
 
       return users.map(user => this.mapToUserResponse(user));
@@ -343,7 +444,7 @@ export class UsersService {
     try {
       const users = await this.userRepository.find({
         where: { role: role as string, valido: '1' },
-        order: { nombre: 'ASC' },
+        order: { nombre: 'DESC' },
       });
 
       return users.map(user => this.mapToUserResponse(user));
@@ -360,7 +461,7 @@ export class UsersService {
     try {
       const users = await this.userRepository.find({
         where: { division, valido: '1' },
-        order: { nombre: 'ASC' },
+        order: { nombre: 'DESC' },
       });
 
       return users.map(user => this.mapToUserResponse(user));
@@ -399,9 +500,16 @@ export class UsersService {
         .getRawMany();
 
       return {
+        /*
         totalUsers,
         usersByRole,
         usersByDivision,
+        */
+        total: totalUsers,
+        active: totalUsers, // Simplificación - todos los usuarios obtenidos están activos
+        inactive: 0,
+        byRole: usersByRole.reduce((acc, item) => ({ ...acc, [item.role]: parseInt(item.count) }), {} as Record<UserRole, number>),
+        byDivision: usersByDivision.reduce((acc, item) => ({ ...acc, [item.division]: parseInt(item.count) }), {} as Record<string, number>),
       };
     } catch (error) {
       this.logger.error('Error obteniendo estadísticas de usuarios:', error);
@@ -432,8 +540,8 @@ export class UsersService {
    * La contraseña se valida usando el hash SHA-256 de (cedula + clave).
    */
   async updateUserPhone(
-    cedula: string, 
-    clave: string, 
+    cedula: string,
+    clave: string,
     telefono: string
   ): Promise<{ success: boolean; message: string; user?: any }> {
     try {
@@ -446,10 +554,10 @@ export class UsersService {
 
       // Buscar usuario en la tabla real usando cédula y hash de contraseña
       const user = await this.userWriteRepository.findOne({
-        where: { 
+        where: {
           cedula,
           password: passwordHash,
-          valido: '1' 
+          valido: '1'
         },
       });
 
@@ -460,7 +568,7 @@ export class UsersService {
 
       // Actualizar el número de teléfono
       user.telefono = telefono;
-      
+
       await this.userWriteRepository.save(user);
 
       this.logger.log(`Teléfono actualizado para usuario: ${cedula}`);
@@ -479,11 +587,11 @@ export class UsersService {
 
     } catch (error) {
       this.logger.error(`Error actualizando teléfono para usuario ${cedula}:`, error);
-      
+
       if (error instanceof UnauthorizedException) {
         throw error;
       }
-      
+
       throw new UnauthorizedException('Error interno del servidor');
     }
   }
@@ -521,7 +629,7 @@ export class UsersService {
       });
     }
 
-    return queryBuilder.orderBy('user.nombre', 'ASC');
+    return queryBuilder.orderBy('user.nombre', 'DESC');
   }
 
   /**
@@ -536,6 +644,7 @@ export class UsersService {
       fullname: user.getFullName(),
       role: user.role as UserRole,
       user_email: user.user_email,
+      /*
       telefono: user.telefono,
       direccion: '',
       celular: '',
@@ -549,8 +658,29 @@ export class UsersService {
       comision_porciento: '',
       default_portalid: '',
       nuevocampo: '',
-      encargadoId: '',
+      encargadoId: '', 
       valido: user.valido,
+      telefono: user.telefono,
+      direccion: user.direccion,
+      celular: user.celular,
+      */
+      valido: user.valido === '1',
+    };
+  }
+
+  private mapToUserResponseWithNames(user: UserEntity): IUserResponse {
+    return {
+      id: user.id,
+      cedula: user.cedula,
+      nombre: user.nombre,
+      apellido: user.apellido,
+      //fullname: user.getFullName(),
+      role: user.role as UserRole,
+      user_email: user.user_email,
+      telefono: user.telefono,
+      direccion: user.direccion,
+      celular: user.celular,
+      valido: user.valido === '1',
     };
   }
 }

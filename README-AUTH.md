@@ -35,7 +35,7 @@ Crear archivo `.env` en la raíz del proyecto:
 
 ```env
 # Database Configuration
-DB_HOST=10.8.2.226
+DB_HOST=192.168.0.236
 DB_PORT=1433
 DB_USERNAME=sa
 DB_PASSWORD=$ignos1234

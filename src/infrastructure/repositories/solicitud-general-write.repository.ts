@@ -94,7 +94,7 @@ export class SolicitudGeneralWriteRepository {
       .getOne();
 
       if (!last?.solicitud_numero) return `${year}-00001`;
-
+      
       const lastNumber = parseInt(last.solicitud_numero.split('-')[1], 10) || 0;
       return `${year}-${(lastNumber + 1).toString().padStart(5, '0')}`;
     }

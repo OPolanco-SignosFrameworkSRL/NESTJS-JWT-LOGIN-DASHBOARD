@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
   Query,
@@ -11,7 +11,8 @@ import {
   HttpStatus,
   ParseIntPipe,
   Request,
-  BadRequestException,
+  //BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -27,11 +28,12 @@ import { UpdateUserDto } from '../../core/application/dto/update-user.dto';
 import { RegisterDto } from '../../core/application/dto/register.dto';
 import { UserFiltersDto } from '../../core/application/dto/user-filters.dto';
 import { UpdatePhoneDto } from '../../core/application/dto/update-phone.dto';
-import { DeleteUserDto } from '../../core/application/dto/delete-user.dto';
+//import { DeleteUserDto } from '../../core/application/dto/delete-user.dto';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
 import { UserRole } from '../../core/domain/user.interface';
+import { PaginationDto, PaginatedResponseDto } from '../../core/application/dto/pagination.dto';
 //import { ApiPaginatedResponse } from '../../common/decorators/api-paginated-response.decorator';
 
 @ApiTags('Usuarios')
@@ -78,10 +80,23 @@ export class UsersController {
   @ApiQuery({ name: 'division', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'active', required: false, type: Boolean })
+  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Lista de usuarios obtenida exitosamente',
-    type: [Object],
+    schema: {
+      type: 'object',
+      properties: {
+        data: { type: 'array', items: { type: 'object' } },
+        total: { type: 'number', example: 150 },
+        page: { type: 'number', example: 1 },
+        limit: { type: 'number', example: 10 },
+        totalPages: { type: 'number', example: 15 },
+        hasNext: { type: 'boolean', example: true },
+        hasPrev: { type: 'boolean', example: false }
+      }
+    }
   })
   async findAll(@Query() filters: UserFiltersDto) {
     return await this.usersService.findAll(filters);
@@ -166,24 +181,29 @@ export class UsersController {
       return await this.usersService.findByDivision(division);
     }
   */
-  // ❌ ENDPOINT DESHABILITADO - Obtener un usuario por ID
-  /*
-    @Get(':id')
-    @ApiOperation({ summary: 'Obtener un usuario por ID' })
-    @ApiParam({ name: 'id', type: Number })
-    @ApiResponse({
-      status: HttpStatus.OK,
-      description: 'Usuario obtenido exitosamente',
-      type: Object,
-    })
-    @ApiResponse({
-      status: HttpStatus.NOT_FOUND,
-      description: 'Usuario no encontrado',
-    })
-    async findOne(@Param('id', ParseIntPipe) id: number) {
-      return await this.usersService.findOne(id);
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({ summary: 'Obtener un usuario por ID' })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Usuario obtenido exitosamente',
+    type: Object,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Usuario no encontrado',
+  })
+  async findOne(@Param('id', ParseIntPipe) id: number) {
+    const user = await this.usersService.findOne(id);
+
+    return {
+      data: user,
+      statusCode: 200,
+      message: 'Usuario obtenido exitosamente',
+      timestamp: new Date().toISOString(),
     }
-  */
+  }
   @Get('cedula/:cedula')
   @ApiOperation({ summary: 'Obtener un usuario por cédula' })
   @ApiParam({ name: 'cedula', type: String })
@@ -200,9 +220,29 @@ export class UsersController {
     return await this.usersService.findByCedula(cedula);
   }
 
-
-  @Patch(':id')
+  @Get(':id/preview-update')
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({ 
+    summary: 'Vista previa de datos antes de actualizar',
+    description: 'Obtiene los datos actuales del usuario para mostrar antes de la actualización'
+  })
+  async previewUpdate(@Param('id', ParseIntPipe) id: number) {
+    const user = await this.usersService.findOne(id);
+    
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    }
+    
+    return {
+      message: 'Datos actuales del usuario',
+      datos: user,
+      instrucciones: 'Envía los campos que quieres cambiar al endpoint PUT /users/:id'
+    };
+  }
+
+  @Put(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  /* 
   @ApiOperation({ summary: 'Actualizar un usuario (Admin puede actualizar cualquier usuario, Usuario solo puede actualizar sus propios datos)' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({
@@ -217,6 +257,10 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Datos de entrada inválidos',
+     */
+  @ApiOperation({ 
+    summary: 'Actualizar un usuario',
+    description: 'Muestra los datos actuales y luego actualiza el usuario' 
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -224,14 +268,33 @@ export class UsersController {
     @Request() req,
   ) {
     const currentUser = req.user;
-    return await this.usersService.update(id, updateUserDto, currentUser);
+    //return await this.usersService.update(id, updateUserDto, currentUser);
+    // 🔍 Obtener datos actuales ANTES de actualizar
+    const currentUserData = await this.usersService.findOne(id);
+    
+    if (!currentUserData) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    }
+    
+    // ✅ Actualizar usuario
+    const updatedUser = await this.usersService.update(id, updateUserDto, currentUser);
+    
+    return {
+      message: 'Usuario actualizado exitosamente',
+      datosAnteriores: currentUserData, // Datos antes de la actualización
+      datosActualizados: updatedUser,   // Datos después de la actualización
+      cambiosRealizados: updateUserDto       // Qué campos se enviaron para cambiar
+    };
   }
 
   @Delete(':id')
   @Roles(UserRole.Admin)
   @ApiOperation({
-    summary: 'Eliminar un usuario (soft delete por defecto, eliminación física con confirmación)',
+    /* summary: 'Eliminar un usuario (soft delete por defecto, eliminación física con confirmación)',
     description: 'Por defecto realiza soft delete. Para eliminación física permanente, enviar confirmPermanentDelete: true y confirmText: "SI, ELIMINAR PERMANENTEMENTE"'
+ */
+    summary: 'Eliminar un usuario (soft delete)',
+    description: 'Realiza soft delete del usuario. Solo requiere el ID en la URL.'
   })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({
@@ -240,8 +303,9 @@ export class UsersController {
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'Usuario marcado como eliminado (soft delete)' },
-        type: { type: 'string', enum: ['soft', 'permanent'], example: 'soft' },
+        /* message: { type: 'string', example: 'Usuario marcado como eliminado (soft delete)' },
+        type: { type: 'string', enum: ['soft', 'permanent'], example: 'soft' }, */
+        message: { type: 'string', example: 'Usuario marcado como eliminado exitosamente' },
         user: {
           type: 'object',
           properties: {
@@ -264,12 +328,11 @@ export class UsersController {
   })
   async remove(
     @Param('id', ParseIntPipe) id: number,
-    @Body() deleteUserDto: DeleteUserDto,
+    //@Body() deleteUserDto: DeleteUserDto,
     @Request() req
   ) {
     const currentUser = req.user;
-
-    // Validar confirmación para eliminación permanente
+    /* // Validar confirmación para eliminación permanente
     if (deleteUserDto.confirmPermanentDelete) {
       if (deleteUserDto.confirmText !== 'SI, ELIMINAR PERMANENTEMENTE') {
         throw new BadRequestException('Para eliminación permanente, debes escribir exactamente: "SI, ELIMINAR PERMANENTEMENTE"');
@@ -279,12 +342,13 @@ export class UsersController {
     return await this.usersService.remove(
       id,
       currentUser,
-      deleteUserDto.confirmPermanentDelete,
-      deleteUserDto.reason
-    );
+       deleteUserDto.confirmPermanentDelete,
+      deleteUserDto.reason 
+    ); */
+    return await this.usersService.remove(id, currentUser);
   }
 
-  @Patch(':id/restore')
+  @Put(':id/restore')
   @Roles(UserRole.Admin)
   @ApiOperation({ summary: 'Restaurar un usuario eliminado (soft delete)' })
   @ApiParam({ name: 'id', type: Number })
