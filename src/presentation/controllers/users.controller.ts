@@ -12,6 +12,7 @@ import {
   ParseIntPipe,
   Request,
   //BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -219,9 +220,29 @@ export class UsersController {
     return await this.usersService.findByCedula(cedula);
   }
 
+  @Get(':id/preview-update')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({ 
+    summary: 'Vista previa de datos antes de actualizar',
+    description: 'Obtiene los datos actuales del usuario para mostrar antes de la actualización'
+  })
+  async previewUpdate(@Param('id', ParseIntPipe) id: number) {
+    const user = await this.usersService.findOne(id);
+    
+    if (!user) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    }
+    
+    return {
+      message: 'Datos actuales del usuario',
+      datos: user,
+      instrucciones: 'Envía los campos que quieres cambiar al endpoint PUT /users/:id'
+    };
+  }
 
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
+  /* 
   @ApiOperation({ summary: 'Actualizar un usuario (Admin puede actualizar cualquier usuario, Usuario solo puede actualizar sus propios datos)' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({
@@ -236,6 +257,10 @@ export class UsersController {
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
     description: 'Datos de entrada inválidos',
+     */
+  @ApiOperation({ 
+    summary: 'Actualizar un usuario',
+    description: 'Muestra los datos actuales y luego actualiza el usuario' 
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -243,7 +268,23 @@ export class UsersController {
     @Request() req,
   ) {
     const currentUser = req.user;
-    return await this.usersService.update(id, updateUserDto, currentUser);
+    //return await this.usersService.update(id, updateUserDto, currentUser);
+    // 🔍 Obtener datos actuales ANTES de actualizar
+    const currentUserData = await this.usersService.findOne(id);
+    
+    if (!currentUserData) {
+      throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
+    }
+    
+    // ✅ Actualizar usuario
+    const updatedUser = await this.usersService.update(id, updateUserDto, currentUser);
+    
+    return {
+      message: 'Usuario actualizado exitosamente',
+      datosAnteriores: currentUserData, // Datos antes de la actualización
+      datosActualizados: updatedUser,   // Datos después de la actualización
+      cambiosRealizados: updateUserDto       // Qué campos se enviaron para cambiar
+    };
   }
 
   @Delete(':id')

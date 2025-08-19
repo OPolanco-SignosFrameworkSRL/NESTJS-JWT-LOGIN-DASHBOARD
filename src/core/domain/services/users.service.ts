@@ -59,7 +59,7 @@ export class UsersService {
 
       // Aplicar paginación
       const users = await queryBuilder
-        .orderBy('user.nombre', 'ASC')
+        .orderBy('user.nombre', 'DESC')
         .skip(skip)
         .take(limit)
         .getMany();
@@ -424,7 +424,7 @@ export class UsersService {
           '(user.nombre LIKE :term OR user.apellido LIKE :term OR user.cedula LIKE :term)',
           { term: `%${term}%` },
         )
-        .orderBy('user.nombre', 'ASC')
+        .orderBy('user.nombre', 'DESC')
         .getMany();
 
       return users.map(user => this.mapToUserResponse(user));
@@ -444,7 +444,7 @@ export class UsersService {
     try {
       const users = await this.userRepository.find({
         where: { role: role as string, valido: '1' },
-        order: { nombre: 'ASC' },
+        order: { nombre: 'DESC' },
       });
 
       return users.map(user => this.mapToUserResponse(user));
@@ -461,7 +461,7 @@ export class UsersService {
     try {
       const users = await this.userRepository.find({
         where: { division, valido: '1' },
-        order: { nombre: 'ASC' },
+        order: { nombre: 'DESC' },
       });
 
       return users.map(user => this.mapToUserResponse(user));
@@ -629,7 +629,7 @@ export class UsersService {
       });
     }
 
-    return queryBuilder.orderBy('user.nombre', 'ASC');
+    return queryBuilder.orderBy('user.nombre', 'DESC');
   }
 
   /**

@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './presentation/modules/auth.module';
 import { UsersModule } from './presentation/modules/users.module';
+import { RolesModule } from './presentation/modules/roles.module';
 import { CashRequestModule } from './presentation/modules/cash-request.module';
 import { SolicitudGeneralModule } from './presentation/modules/solicitud-general.module';
 import { CommentModule } from './presentation/modules/comment.module';
@@ -27,6 +28,7 @@ import { appConfig } from './config/app.config';
     }),
     AuthModule,
     UsersModule,
+    RolesModule,
     CashRequestModule,
     SolicitudGeneralModule,
     CommentModule,
