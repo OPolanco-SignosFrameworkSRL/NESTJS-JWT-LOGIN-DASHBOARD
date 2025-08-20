@@ -1,5 +1,5 @@
 import { isAxiosError } from "axios"
-import { getAllEmployeesSchema, getEmployeeByIdSchema, type CreateEmployee } from "@/infrastructure/schemas/admin/admin"
+import { getAllEmployeesSchema, getAllRolesSchema, getEmployeeByIdSchema, type CreateEmployee } from "@/infrastructure/schemas/admin/admin"
 
 import api from "@/infrastructure/api"
 
@@ -27,7 +27,6 @@ export const createEmployee = async (formData: CreateEmployee) => {
 
 export const getAllEmployees = async ({page, limit}: adminProps) => {
 
-    
     try {
         
         const url = `/users?page=${page}&limit=${limit}`
@@ -95,6 +94,28 @@ export const deleteEmployee = async (id: number ) => {
         const { data } = await api.delete(url)
 
         return data
+        
+    } catch (error) {
+        if(isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error);
+        }
+    }
+}
+
+/* */
+
+export const getAllRoles = async () => {
+    try {
+
+        const url = '/roles'
+
+        const { data } = await api(url)
+
+        const result = getAllRolesSchema.safeParse(data)
+
+        if (result.success) {
+            return result.data
+        }
         
     } catch (error) {
         if(isAxiosError(error) && error.response) {

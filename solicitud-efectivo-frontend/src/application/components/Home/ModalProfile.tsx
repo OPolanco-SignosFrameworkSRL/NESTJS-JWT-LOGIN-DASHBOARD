@@ -1,7 +1,7 @@
 import Modal from "@/application/ui/Modal/Modal"
 import { IoMdSettings } from "react-icons/io";
 import { FaUser } from "react-icons/fa";
-import { TbLayoutDashboardFilled } from "react-icons/tb";
+//import { TbLayoutDashboardFilled } from "react-icons/tb";
 import { MdOutlineLogout } from "react-icons/md";
 import { useAppStore } from "@/application/store/useAppStore";
 import { Link } from "react-router-dom";
@@ -11,7 +11,7 @@ const ModalProfile = () => {
 
     const modalItems = [
         {icon: <FaUser size={24} />, label: "Perfil", path: "/perfil"},
-        {icon: <TbLayoutDashboardFilled size={24}/>, label: "Admin Dashboard", path: "/admin-dashboard?pageNumber=1"},
+        //{icon: <TbLayoutDashboardFilled size={24}/>, label: "Admin Dashboard", path: "/admin-dashboard?pageNumber=1"},
         {icon: <IoMdSettings size={24}/>, label: "Configuración", path: "/configuracion"}
     ]
 
@@ -28,7 +28,7 @@ const ModalProfile = () => {
 
             <Modal isActive={showHeaderModal} className="absolute right-0 flex justify-end"> 
 
-                <div className="bg-white w-72 h-60 rounded-md shadow-lg flex flex-col">
+                <div className="bg-white w-72 h-52 rounded-md shadow-lg flex flex-col">
 
                     <div className="flex flex-col space-y-1">
                         <span className="text-sm sm:text-base mx-2 mt-2 font-medium">{decodedToken?.fullname}</span>

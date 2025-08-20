@@ -1,5 +1,5 @@
 import Input from "@/application/ui/Input/Input";
-import { updateEmployee, getEmployeeById } from "@/infrastructure/api/Admin/employee";
+import { updateEmployee, getEmployeeById } from "@/infrastructure/api/admin/admin";
 import type { CreateEmployee } from "@/infrastructure/schemas/admin/admin";
 import { hashPassword } from "@/shared/utilts/convertToSha256";
 import { getUrlParams } from "@/shared/utilts/GetUrlParams";
@@ -61,7 +61,7 @@ export default function EditEmployee() {
         apellido: data.data.apellido,
         password: "",
         cedula: data.data.cedula,
-        role: data.data.role,
+        role: Number(data.data.role),
         user_email: data.data.user_email,
         telefono: data.data.telefono,
         direccion: data.data.direccion,

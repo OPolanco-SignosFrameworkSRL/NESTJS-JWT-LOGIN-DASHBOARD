@@ -7,7 +7,7 @@ export const createEmployeeSchema = z.object({
     fullname: z.string(),
     password: z.string().optional(),
     clave: z.string(),/* */
-    role: z.string(),
+    role: z.number(),
     user_email: z.string().email(),
     telefono: z.string(),
     direccion: z.string(),
@@ -61,6 +61,15 @@ export const getEmployeeByIdSchema = z.object({
     })),
 })
 
+export const getAllRolesSchema = z.object({
+    data: z.array(z.object ({
+        id: z.number(),
+        role_name: z.string(),
+        valido: z.boolean()
+    }))
+})
+
 export type GetAllEmployees = z.infer<typeof getAllEmployeesSchema>
 export type EmployeeById = z.infer<typeof getEmployeeByIdSchema>
 export type CreateEmployee = z.infer<typeof createEmployeeSchema>
+export type GetAllRoles = z.infer<typeof getAllRolesSchema>

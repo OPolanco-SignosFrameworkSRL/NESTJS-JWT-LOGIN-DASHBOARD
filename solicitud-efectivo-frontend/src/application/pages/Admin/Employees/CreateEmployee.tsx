@@ -1,7 +1,8 @@
 import Input from "@/application/ui/Input/Input";
-import { createEmployee } from "@/infrastructure/api/Admin/employee";
+import Select from "@/application/ui/Select/Select";
+import { createEmployee, getAllRoles } from "@/infrastructure/api/admin/admin";
 import type { CreateEmployee } from "@/infrastructure/schemas/admin/admin";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
 
@@ -10,6 +11,13 @@ export default function Register() {
   const { register, handleSubmit, formState: { errors } } = useForm<CreateEmployee>()
 
   const queryClient = useQueryClient()
+
+  const { data } = useQuery({
+    queryKey: ['roles'],
+    queryFn: getAllRoles
+  })
+
+
 
   const { mutate } = useMutation({
 
@@ -39,9 +47,10 @@ export default function Register() {
     data.nuevocampo = "valor"
     data.encargadoId = "1"
 
+    data.role = Number(data.role)
+
     mutate(data)
 
-    
   }
 
   return (
@@ -68,66 +77,102 @@ export default function Register() {
           noValidate
         >
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10 space-y-2">
 
             <div>
-              <label className="text-gray-800" htmlFor="name">Nombre:</label>
+
+              <div className="flex items-center gap-2 mb-2">
+                <label className="text-gray-800" htmlFor="name">Nombre:</label>
+                <span className="text-red-500">*</span>
+              </div>
+
               <Input
                 id="name"
                 type="text"
                 placeholder="Pedro"
-                className="mt-2"
+                
                 {...register("nombre", { required: "El nombre es requerido" })}
               />
               {errors.nombre && <p className="text-red-500">{errors.nombre.message}</p>}
+              
             </div>
 
             <div>
-              <label className="text-gray-800" htmlFor="lastName">Apellido:</label>
+
+              <div className="flex items-center gap-2 mb-2">
+                <label className="text-gray-800" htmlFor="lastName">Apellido:</label>
+                <span className="text-red-500">*</span>
+              </div>
+
               <Input
                 id="lastName"
                 type="text"
                 placeholder="Enriquez"
-                className="mt-2"
+                
                 {...register("apellido", { required: "El apellido es requerido" })}
               />
+
               {errors.apellido && <p className="text-red-500">{errors.apellido.message}</p>}
+
             </div>
 
             <div>
-              <label className="text-gray-800" htmlFor="cedula">Cedula:</label>
+
+              <div className="flex items-center gap-2 mb-2">
+                <label className="text-gray-800" htmlFor="cedula">Cedula:</label>
+                <span className="text-red-500">*</span>
+              </div>
+
               <Input
                 id="cedula"
                 type="text"
-                className="mt-2"
+                
                 placeholder="40245980129"
                 {...register("cedula", { required: "La cedula es requerida" })}
               />
+
               {errors.cedula && <p className="text-red-500">{errors.cedula.message}</p>}
+
             </div>
 
             <div>
-              <label className="text-gray-800" htmlFor="password">Contraseña:</label>
+
+              <div className="flex items-center gap-2 mb-2">
+                <label className="text-gray-800" htmlFor="password">Contraseña:</label>
+                <span className="text-red-500">*</span>
+              </div>
+
               <Input
                 id="password"
                 type="password"
-                className="mt-2"
+                
                 placeholder="Contraseña"
                 {...register("password", { required: "La contraseña es requerida" })}
               />
+
               {errors.password && <p className="text-red-500">{errors.password.message}</p>}
+
             </div>
 
             <div>
-              <label className="text-gray-800" htmlFor="rol">Role:</label>
-              <Input
+
+              <div className="flex items-center gap-2 mb-2">
+                <label className="text-gray-800" htmlFor="rol">Role:</label>
+                <span className="text-red-500">*</span>
+              </div>
+
+              <Select
                 id="rol"
-                type="text"
-                className="mt-2"
-                placeholder="pedro@gmail.com"
+                placeholder="Selecciona un rol"
+                options={data?.data.map(items => ({
+                  label: items.role_name,
+                  value: items.id
+                }))}
                 {...register("role", { required: "El role es requerido" })}
               />
+
               {errors.role && <p className="text-red-500">{errors.role.message}</p>}
+
             </div>
 
             <div>
@@ -135,7 +180,6 @@ export default function Register() {
               <Input
                 id="email"
                 type="text"
-                className="mt-2"
                 placeholder="pedro@gmail.com"
                 {...register("user_email", { required: "El email es requerido" })}
               />
@@ -147,7 +191,6 @@ export default function Register() {
               <Input
                 id="telefono"
                 type="text"
-                className="mt-2"
                 placeholder="04145980129"
                 {...register("telefono", { required: "El telefono es requerido" })}
               />
@@ -159,7 +202,6 @@ export default function Register() {
               <Input
                 id="celular"
                 type="text"
-                className="mt-2"
                 placeholder="04145980129"
                 {...register("celular", { required: "El celular es requerido" })}
               />
@@ -172,7 +214,6 @@ export default function Register() {
             <Input
               id="direccion"
               type="textarea"
-              className="mt-2"
               placeholder="04145980129"
               {...register("direccion", { required: "La direccion es requerida" })}
             />

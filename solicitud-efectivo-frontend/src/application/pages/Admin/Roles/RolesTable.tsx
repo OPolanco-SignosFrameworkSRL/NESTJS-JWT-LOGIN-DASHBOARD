@@ -1,7 +1,7 @@
 
 
 import SkeletonGetUsers from "@/application/components/Admin/SkeletonGetUsers";
-import { deleteEmployee, getAllEmployees } from "@/infrastructure/api/Admin/employee";
+import { deleteEmployee, getAllEmployees } from "@/infrastructure/api/admin/admin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { TbEdit } from "react-icons/tb";
