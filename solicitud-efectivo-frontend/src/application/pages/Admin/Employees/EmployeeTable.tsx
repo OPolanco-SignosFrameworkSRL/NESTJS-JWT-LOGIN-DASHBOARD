@@ -66,7 +66,7 @@ export default function EmployeeTable() {
   
   if(data) return (
     
-    <Container className=" ">
+    <Container>
 
       <Container className="flex flex-col sm:flex-row justify-between items-center">
 
