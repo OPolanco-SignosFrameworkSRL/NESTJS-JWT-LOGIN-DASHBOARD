@@ -1,6 +1,6 @@
 
 
-import SkeletonGetUsers from "@/application/components/Admin/SkeletonGetUsers";
+import SkeletonGetUsers from "@/application/components/Admin/SkeletonTable";
 import { deleteEmployee, getAllEmployees } from "@/infrastructure/api/admin/admin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
