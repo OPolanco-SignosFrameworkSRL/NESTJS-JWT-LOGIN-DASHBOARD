@@ -1,0 +1,120 @@
+import { RiArrowLeftSLine, RiArrowRightSLine } from 'react-icons/ri'
+import Container from '../ui/Container/Container'
+import { useState, useEffect } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+
+type PaginationProps = {
+    totalRecords: number
+    pageSize: number
+    onPageChange?: (page: number) => void
+}
+
+const Pagination = ({totalRecords, pageSize, onPageChange}: PaginationProps) => {
+
+    const navigate = useNavigate()
+
+    const location = useLocation()
+    
+    const getInitialPage = () => {
+        const searchParams = new URLSearchParams(location.search);
+        const pageParam = searchParams.get("pageNumber");
+        return pageParam ? Number(pageParam) : 1;
+    };
+
+    const [currentPage, setCurrentPage] = useState(getInitialPage)
+
+    const totalPages = Math.ceil(totalRecords / pageSize)
+
+    const updateUrl = (page: number) => {
+        const searchParams = new URLSearchParams(window.location.search);
+        searchParams.set("pageNumber", page.toString());
+        navigate(`?${searchParams.toString()}`);
+    };
+
+    const handlePageChange = (page: number) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page)
+            updateUrl(page)
+            if (onPageChange) {
+                onPageChange(page)
+            }
+        }
+    }
+    
+    useEffect(() => {
+        const page = getInitialPage();
+        if (page !== currentPage) {
+            setCurrentPage(page);
+            if (onPageChange) {
+                onPageChange(page);
+            }
+        }
+    }, [location.search, onPageChange, currentPage]);
+    
+    const getVisiblePageNumbers = () => {
+        const visiblePages = 5;
+        const halfVisible = Math.floor(visiblePages / 2);
+        let start = Math.max(1, currentPage - halfVisible);
+        let end = Math.min(totalPages, start + visiblePages - 1);
+      
+        if (end - start + 1 < visiblePages) {
+            start = Math.max(1, end - visiblePages + 1);
+        }
+      
+        let pages = Array.from({ length: end - start + 1 }, (_, i) => start + i);
+      
+        if (!pages.includes(1) && pages.length > 0) {
+            pages = [1, ...pages];
+        }
+        
+        if (!pages.includes(totalPages) && totalPages > 1) {
+            pages.push(totalPages);
+        }
+      
+        return pages;
+    };
+
+    const visiblePageNumbers = getVisiblePageNumbers();
+
+    return (
+        <div className="flex w-full items-center justify-center mt-5 gap-2">
+            <div 
+                className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground border h-10 w-10 bg-white border-emerald-200 hover:bg-emerald-50 cursor-pointer"
+                onClick={() => handlePageChange(currentPage - 1)}
+                style={{ opacity: currentPage === 1 ? 0.5 : 1 }}
+            >
+                <RiArrowLeftSLine/>
+            </div>
+
+            <div className="flex gap-2">
+                {visiblePageNumbers.map((number) => (
+                    <button
+                        key={number}
+                        onClick={() => handlePageChange(number)}
+                        className={` border-2 border-emerald-200 rounded-md px-2.5 py-1 cursor-pointer ${
+                            currentPage === number ? "bg-emerald-50" : ""
+                        }`}
+                    >
+                        <Container
+                            className={`pagination-button ${
+                                currentPage === number ? "active-arrow" : ""
+                            }`}
+                        >
+                            {number}
+                        </Container>
+                    </button>
+                ))}
+            </div>
+
+            <div 
+                className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none bg-white disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground border h-10 w-10 border-emerald-200 hover:bg-emerald-50 cursor-pointer"
+                onClick={() => handlePageChange(currentPage + 1)}
+                style={{ opacity: currentPage === totalPages ? 0.5 : 1 }}
+            >
+                <RiArrowRightSLine/>
+            </div>
+        </div>
+    )
+}
+
+export default Pagination
