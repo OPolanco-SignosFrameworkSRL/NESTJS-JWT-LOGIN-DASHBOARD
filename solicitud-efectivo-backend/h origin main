@@ -1,5 +1,0 @@
-[33me0657d0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m feat: resolver dependencias faltantes y documentar funcionalidades de usuario - Instalar dependencias @nestjs/swagger, class-validator, class-transformer - Documentar endpoints de registro público y protegido - Analizar funcionalidades disponibles para usuarios y administradores - Verificar permisos de acceso a endpoints de autenticación
-[33m90e4b36[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m feat: implement robust fallback system for all solicitud types
-[33mfcfb954[m feat: Agregar módulo completo de Solicitudes de Efectivo
-[33mc7f1b18[m feat: implement Clean Architecture with complete restructuring
-[33m179638d[m refactor: eliminar frontend y reorganizar estructura del proyecto - Eliminado frontend integrado y carpetas vacías - Reorganizada estructura siguiendo arquitectura hexagonal - Actualizado .gitignore para excluir dist/ y archivos innecesarios - Limpiado Dockerfile removiendo referencias al frontend - Actualizado README.md removiendo mención del frontend - Mantenida funcionalidad completa de API y Swagger
