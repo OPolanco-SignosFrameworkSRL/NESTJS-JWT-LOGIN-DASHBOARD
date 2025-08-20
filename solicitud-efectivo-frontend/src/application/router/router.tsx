@@ -5,12 +5,12 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Home from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import SolicitudGastos from '../pages/SolicitudGastos';
-import AdminDashboard from '../pages/Admin/AdminDashboard';
-import CreateEmployee from '../pages/Admin/CreateEmployee';
+import CreateEmployee from '../pages/Admin/Employees/CreateEmployee';
 import NewRequest from '../pages/Request/NewRequest';
 import Disbursement from '../pages/Disbursement';
 import { ProtectedRoute } from '@/application/layout/ProtectedRoute';
-import EditEmployee from '../pages/Admin/EditEmployee';
+import EditEmployee from '../pages/Admin/Employees/EditEmployee';
+import Admin from '../pages/Admin/Admin';
 
 
 const RouterComponent = () => {
@@ -41,10 +41,6 @@ const RouterComponent = () => {
           element: <SolicitudGastos/>
         },
         {
-          path: '/admin-dashboard',
-          element: <AdminDashboard/>
-        },
-        {
           path: '/create-employee',
           element: <CreateEmployee/>
         },
@@ -59,6 +55,10 @@ const RouterComponent = () => {
         {
           path: '/edit-employee',
           element: <EditEmployee/>
+        },
+        {
+          path: '/admin',
+          element: <Admin/>
         }
       ],
     },

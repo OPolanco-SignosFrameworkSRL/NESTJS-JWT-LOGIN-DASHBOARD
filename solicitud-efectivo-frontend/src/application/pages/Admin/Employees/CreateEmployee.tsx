@@ -1,7 +1,5 @@
-
-
 import Input from "@/application/ui/Input/Input";
-import { createEmployee } from "@/infrastructure/api/Admin/admin";
+import { createEmployee } from "@/infrastructure/api/Admin/employee";
 import type { CreateEmployee } from "@/infrastructure/schemas/admin/admin";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -57,7 +55,7 @@ export default function Register() {
           </h2>
 
           <Link
-            to="/admin-dashboard?pageNumber=1"
+            to="/admin"
             className="rounded-md bg-gradient-to-r from-green-600 to-emerald-600 p-2 sm:p-3 text-sm font-bold text-white shadow-sm hover:from-green-700 hover:to-emerald-700"
             >
             Volver a Dashboard

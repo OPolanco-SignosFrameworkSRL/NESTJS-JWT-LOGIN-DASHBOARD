@@ -9,19 +9,25 @@ import { useAppStore } from "../store/useAppStore"
 import ModalProfile from "../components/Home/ModalProfile"
 import { useCloseModalOnRouteChange } from "../hooks/useCloseModalOnRouteChange"
 
+import { Toaster }  from "react-hot-toast"
+
 const Layout = () => {
 
   useCloseModalOnRouteChange();
 
-  const [isOpen, setIsOpen] = useState(false) 
+  const isNavOpen = useAppStore(state => state.isNavOpen)
+
+  const handleShowNav = useAppStore(state => state.handleShowNav)
+  const closeNav = useAppStore(state => state.closeNav)
+
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(true) 
 
   const handleOpen = () => {
-    setIsOpen(!isOpen)
+    handleShowNav()
   }
 
   const handleTouchStart = () => {
-    setIsOpen(false) 
+    closeNav()
   }
 
   const getInfoUsers = useAppStore(state => state.GetUserFromToken)
@@ -37,9 +43,9 @@ const Layout = () => {
       setIsMobileOrTablet(isSmallScreen)
       
       if (isSmallScreen) {
-        setIsOpen(false)
+        closeNav()
       } else {
-        setIsOpen(true)
+        handleShowNav()
       }
     }
     
@@ -50,16 +56,21 @@ const Layout = () => {
     return () => window.removeEventListener('resize', checkScreenSize)
   }, [])
 
-  const show = useAppStore(state => state.show)
+  const showHeaderModal = useAppStore(state => state.showHeaderModal)
 
   return (
 
     <>
 
+      <Toaster
+       position="top-right"
+       reverseOrder={false}
+      />
+
       {/* AsideMenu Start */}
       
       <aside>
-        <AsideMenu isOpen={isOpen} handleTouchStart={handleTouchStart} />
+        <AsideMenu isOpen={isNavOpen} handleTouchStart={handleTouchStart} />
       </aside>
 
         
@@ -70,7 +81,7 @@ const Layout = () => {
         transition-all 
         duration-500 
         ease-in-out 
-        ${!isMobileOrTablet && isOpen ? 'ml-72' : 'ml-0'}
+        ${!isMobileOrTablet && isNavOpen ? 'ml-72' : 'ml-0'}
       `}>
         
         
@@ -78,7 +89,7 @@ const Layout = () => {
             <Header handleOpen={handleOpen}/>
         </header>
         
-        {show && <ModalProfile/>}
+        {showHeaderModal && <ModalProfile/>}
 
           <main className="m-5 sm:m-10">
 

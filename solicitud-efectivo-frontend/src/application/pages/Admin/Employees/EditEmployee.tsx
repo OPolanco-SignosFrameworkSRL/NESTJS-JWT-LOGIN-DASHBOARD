@@ -1,14 +1,13 @@
-
-
 import Input from "@/application/ui/Input/Input";
-import { editEmployee, getEmployeeById } from "@/infrastructure/api/Admin/admin";
+import { updateEmployee, getEmployeeById } from "@/infrastructure/api/Admin/employee";
 import type { CreateEmployee } from "@/infrastructure/schemas/admin/admin";
 import { hashPassword } from "@/shared/utilts/convertToSha256";
 import { getUrlParams } from "@/shared/utilts/GetUrlParams";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function EditEmployee() {
 
@@ -16,6 +15,8 @@ export default function EditEmployee() {
   const queryClient = useQueryClient()
   
   const employeeId = getUrlParams('employeeId')
+
+  const navigate = useNavigate()
   
   const { data } = useQuery({
     queryKey:['editEmployee', employeeId],
@@ -27,12 +28,14 @@ export default function EditEmployee() {
   
   const { mutate } = useMutation({
 
-    mutationFn: (data: CreateEmployee) => editEmployee(Number(employeeId), data),
+    mutationFn: (data: CreateEmployee) => updateEmployee(Number(employeeId), data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] })
+      toast.success("Información actualizada correctamente!")
+      navigate("/admin")
     },
-    onError: (error) => {
-      console.log(error)
+    onError: () => {
+      toast.error("La información no ha podido ser actualizada correctamente.")
     }
   })
 
@@ -43,15 +46,10 @@ export default function EditEmployee() {
     if(data.password && data.password !== "") {
       const hashedPassword = await hashPassword(data.cedula, data.password);
       data.password = hashedPassword;
-      console.log("Contraseña hasheada:", data.password);
-
     } else {
       data.password = undefined;
-      console.log("Sin contraseña, enviando undefined");
     }
 
-  
-    
     mutate(data)
     
   }
@@ -83,7 +81,7 @@ export default function EditEmployee() {
           </h2>
 
           <Link
-            to="/admin-dashboard?pageNumber=1"
+            to="/admin"
             className="rounded-md bg-gradient-to-r from-green-600 to-emerald-600 p-2 sm:p-3 text-sm font-bold text-white shadow-sm hover:from-green-700 hover:to-emerald-700"
             //onClick={() => queryClient.invalidateQueries({ queryKey: ['employees', employeeId]})}
             >

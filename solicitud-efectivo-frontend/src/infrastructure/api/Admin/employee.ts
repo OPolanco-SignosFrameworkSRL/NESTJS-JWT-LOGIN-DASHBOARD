@@ -1,7 +1,7 @@
 import { isAxiosError } from "axios"
+import { getAllEmployeesSchema, getEmployeeByIdSchema, type CreateEmployee } from "@/infrastructure/schemas/admin/admin"
 
 import api from "@/infrastructure/api"
-import { getAllEmployeesSchema, getEmployeeByIdSchema, type CreateEmployee } from "@/infrastructure/schemas/admin/admin"
 
 
 type adminProps = {
@@ -72,7 +72,7 @@ export const getEmployeeById = async (id: number) => {
 }
 
 
-export const editEmployee = async (id: number, formData: CreateEmployee) => {
+export const updateEmployee = async (id: number, formData: CreateEmployee) => {
     try {
         const url = `/users/${id}`
 
@@ -82,6 +82,22 @@ export const editEmployee = async (id: number, formData: CreateEmployee) => {
         
     } catch (error) {
          if(isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error);
+        }
+    }
+}
+
+export const deleteEmployee = async (id: number ) => {
+    try {
+
+        const url = `/users/${id}`
+
+        const { data } = await api.delete(url)
+
+        return data
+        
+    } catch (error) {
+        if(isAxiosError(error) && error.response) {
             throw new Error(error.response.data.error);
         }
     }

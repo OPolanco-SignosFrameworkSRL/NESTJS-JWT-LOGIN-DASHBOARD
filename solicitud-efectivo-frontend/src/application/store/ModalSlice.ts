@@ -1,17 +1,27 @@
 import type { StateCreator } from "zustand";
 
 export type ModalSliceProps = {
-    show: boolean
-    handleShowModal: () => void
-    closeModal: () => void
+    showHeaderModal: boolean
+    showAdminTableModal: boolean
+    handleShowModal: (view: string) => void
+    closeModal: (view: string) => void
 };
 
 export const createModalSlice: StateCreator<ModalSliceProps> = (set, get) => ({
-    show: false,
-    handleShowModal: () => {
-        set({ show: !get().show });
+    showHeaderModal: false,
+    showAdminTableModal: false,
+    handleShowModal: (view: string) => {
+        if(view === "header") {
+            set({ showHeaderModal: !get().showHeaderModal });
+        } else if(view === "adminTable") {
+            set({ showAdminTableModal: !get().showAdminTableModal });
+        }
     },
-    closeModal: () => {
-        set({ show: false });
+    closeModal: (view: string) => {
+        if(view === "header") {
+            set({ showHeaderModal: false });
+        } else if(view === "adminTable") {
+            set({ showAdminTableModal: false });
+        }
     },
 });

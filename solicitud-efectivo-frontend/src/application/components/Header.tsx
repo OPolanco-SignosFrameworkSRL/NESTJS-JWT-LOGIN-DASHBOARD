@@ -1,6 +1,7 @@
 import Container from "../ui/Container/Container"
 import { RxHamburgerMenu } from "react-icons/rx";
 import { useAppStore } from "../store/useAppStore";
+import Title from "../ui/Text/Title";
 
 type HeaderProps = {
   handleOpen: () => void
@@ -26,14 +27,12 @@ const Header = ({ handleOpen }: HeaderProps) => {
             <RxHamburgerMenu size={24} className="text-gray-700"/>
           </button>
 
-          <span className="text-sm sm:text-base lg:text-xl text-emerald-500 font-bold">
-            Sistema de Flujo de Efectivo
-          </span>
+          <Title text="Sistema de Flujo de Efectivo"/>
 
           <Container className="flex items-center gap-4">
 
             <span
-              onClick={() => handleShowModal()}
+              onClick={() => handleShowModal("header")}
               className="text-white bg-blue-500 rounded-full w-10 h-10 flex items-center justify-center font-medium cursor-pointer">
               {initials}
             </span>

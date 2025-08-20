@@ -15,7 +15,7 @@ const ModalProfile = () => {
         {icon: <IoMdSettings size={24}/>, label: "Configuración", path: "/configuracion"}
     ]
 
-    const show = useAppStore(state => state.show)
+    const showHeaderModal = useAppStore(state => state.showHeaderModal)
 
     const { decodedToken } = useAppStore()
 
@@ -26,7 +26,7 @@ const ModalProfile = () => {
     <>
         <div className="sticky top-18 z-50 lg:relative md:top-0">
 
-            <Modal isActive={show} className="absolute right-0 flex justify-end"> 
+            <Modal isActive={showHeaderModal} className="absolute right-0 flex justify-end"> 
 
                 <div className="bg-white w-72 h-60 rounded-md shadow-lg flex flex-col">
 

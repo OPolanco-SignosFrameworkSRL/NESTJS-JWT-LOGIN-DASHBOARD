@@ -31,7 +31,7 @@ const Nav = () => {
         {label: "Estadísticas", path: "/estadisticas", icon: <PiChartLineUpBold size={26} />},
         {label: "Recursos Humanos", path: "/recursos-humanos", icon: <IoPeopleSharp size={26} />},
         {label: "Caja Chica", path: "/caja-chica", icon: <FaRegMoneyBillAlt size={26} />},
-        {label: "Administración", path: "/administracion", icon: <IoIosSettings size={26} />},
+        {label: "Administración", path: "/admin", icon: <IoIosSettings size={26} />},
     ]
 
     const isActive = location.pathname

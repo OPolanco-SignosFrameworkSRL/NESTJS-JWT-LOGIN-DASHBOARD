@@ -46,14 +46,14 @@ const RequestTable = () => {
 
                     </div>
 
-                    <div className="flex items-center gap-2 w-full md:w-auto">
+                    <div className="flex items-center gap-2 w-full md:w-1/2 lg:w-3/6 xl:w-2/6  ">
 
                         <span className="text-sm sm:text-base text-gray-800 font-semibold whitespace-nowrap">Estado:</span>
 
                         <Select
                             options={[]}
                             placeholder="Buscar"
-                            twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300 flex-1 min-w-[210px] md:flex-none md:min-w-[200px]")}
+                            twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300")}
                         />
 
                     </div>

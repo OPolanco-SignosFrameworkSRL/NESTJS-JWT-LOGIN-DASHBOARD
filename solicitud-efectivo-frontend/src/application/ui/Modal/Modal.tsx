@@ -17,7 +17,7 @@ const Modal = ({children, isActive, onMouseLeave, onClick, className}: ModalProp
 
     function handleClickOutside(event: MouseEvent) {
       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        handleShowModal(); 
+        handleShowModal("header"); 
       }
     }
 
@@ -43,6 +43,7 @@ const Modal = ({children, isActive, onMouseLeave, onClick, className}: ModalProp
           {children}
 
         </div>
+
       )}
 
     </>

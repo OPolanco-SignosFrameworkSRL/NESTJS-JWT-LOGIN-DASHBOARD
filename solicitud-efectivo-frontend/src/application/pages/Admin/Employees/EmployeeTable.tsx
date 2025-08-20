@@ -1,9 +1,7 @@
-
-
 import SkeletonGetUsers from "@/application/components/Admin/SkeletonGetUsers";
-import { getAllEmployees } from "@/infrastructure/api/Admin/admin";
-import { useQuery } from "@tanstack/react-query";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { deleteEmployee, getAllEmployees } from "@/infrastructure/api/Admin/employee";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link, useNavigate } from "react-router-dom";
 import { TbEdit } from "react-icons/tb";
 import { FaRegTrashAlt } from "react-icons/fa";
 import Container from "@/application/ui/Container/Container";
@@ -11,17 +9,18 @@ import Pagination from "@/application/components/Pagination";
 import Select from "@/application/ui/Select/Select";
 import Input from "@/application/ui/Input/Input";
 import { twMerge } from "tailwind-merge";
+import { getUrlParams } from "@/shared/utilts/GetUrlParams";
+import { useAppStore } from "@/application/store/useAppStore";
+import ConfirmEliminationModal from "@/application/components/ConfirmEliminationModal";
+import toast from "react-hot-toast";
 
+export default function EmployeeTable() {
 
-export default function Dashboard() {
+  const pageNumber = getUrlParams("pageNumber") || 1
 
   const navigate = useNavigate()
 
-  const location = useLocation()
-
-  const urlParams = new URLSearchParams(location.search)
-
-  const pageNumber = urlParams.get("pageNumber")
+  const queryClient = useQueryClient()
 
   const limit = 10 /* Cambiar a un select para ver cantidad de registros */
 
@@ -36,21 +35,44 @@ export default function Dashboard() {
   const tableCss = 'text-sm sm:text-base p-4 align-middle [&:has([role=checkbox])]:pr-0'
 
   
-  if(isLoading) return <SkeletonGetUsers/>
-
-  const onClick = (id: number) => {
-    navigate(`/edit-employee?employeeId=${id}`)
+  const onClick = (employeeId: number) => {
+    queryClient.invalidateQueries({ queryKey: ["editEmployee", String(employeeId)] })
+    navigate(`/edit-employee?employeeId=${employeeId}`)
   }
+
+  const handleShowModal = useAppStore(state => state.handleShowModal)
+
+  const { mutate } = useMutation({
+
+    mutationFn: (id: number) => deleteEmployee(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["employees"] })
+      toast.success("Empleado eliminado correctamente")
+    },
+    onError: () => {
+      toast.error("No se pudo eliminar el empleado")
+    }
+  })
+
+
+  const handleDeleteEmployee = (employeeId: number) => {
+    console.log(employeeId)
+    mutate(employeeId)
+  }
+
+  let employeeId : number
+
+  if(isLoading) return <SkeletonGetUsers/>  
   
   if(data) return (
     
-    <Container className="mt-10 p-6 sm:p-10 bg-white shadow-lg">
+    <Container className=" ">
 
       <Container className="flex flex-col sm:flex-row justify-between items-center">
 
         
         <h2 className="text-xs sm:text-base md:text-xl text-emerald-500 font-bold">
-          Gestion de Usuario
+          Empleados
         </h2>
 
         <Link to="/create-employee"
@@ -75,24 +97,24 @@ export default function Dashboard() {
 
         </div>
 
-        <div className="flex items-center gap-2 w-full md:w-auto">
+        <div className="flex items-center gap-2 w-full md:w-1/2 lg:w-3/6 xl:w-2/6  ">
 
             <span className="text-sm sm:text-base text-gray-800 font-semibold whitespace-nowrap">Estado:</span>
 
             <Select
                 options={[]}
                 placeholder="Buscar"
-                twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300 flex-1 min-w-[210px] md:flex-none md:min-w-[200px]")}
+                twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300")}
             />
 
         </div>
 
       </div>
 
-    <Container className="border border-green-300 overflow-hidden my-5">
+      <Container className="border border-green-300 overflow-hidden my-5">
 
 
-      <Container className="relative w-full overflow-auto">
+        <Container className="relative w-full overflow-auto">
 
           <table className="w-full caption-bottom text-sm">
               <thead className="[&_tr]:border-b bg-gradient-to-r from-emerald-50 to-green-50">
@@ -105,7 +127,7 @@ export default function Dashboard() {
                   </tr>
               </thead>
               <tbody className="[&_tr:last-child]:border-0 bg-white">
-   
+    
                 {data.data.map((data, index) => (
                   <tr key={index} className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                       <td className={tableCss}> {data.fullname}</td>
@@ -118,7 +140,12 @@ export default function Dashboard() {
                         >
                           <TbEdit size={24} className="text-blue-500 cursor-pointer hover:text-blue-700"/>
                         </button>
-                        <button>
+                        <button
+                          onClick={() => {
+                            handleShowModal("adminTable")
+                            employeeId = data.id
+                          }}
+                        >
                           <FaRegTrashAlt size={20} className="text-red-500 cursor-pointer hover:text-red-700"/>
                         </button>
                       </td>
@@ -127,13 +154,16 @@ export default function Dashboard() {
               </tbody>
           </table>
 
+        </Container>
+
       </Container>
 
+
+      <Pagination totalRecords={data.total} pageSize={data.limit}/>
+
+      <ConfirmEliminationModal onClickCloseModalArgs="adminTable" handleDelete={() => handleDeleteEmployee(employeeId)}/>
+
     </Container>
-
-    <Pagination totalRecords={data.total} pageSize={data.limit}/>
-
-  </Container>
 
       
   );
