@@ -89,9 +89,9 @@ export default function EmployeeTable() {
 
             <span className="text-sm sm:text-base text-gray-800 font-semibold">Buscar:</span>
             <Input
-                type="text"
-                placeholder="Buscar"
-                twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300 h-11")}
+              type="text"
+              placeholder="Buscar"
+              twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300 h-11")}
             />
 
         </Container>
@@ -101,9 +101,9 @@ export default function EmployeeTable() {
             <span className="text-sm sm:text-base text-gray-800 font-semibold whitespace-nowrap">Estado:</span>
 
             <Select
-                options={[]}
-                placeholder="Buscar"
-                twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300")}
+              options={[]}
+              placeholder="Buscar"
+              twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300")}
             />
 
         </Container>
@@ -120,40 +120,43 @@ export default function EmployeeTable() {
               <thead className="[&_tr]:border-b bg-gradient-to-r from-emerald-50 to-green-50">
 
                   <tr className=" border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                  <th className={`${tableCssHeader}`}>Empleado</th>
+                  
+                    <th className={`${tableCssHeader}`}>Empleado</th>
                     <th className={`${tableCssHeader}`}>Cedula</th>
                     <th className={`${tableCssHeader}`}>Rol</th>
                     <th className={`${tableCssHeader}`}>Correo</th>
                     <th className={`${tableCssHeader}`}>Acciones</th>
+
                   </tr>
-                  
+
               </thead>
 
               <tbody className="[&_tr:last-child]:border-0 bg-white">
     
                 {data.data.map((data, index) => (
                   <tr key={index} className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                      <td className={tableCss}> {data.fullname}</td>
-                      <td className={tableCss}> {data.cedula}</td>
-                      <td className={tableCss}> {data.role}</td>
-                      <td className={tableCss}> {data.user_email}</td>
-                      <td className={`${tableCss} flex items-center space-x-2`}>
-                        <button
-                          onClick={() => onClick(data.id)}
-                        >
-                          <TbEdit size={24} className="text-blue-500 cursor-pointer hover:text-blue-700"/>
-                        </button>
-                        <button
-                          onClick={() => {
-                            handleShowModal("adminTable")
-                            employeeId = data.id
-                          }}
-                        >
-                          <FaRegTrashAlt size={20} className="text-red-500 cursor-pointer hover:text-red-700"/>
-                        </button>
-                      </td>
-                    </tr>
+                    <td className={tableCss}> {data.fullname}</td>
+                    <td className={tableCss}> {data.cedula}</td>
+                    <td className={tableCss}> {data.role}</td>
+                    <td className={tableCss}> {data.user_email}</td>
+                    <td className={`${tableCss} flex items-center space-x-2`}>
+                      <button
+                        onClick={() => onClick(data.id)}
+                      >
+                        <TbEdit size={24} className="text-blue-500 cursor-pointer hover:text-blue-700"/>
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleShowModal("adminTable")
+                          employeeId = data.id
+                        }}
+                      >
+                        <FaRegTrashAlt size={20} className="text-red-500 cursor-pointer hover:text-red-700"/>
+                      </button>
+                    </td>
+                  </tr>
                 ))}
+
               </tbody>
 
           </table>
@@ -162,14 +165,12 @@ export default function EmployeeTable() {
 
       </Container>
 
-
       <Pagination totalRecords={data.total} pageSize={data.limit}/>
 
       <ConfirmEliminationModal onClickCloseModalArgs="adminTable" handleDelete={() => handleDeleteEmployee(employeeId)}/>
 
     </Container>
 
-      
   );
 }
 

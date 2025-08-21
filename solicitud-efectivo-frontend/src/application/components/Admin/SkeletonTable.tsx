@@ -12,7 +12,6 @@ const SkeletonTable = () => {
 
       <Container className="flex flex-row justify-between items-center">
 
-        
         <Container className="h-8 bg-gray-200 rounded animate-pulse w-2/6"></Container>
 
         <Container className="h-8 bg-gray-200 rounded animate-pulse w-3/6"></Container>
