@@ -82,7 +82,7 @@ export class CreateUserUseCase {
         nuevocampo: userData.nuevocampo,
         encargadoId: userData.encargadoId,
         passwchanged: '0',
-        valido: '1',
+        valido: 1,
       };
 
       // Crear el usuario

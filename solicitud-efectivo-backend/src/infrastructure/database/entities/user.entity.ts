@@ -89,11 +89,10 @@ export class UserEntity {
 
   @ApiProperty({
     description: 'Indica si el usuario está activo',
-    example: '1',
-    maxLength: 1,
+    example: 1,
   })
-  @Column({ length: 1, default: '1' })
-  valido: string;
+  @Column({ type: 'tinyint', default: 1 })
+  valido: number;
 
   @ApiProperty({
     description: 'División del usuario',
@@ -144,7 +143,7 @@ export class UserEntity {
   }
 
   isActive(): boolean {
-    return this.valido === '1' && this.estado === 'ACTIVO';
+    return this.valido === 1 && this.estado === 'ACTIVO';
   }
 
   hasRole(role: string): boolean {

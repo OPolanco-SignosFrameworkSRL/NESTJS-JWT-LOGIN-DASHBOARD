@@ -84,7 +84,7 @@ export interface IUserFilters {
   role?: UserRole;
   division?: string;
   search?: string;
-  active?: boolean;
+  active?: string; // 'true' para activos, 'false' para inactivos, '--' o undefined para todos
   page?: number;
   limit?: number;
   offset?: number;

@@ -223,11 +223,10 @@ export class UserWriteEntity {
 
   @ApiProperty({
     description: 'Indica si el usuario está activo',
-    example: '1',
-    maxLength: 1,
+    example: 1,
   })
-  @Column({ length: 1, default: '1' })
-  valido: string;
+  @Column({ type: 'tinyint', default: 1 })
+  valido: number;
 
   @ApiProperty({
     description: 'Fecha de eliminación (soft delete)',
@@ -254,7 +253,7 @@ export class UserWriteEntity {
   }
 
   isActive(): boolean {
-    return this.valido === '1';
+    return this.valido === 1;
   }
 
   hasRole(role: string): boolean {

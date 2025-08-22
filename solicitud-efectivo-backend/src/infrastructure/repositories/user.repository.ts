@@ -32,7 +32,7 @@ export class UserRepository implements IUserRepository {
       userEntity.role as UserRole,
       userEntity.user_email,
       userEntity.telefono,
-      userEntity.valido === '1',
+      userEntity.valido === 1,
       userEntity.division,
       userEntity.cargo,
       userEntity.dependencia,
@@ -57,7 +57,7 @@ export class UserRepository implements IUserRepository {
 
     if (filters?.search) {
       query.andWhere(
-        '(user.nombre LIKE :search OR user.apellido LIKE :search OR user.cedula LIKE :search)',
+        '(user.nombre LIKE :term OR user.apellido LIKE :term OR user.cedula LIKE :term)',
         { search: `%${filters.search}%` }
       );
     }
@@ -151,15 +151,16 @@ export class UserRepository implements IUserRepository {
    * Elimina un usuario (soft delete)
    */
   async delete(id: number): Promise<void> {
-    await this.userWriteRepository.update(id, { valido: '0' });
+    await this.userWriteRepository.update(id, { valido: 0 });
   }
 
   /**
    * Restaura un usuario eliminado
    */
   async restore(id: number): Promise<User> {
-    await this.userWriteRepository.update(id, { valido: '1' });
+    await this.userWriteRepository.update(id, { valido: 1 });
     
+    // Obtener el usuario restaurado desde la vista de lectura
     const restoredUser = await this.userReadRepository.findOne({ where: { id } });
     return this.mapToDomain(restoredUser!);
   }
@@ -168,7 +169,7 @@ export class UserRepository implements IUserRepository {
    * Encuentra usuarios eliminados
    */
   async findDeleted(): Promise<User[]> {
-    const users = await this.userReadRepository.find({ where: { valido: '0' } });
+    const users = await this.userReadRepository.find({ where: { valido: 0 } });
     return users.map(user => this.mapToDomain(user));
   }
 
@@ -176,7 +177,7 @@ export class UserRepository implements IUserRepository {
    * Verifica si existe un usuario con la cédula dada
    */
   async exists(cedula: string): Promise<boolean> {
-    const user = await this.userWriteRepository.findOne({ where: { cedula } });
+    const user = await this.userReadRepository.findOne({ where: { cedula } });
     return !!user;
   }
 
@@ -185,8 +186,8 @@ export class UserRepository implements IUserRepository {
    */
   async getStats(): Promise<IUserStats> {
     const total = await this.userReadRepository.count();
-    const active = await this.userReadRepository.count({ where: { valido: '1' } });
-    const inactive = await this.userReadRepository.count({ where: { valido: '0' } });
+    const active = await this.userReadRepository.count({ where: { valido: 1 } });
+    const inactive = await this.userReadRepository.count({ where: { valido: 0 } });
 
     // Estadísticas por rol
     const roleStats = await this.userReadRepository
@@ -202,7 +203,6 @@ export class UserRepository implements IUserRepository {
       Supervisor: 0,
       Manager: 0,
       Administrator: 0,
-
     };
 
     roleStats.forEach(stat => {
@@ -237,6 +237,7 @@ export class UserRepository implements IUserRepository {
   async updatePhone(cedula: string, telefono: string): Promise<User> {
     await this.userWriteRepository.update({ cedula }, { telefono });
     
+    // Obtener el usuario actualizado desde la vista de lectura
     const updatedUser = await this.userReadRepository.findOne({ where: { cedula } });
     return this.mapToDomain(updatedUser!);
   }
@@ -245,20 +246,14 @@ export class UserRepository implements IUserRepository {
    * Valida las credenciales de un usuario (cédula y contraseña hasheada)
    */
   async validateCredentials(cedula: string, hashedPassword: string): Promise<boolean> {
-    try {
-      // Buscar usuario en la tabla de escritura para obtener la contraseña
-      const userWrite = await this.userWriteRepository.findOne({
-        where: { cedula, valido: '1' },
-      });
+    const user = await this.userWriteRepository.findOne({
+      where: { cedula, valido: 1 },
+    });
 
-      if (!userWrite) {
-        return false;
-      }
-
-      // Comparar la contraseña hasheada proporcionada con la almacenada
-      return userWrite.password === hashedPassword;
-    } catch (error) {
+    if (!user) {
       return false;
     }
+
+    return user.password === hashedPassword;
   }
 } 

@@ -79,7 +79,14 @@ export class UsersController {
   @ApiQuery({ name: 'role', required: false, enum: UserRole })
   @ApiQuery({ name: 'division', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
-  @ApiQuery({ name: 'active', required: false, type: Boolean })
+  @ApiQuery({ 
+    name: 'active', 
+    required: false, 
+    type: String, 
+    description: 'Filtrar por estado: true=solo activos, false=solo inactivos, --=todos',
+    example: '--',
+    enum: ['true', 'false', '--']
+  })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({
@@ -185,6 +192,14 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Obtener un usuario por ID' })
   @ApiParam({ name: 'id', type: Number })
+  @ApiQuery({ 
+    name: 'active', 
+    type: String, 
+    required: false, 
+    description: 'Filtrar por estado: true=solo activos, false=solo inactivos, --=todos',
+    example: '--',
+    enum: ['true', 'false', '--']
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Usuario obtenido exitosamente',
@@ -194,8 +209,13 @@ export class UsersController {
     status: HttpStatus.NOT_FOUND,
     description: 'Usuario no encontrado',
   })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
-    const user = await this.usersService.findOne(id);
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('active') active?: string
+  ) {
+    // Si active es 'false', incluir inactivos; si es 'true' o '--', solo activos
+    const includeInactive = active === 'false';
+    const user = await this.usersService.findOne(id, includeInactive);
 
     return {
       data: user,
@@ -207,6 +227,14 @@ export class UsersController {
   @Get('cedula/:cedula')
   @ApiOperation({ summary: 'Obtener un usuario por cédula' })
   @ApiParam({ name: 'cedula', type: String })
+  @ApiQuery({ 
+    name: 'active', 
+    type: String, 
+    required: false, 
+    description: 'Filtrar por estado: true=solo activos, false=solo inactivos, --=todos',
+    example: '--',
+    enum: ['true', 'false', '--']
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Usuario obtenido exitosamente',
@@ -216,8 +244,13 @@ export class UsersController {
     status: HttpStatus.NOT_FOUND,
     description: 'Usuario no encontrado',
   })
-  async findByCedula(@Param('cedula') cedula: string) {
-    return await this.usersService.findByCedula(cedula);
+  async findByCedula(
+    @Param('cedula') cedula: string,
+    @Query('active') active?: string
+  ) {
+    // Si active es 'false', incluir inactivos; si es 'true' o '--', solo activos
+    const includeInactive = active === 'false';
+    return await this.usersService.findByCedula(cedula, includeInactive);
   }
 
   @Get(':id/preview-update')
@@ -260,7 +293,7 @@ export class UsersController {
      */
   @ApiOperation({ 
     summary: 'Actualizar un usuario',
-    description: 'Muestra los datos actuales y luego actualiza el usuario' 
+    description: 'Actualiza los datos del usuario. Incluye campos como nombre, apellido, email, teléfono, rol y estado de activación (valido: 1=activo, 0=inactivo).' 
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
@@ -268,9 +301,9 @@ export class UsersController {
     @Request() req,
   ) {
     const currentUser = req.user;
-    //return await this.usersService.update(id, updateUserDto, currentUser);
-    // 🔍 Obtener datos actuales ANTES de actualizar
-    const currentUserData = await this.usersService.findOne(id);
+    
+    // 🔍 Obtener datos actuales ANTES de actualizar (incluyendo usuarios inactivos)
+    const currentUserData = await this.usersService.findOne(id, true);
     
     if (!currentUserData) {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
@@ -348,7 +381,7 @@ export class UsersController {
     return await this.usersService.remove(id, currentUser);
   }
 
-  @Put(':id/restore')
+  /* @Put(':id/restore')
   @Roles(UserRole.Admin)
   @ApiOperation({ summary: 'Restaurar un usuario eliminado (soft delete)' })
   @ApiParam({ name: 'id', type: Number })
@@ -382,7 +415,7 @@ export class UsersController {
   async restore(@Param('id', ParseIntPipe) id: number, @Request() req) {
     const currentUser = req.user;
     return await this.usersService.restore(id, currentUser);
-  }
+  } */
   // ❌ ENDPOINT DESHABILITADO - Obtener lista de usuarios eliminados (soft delete)
   /*
     @Get('deleted/list')

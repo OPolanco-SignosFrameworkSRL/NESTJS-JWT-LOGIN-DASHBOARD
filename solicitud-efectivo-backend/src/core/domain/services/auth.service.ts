@@ -47,7 +47,7 @@ export class AuthService {
     try {
       // Buscar usuario en la vista para obtener datos completos
       const user = await this.userRepository.findOne({
-        where: { cedula, valido: '1' },
+        where: { cedula, valido: 1 },
       });
 
       if (!user) {
@@ -180,7 +180,7 @@ export class AuthService {
         nuevocampo: data.nuevocampo,
         encargadoId: data.encargadoId,
         passwchanged: '0',
-        valido: '1',
+        valido: 1,
       });
 
       const savedUser = await this.userWriteRepository.save(newUser);
@@ -517,7 +517,7 @@ export class AuthService {
         where: { 
           cedula,
           password: passwordHash,
-          valido: '1' 
+          valido: 1 
         },
       });
 
