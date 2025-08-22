@@ -27,7 +27,7 @@ export class UserWrite {
     public readonly nuevocampo: string,
     public readonly encargadoId: string,
     public readonly passwchanged: string,
-    public readonly valido: number,
+    public readonly valido: string,
     public readonly deleted_at?: Date,
     public readonly deleted_by?: number,
   ) {}
@@ -41,7 +41,7 @@ export class UserWrite {
   }
 
   isActive(): boolean {
-    return this.valido === 1;
+    return this.valido === '1';
   }
 
   hasRole(role: string): boolean {

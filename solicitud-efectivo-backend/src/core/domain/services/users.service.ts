@@ -10,6 +10,7 @@ import {
   IUserFilters,
   IUserUpdateData,
   UserRole,
+  //} from '../user.interface';
 } from '../interfaces/user.interface';
 import { PaginationDto, PaginatedResponseDto } from '../../application/dto/pagination.dto';
 
@@ -27,26 +28,16 @@ export class UsersService {
   ) { }
 
   /**
-   * Obtiene todos los usuarios con paginación
-   * @param filters - Filtros de búsqueda que incluyen includeInactive
+   * Obtiene todos los usuarios activos con paginación
    */
   async findAll(filters?: IUserFilters): Promise<PaginatedResponseDto<IUserResponse>> {
     try {
-      const { page = 1, limit = 10, active, ...otherFilters } = filters || {};
+      const { page = 1, limit = 10, ...otherFilters } = filters || {};
       const skip = (page - 1) * limit;
 
       const queryBuilder = this.userRepository
-        .createQueryBuilder('user');
-
-      // Filtrar por estado activo/inactivo según el parámetro active
-      if (active === 'true') {
-        // Solo usuarios activos
-        queryBuilder.where('user.valido = :valido', { valido: 1 });
-      } else if (active === 'false') {
-        // Solo usuarios inactivos
-        queryBuilder.where('user.valido = :valido', { valido: 0 });
-      }
-      // Si active es undefined, '--' o cualquier otro valor, no se aplica filtro (muestra todos)
+        .createQueryBuilder('user')
+        .where('user.valido = :valido', { valido: '1' });
 
       if (otherFilters?.role) {
         queryBuilder.andWhere('user.role = :role', { role: otherFilters.role });
@@ -92,27 +83,15 @@ export class UsersService {
 
   /**
    * Obtiene un usuario por ID
-   * @param id - ID del usuario
-   * @param includeInactive - Si true, incluye usuarios inactivos (valido: 0)
    */
-  async findOne(id: number, includeInactive: boolean = false): Promise<IUserResponse> {
+  async findOne(id: number): Promise<IUserResponse> {
     try {
-      const whereCondition: any = { id };
-      
-      // Solo filtrar por valido si no se quieren incluir inactivos
-      if (!includeInactive) {
-        whereCondition.valido = 1;
-      }
-
       const user = await this.userRepository.findOne({
-        where: whereCondition,
+        where: { id, valido: '1' },
       });
 
       if (!user) {
-        const statusMessage = includeInactive 
-          ? `Usuario con ID ${id} no encontrado` 
-          : `Usuario con ID ${id} no encontrado o está inactivo`;
-        throw new NotFoundException(statusMessage);
+        throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
       }
 
       return this.mapToUserResponseWithNames(user);
@@ -124,27 +103,17 @@ export class UsersService {
 
   /**
    * Obtiene un usuario por cédula
-   * @param cedula - Cédula del usuario
-   * @param includeInactive - Si true, incluye usuarios inactivos (valido: 0)
    */
-  async findByCedula(cedula: string, includeInactive: boolean = false): Promise<IUserResponse> {
+  async findByCedula(cedula: string): Promise<IUserResponse> {
     try {
-      const whereCondition: any = { cedula };
-      
-      // Solo filtrar por valido si no se quieren incluir inactivos
-      if (!includeInactive) {
-        whereCondition.valido = 1;
-      }
-
       const user = await this.userRepository.findOne({
-        where: whereCondition,
+        where: { cedula, valido: '1' },
       });
 
       if (!user) {
-        const statusMessage = includeInactive 
-          ? `Usuario con cédula ${cedula} no encontrado` 
-          : `Usuario con cédula ${cedula} no encontrado o está inactivo`;
-        throw new NotFoundException(statusMessage);
+        throw new NotFoundException(
+          `Usuario con cédula ${cedula} no encontrado`,
+        );
       }
 
       return this.mapToUserResponse(user);
@@ -162,6 +131,7 @@ export class UsersService {
    */
   async update(
     id: number,
+     //updateData: IUserUpdateData,
     updateData: any,
     currentUser?: { id: number; role: UserRole },
   ): Promise<IUserResponse> {
@@ -176,6 +146,7 @@ export class UsersService {
       }
 
       // Verificar permisos: Admin puede actualizar cualquier usuario, Usuario solo puede actualizar sus propios datos
+      //if (currentUser && currentUser.role !== UserRole.Admin && currentUser.id !== id) {
       if (currentUser && currentUser.role !== 'Admin' && currentUser.id !== id) {
         throw new UnauthorizedException('No tienes permisos para actualizar este usuario');
       }
@@ -189,14 +160,65 @@ export class UsersService {
       if (updateData.telefono) userWrite.telefono = updateData.telefono;
       if (updateData.celular) userWrite.celular = updateData.celular;
       if (updateData.direccion) userWrite.direccion = updateData.direccion;
+      /*
+      if (updateData.celular) userWrite.celular = updateData.celular;
+      if (updateData.user_status) userWrite.user_status = updateData.user_status;
+      if (updateData.caja_id !== undefined) userWrite.caja_id = updateData.caja_id;
+      if (updateData.tienda_id !== undefined) userWrite.tienda_id = updateData.tienda_id;
+      if (updateData.allow_multi_tienda !== undefined) userWrite.allow_multi_tienda = updateData.allow_multi_tienda;
+      if (updateData.max_descuento !== undefined) userWrite.max_descuento = updateData.max_descuento;
+      if (updateData.close_caja !== undefined) userWrite.close_caja = updateData.close_caja;
+      if (updateData.user_account_email) userWrite.user_account_email = updateData.user_account_email;
+      if (updateData.user_account_email_passw) userWrite.user_account_email_passw = updateData.user_account_email_passw;
+      if (updateData.comision_porciento !== undefined) userWrite.comision_porciento = updateData.comision_porciento;
+      if (updateData.default_portalid !== undefined) userWrite.default_portalid = updateData.default_portalid;
+      if (updateData.nuevocampo) userWrite.nuevocampo = updateData.nuevocampo;
+      if (updateData.encargadoId !== undefined) userWrite.encargadoId = updateData.encargadoId;
+      if (updateData.valido !== undefined) userWrite.valido = updateData.valido;
       
-      // Actualizar estado de activación si se proporciona
-      if (updateData.valido !== undefined) {
-        // Convertir string a number: '1' -> 1, '0' -> 0
-        userWrite.valido = parseInt(updateData.valido, 10);
+      // Manejar cedula y password de manera coordinada
+      if (updateData.cedula) {
+        const oldCedula = userWrite.cedula;
+        userWrite.cedula = updateData.cedula;
+        
+        // Si se cambió la cédula pero NO se proporcionó nueva contraseña,
+        // necesitamos regenerar el hash con la nueva cédula
+        if (!updateData.password) {
+          // Aquí necesitaríamos la contraseña original, pero no la tenemos
+          // Por seguridad, requerimos que cuando se cambie la cédula, también se proporcione la contraseña
+          throw new BadRequestException('Cuando se actualiza la cédula, se debe proporcionar también la contraseña');
+        }
       }
+      // Actualizar contraseña solo si se proporciona
+      if (updateData.password) {
 
       // Actualizar contraseña solo si se proporciona y no está vacía
+      if (updateData.password && updateData.password.trim() !== '') {
+        // Generar hash de la contraseña (cedula + clave)
+        const passwordHash = this.cryptoService.calculateSHA256(userWrite.cedula + updateData.password);
+        userWrite.password = passwordHash;
+      }
+      */
+/*  // Actualizar contraseña solo si se proporciona y no está vacía
+ if (updateData.password && updateData.password.trim() !== '') {
+  let passwordHash;
+  
+  // Si ya es un hash (64 caracteres hexadecimales), usarlo directamente
+  if (/^[a-f0-9]{64}$/i.test(updateData.password)) {
+    passwordHash = updateData.password;
+  } else {
+    // Si es texto plano, generar el hash
+    passwordHash = this.cryptoService.calculateSHA256(userWrite.cedula + updateData.password);
+  }
+  
+  userWrite.password = passwordHash;
+}
+      
+      // Actualizar contraseña solo si se proporciona y no está vacía
+      if (updateData.password && updateData.password.trim() !== '') {
+        // Generar hash de la contraseña (cedula + clave)
+        const passwordHash = this.cryptoService.calculateSHA256(userWrite.cedula + updateData.password); */
+      // VERSIÓN FUNCIONAL - Actualizar contraseña solo si se proporciona y no está vacía
       if (updateData.password && updateData.password.trim() !== '') {
         let passwordHash;
         
@@ -211,17 +233,12 @@ export class UsersService {
         userWrite.password = passwordHash;
       }
 
-      // Actualizar directamente usando update (misma lógica que restore)
-      if (updateData.valido !== undefined) {
-        await this.userWriteRepository.update(id, { valido: parseInt(updateData.valido, 10) });
-      }
-      
-      // Por ahora solo actualizamos valido para probar
-      // Los otros campos se pueden agregar después
+      // Guardar cambios
+      await this.userWriteRepository.save(userWrite);
 
-      // Obtener datos actualizados desde la vista (incluyendo usuarios inactivos)
+      // Obtener datos actualizados desde la vista
       const updatedUser = await this.userRepository.findOne({
-        where: { id }
+        where: { id, valido: '1' }
       });
 
       if (!updatedUser) {
@@ -241,6 +258,10 @@ export class UsersService {
    */
   async remove(
     id: number,
+    /*  currentUser?: { id: number; role: UserRole },
+    confirmPermanentDelete: boolean = false,
+    reason?: string
+  ): Promise<{ message: string; type: 'soft' | 'permanent'; user: any }> { */
     currentUser?: { id: number; role: UserRole }
   ): Promise<{ message: string; user: any }> {
     try {
@@ -257,7 +278,7 @@ export class UsersService {
       await this.validateUserDeletion(userWrite, currentUser);
 
       // Soft delete (solo marcar como eliminado)
-      userWrite.valido = 0;
+      userWrite.valido = '0';
       userWrite.deleted_at = new Date();
       userWrite.deleted_by = currentUser?.id || null;
 
@@ -287,7 +308,7 @@ export class UsersService {
     // Verificar si es el último administrador
     if (user.role === 'Admin') {
       const adminCount = await this.userWriteRepository.count({
-        where: { role: 'Admin', valido: 1 }
+        where: { role: 'Admin', valido: '1' }
       });
 
       if (adminCount <= 1) {
@@ -299,6 +320,11 @@ export class UsersService {
     if (currentUser && currentUser.id === user.id) {
       throw new Error('No puedes eliminarte a ti mismo');
     }
+
+    // Aquí podrías agregar más validaciones como:
+    // - Verificar si tiene registros relacionados en otras tablas
+    // - Verificar si tiene transacciones pendientes
+    // - etc.
   }
 
   /**
@@ -314,12 +340,12 @@ export class UsersService {
         throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
       }
 
-      if (userWrite.valido === 1) {
+      if (userWrite.valido === '1') {
         throw new BadRequestException('El usuario ya está activo');
       }
 
       // Restaurar usuario
-      userWrite.valido = 1;
+      userWrite.valido = '1';
       userWrite.deleted_at = null;
       userWrite.deleted_by = null;
 
@@ -343,7 +369,7 @@ export class UsersService {
   async findDeleted(): Promise<IUserResponse[]> {
     try {
       const deletedUsers = await this.userWriteRepository.find({
-        where: { valido: 0 },
+        where: { valido: '0' },
         order: { deleted_at: 'DESC' }
       });
 
@@ -358,13 +384,33 @@ export class UsersService {
         telefono: user.telefono,
         direccion: user.direccion,
         celular: user.celular,
-        valido: user.valido === 1
+        /*
+        user_status: user.user_status,
+        caja_id: user.caja_id,
+        tienda_id: user.tienda_id,
+        allow_multi_tienda: user.allow_multi_tienda,
+        max_descuento: user.max_descuento,
+        close_caja: user.close_caja,
+        user_account_email: user.user_account_email,
+        comision_porciento: user.comision_porciento,
+        default_portalid: user.default_portalid,
+        nuevocampo: user.nuevocampo,
+        encargadoId: user.encargadoId,
+        valido: user.valido,
+        deleted_at: user.deleted_at,
+        deleted_by: user.deleted_by
+        */
+        valido: user.valido === '1'
       }));
     } catch (error) {
       this.logger.error('Error obteniendo usuarios eliminados:', error);
       throw error;
     }
   }
+
+
+
+
 
   /**
    * Busca usuarios por término
@@ -373,7 +419,7 @@ export class UsersService {
     try {
       const users = await this.userRepository
         .createQueryBuilder('user')
-        .where('user.valido = :valido', { valido: 1 })
+        .where('user.valido = :valido', { valido: '1' })
         .andWhere(
           '(user.nombre LIKE :term OR user.apellido LIKE :term OR user.cedula LIKE :term)',
           { term: `%${term}%` },
@@ -397,7 +443,7 @@ export class UsersService {
   async findByRole(role: UserRole): Promise<IUserResponse[]> {
     try {
       const users = await this.userRepository.find({
-        where: { role: role as string, valido: 1 },
+        where: { role: role as string, valido: '1' },
         order: { nombre: 'DESC' },
       });
 
@@ -414,7 +460,7 @@ export class UsersService {
   async findByDivision(division: string): Promise<IUserResponse[]> {
     try {
       const users = await this.userRepository.find({
-        where: { division, valido: 1 },
+        where: { division, valido: '1' },
         order: { nombre: 'DESC' },
       });
 
@@ -434,14 +480,14 @@ export class UsersService {
   async getStats(): Promise<IUserStats> {
     try {
       const totalUsers = await this.userRepository.count({
-        where: { valido: 1 },
+        where: { valido: '1' },
       });
 
       const usersByRole = await this.userRepository
         .createQueryBuilder('user')
         .select('user.role', 'role')
         .addSelect('COUNT(*)', 'count')
-        .where('user.valido = :valido', { valido: 1 })
+        .where('user.valido = :valido', { valido: '1' })
         .groupBy('user.role')
         .getRawMany();
 
@@ -449,13 +495,18 @@ export class UsersService {
         .createQueryBuilder('user')
         .select('user.division', 'division')
         .addSelect('COUNT(*)', 'count')
-        .where('user.valido = :valido', { valido: 1 })
+        .where('user.valido = :valido', { valido: '1' })
         .groupBy('user.division')
         .getRawMany();
 
       return {
+        /*
+        totalUsers,
+        usersByRole,
+        usersByDivision,
+        */
         total: totalUsers,
-        active: totalUsers,
+        active: totalUsers, // Simplificación - todos los usuarios obtenidos están activos
         inactive: 0,
         byRole: usersByRole.reduce((acc, item) => ({ ...acc, [item.role]: parseInt(item.count) }), {} as Record<UserRole, number>),
         byDivision: usersByDivision.reduce((acc, item) => ({ ...acc, [item.division]: parseInt(item.count) }), {} as Record<string, number>),
@@ -472,7 +523,7 @@ export class UsersService {
   async exists(cedula: string): Promise<boolean> {
     try {
       const count = await this.userRepository.count({
-        where: { cedula, valido: 1 },
+        where: { cedula, valido: '1' },
       });
       return count > 0;
     } catch (error) {
@@ -506,7 +557,7 @@ export class UsersService {
         where: {
           cedula,
           password: passwordHash,
-          valido: 1
+          valido: '1'
         },
       });
 
@@ -551,7 +602,7 @@ export class UsersService {
   private createQueryBuilder(filters?: IUserFilters): SelectQueryBuilder<UserEntity> {
     const queryBuilder = this.userRepository
       .createQueryBuilder('user')
-      .where('user.valido = :valido', { valido: 1 });
+      .where('user.valido = :valido', { valido: '1' });
 
     if (filters?.role) {
       queryBuilder.andWhere('user.role = :role', {
@@ -593,7 +644,27 @@ export class UsersService {
       fullname: user.getFullName(),
       role: user.role as UserRole,
       user_email: user.user_email,
-      valido: user.valido === 1,
+      /*
+      telefono: user.telefono,
+      direccion: '',
+      celular: '',
+      user_status: 1,
+      caja_id: '',
+      tienda_id: '',
+      allow_multi_tienda: '0',
+      max_descuento: '',
+      close_caja: '0',
+      user_account_email: '',
+      comision_porciento: '',
+      default_portalid: '',
+      nuevocampo: '',
+      encargadoId: '', 
+      valido: user.valido,
+      telefono: user.telefono,
+      direccion: user.direccion,
+      celular: user.celular,
+      */
+      valido: user.valido === '1',
     };
   }
 
@@ -603,12 +674,13 @@ export class UsersService {
       cedula: user.cedula,
       nombre: user.nombre,
       apellido: user.apellido,
+      //fullname: user.getFullName(),
       role: user.role as UserRole,
       user_email: user.user_email,
       telefono: user.telefono,
       direccion: user.direccion,
       celular: user.celular,
-      valido: user.valido === 1,
+      valido: user.valido === '1',
     };
   }
 }

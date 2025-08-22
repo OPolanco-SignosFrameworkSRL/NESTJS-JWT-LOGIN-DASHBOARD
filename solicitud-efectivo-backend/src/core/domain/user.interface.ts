@@ -1,4 +1,4 @@
- export enum UserRole {
+export enum UserRole {
   Admin = 'Admin',
   Usuario = 'Usuario',
   Supervisor = 'Supervisor',
@@ -13,13 +13,13 @@ export interface IUser {
   fullname: string;
   role: UserRole;
   user_email: string;
-  
+  /*
   division: string;
   cargo: string;
   dependencia: string;
   recinto: string;
   estado: string; 
-  
+  */
   valido: string;
 }
 
@@ -122,4 +122,4 @@ export interface IUserStats {
   totalUsers: number;
   usersByRole: any[];
   usersByDivision: any[];
-}  
+} 

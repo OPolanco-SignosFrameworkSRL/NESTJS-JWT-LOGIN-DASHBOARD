@@ -32,14 +32,13 @@ export class UserFiltersDto {
   search?: string;
 
   @ApiProperty({
-    description: 'Filtrar por estado de usuario: true=solo activos, false=solo inactivos, --=todos',
-    example: '--',
+    description: 'Filtrar solo usuarios activos',
+    example: true,
     required: false,
-    enum: [true, false, '--'],
   })
   @IsOptional()
-  @IsString({ message: 'El campo active debe ser true, false o --' })
-  active?: string;
+  @IsBoolean({ message: 'El campo active debe ser un booleano' })
+  active?: boolean;
 
   // Campos de paginación
   @ApiProperty({
