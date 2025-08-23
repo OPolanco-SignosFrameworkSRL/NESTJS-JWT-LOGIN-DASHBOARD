@@ -1,4 +1,3 @@
-import SkeletonGetUsers from "@/application/components/Admin/SkeletonTable";
 import { deleteEmployee, getAllEmployees } from "@/infrastructure/api/admin/admin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
@@ -13,7 +12,8 @@ import { getUrlParams } from "@/shared/utilts/GetUrlParams";
 import { useAppStore } from "@/application/store/useAppStore";
 import ConfirmEliminationModal from "@/application/components/ConfirmEliminationModal";
 import toast from "react-hot-toast";
-import ErrorTable from "@/application/components/Admin/ErrorTable";
+import ErrorTable from "@/application/components/admin/ErrorTable";
+import TableSkeleton from "@/application/components/skeletons/TableSkeleton";
 
 export default function EmployeeTable() {
 
@@ -33,10 +33,10 @@ export default function EmployeeTable() {
   })
 
   const tableCssHeader = 'text-sm sm:text-base h-12 px-4 text-left align-middle [&:has([role=checkbox])]:pr-0 w-[120px] font-semibold text-black'
-  const tableCss = 'text-sm sm:text-base p-4 align-middle [&:has([role=checkbox])]:pr-0'
-
+  const tableCss = 'text-sm sm:text-base p-4 align-middle [&:has([role=checkbox])]:pr-0 truncate'
+  
   const onClick = (employeeId: number) => {
-    queryClient.invalidateQueries({ queryKey: ["editEmployee", String(employeeId)] })
+    //queryClient.invalidateQueries({ queryKey: ["editEmployee", String(employeeId)] })
     navigate(`/edit-employee?employeeId=${employeeId}`)
   }
 
@@ -60,7 +60,7 @@ export default function EmployeeTable() {
 
   let employeeId : number
 
-  if(isLoading) return <SkeletonGetUsers/>  
+  if(isLoading) return <TableSkeleton/>  
 
   if(isError) return <ErrorTable/>
   
@@ -121,10 +121,11 @@ export default function EmployeeTable() {
 
                   <tr className=" border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                   
-                    <th className={`${tableCssHeader}`}>Empleado</th>
                     <th className={`${tableCssHeader}`}>Cedula</th>
+                    <th className={`${tableCssHeader}`}>Empleado</th>
                     <th className={`${tableCssHeader}`}>Rol</th>
                     <th className={`${tableCssHeader}`}>Correo</th>
+                    <th className={`${tableCssHeader}`}>Estado</th>
                     <th className={`${tableCssHeader}`}>Acciones</th>
 
                   </tr>
@@ -135,10 +136,17 @@ export default function EmployeeTable() {
     
                 {data.data.map((data, index) => (
                   <tr key={index} className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                    <td className={tableCss}> {data.fullname}</td>
                     <td className={tableCss}> {data.cedula}</td>
+                    <td className={tableCss}> {data.fullname}</td>
                     <td className={tableCss}> {data.role}</td>
                     <td className={tableCss}> {data.user_email}</td>
+                    <td className={`${tableCss}`}> 
+                      {data.valido.toString() === "true" ? (
+                        <div className="bg-green-100 text-green-800 hover:bg-green-100 rounded-full w-24 flex items-center justify-center">Activo</div>
+                      ) : (
+                        <div className="bg-gray-100 text-gray-800 hover:bg-gray-100 rounded-full w-24 flex items-center justify-center">Inactivo</div>
+                      ) }
+                    </td>
                     <td className={`${tableCss} flex items-center space-x-2`}>
                       <button
                         onClick={() => onClick(data.id)}

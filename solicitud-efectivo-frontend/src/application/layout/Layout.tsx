@@ -6,7 +6,7 @@ import AsideMenu from "../components/AsideMenu"
 import Container from "../ui/Container/Container"
 import { useState, useEffect } from "react"
 import { useAppStore } from "../store/useAppStore"
-import ModalProfile from "../components/Home/ModalProfile"
+import ModalProfile from "../components/home/ModalProfile"
 import { useCloseModalOnRouteChange } from "../hooks/useCloseModalOnRouteChange"
 
 import { Toaster }  from "react-hot-toast"

@@ -1,19 +1,22 @@
 import { useState } from "react"
 import Title from "@/application/ui/Text/Title";
-import AdminDashboard from "@/application/pages/Admin/Employees/EmployeeTable"
-import RolesTable from "./Roles/RolesTable";
+import AdminDashboard from "@/application/pages/Admin/employees/EmployeeTable"
+import RolesTable from "@/application/pages/Admin/roles/RolesTable";
+import Dashboard from "@/application/pages/Admin/dashboard/Dashboard";
+import RolesPermissionsTable from "@/application/pages/Admin/rolePermissions/rolePermissionsTable";
 
 
 
 const Admin = () => {
 
   const navItems = [
+    {label: "Dashboard"},
     {label: "Gestión de Usuarios"},
     {label: "Gestión de Roles"},
+    {label: "Gestión de Permisos"}
   ]
 
   const [activeItem, setActiveItem] = useState(navItems[0]);
-
 
   return (
 
@@ -39,25 +42,34 @@ const Admin = () => {
           </nav>
         </div>
 
-
-
         <div className="mt-5">
 
-            {activeItem.label === "Gestión de Usuarios" && (
 
-             <AdminDashboard/>
-            
-            )}
+          {activeItem.label === "Dashboard" && (
+            <Dashboard/>
+          )}
+        
 
-            {activeItem.label === "Gestión de Roles" && (
-              <RolesTable/>
-            )}
+          {activeItem.label === "Gestión de Usuarios" && (
+
+            <AdminDashboard/>
+          
+          )}
+
+          {activeItem.label === "Gestión de Roles" && (
+            <RolesTable/>
+          )}
+
+          {activeItem.label === "Gestión de Permisos" && (
+            <RolesPermissionsTable/>
+          
+          )}
+
 
         </div>
 
 
       </div>
-
 
     </>
 

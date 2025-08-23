@@ -14,10 +14,10 @@ export default function Register() {
 
   const { data } = useQuery({
     queryKey: ['roles'],
-    queryFn: getAllRoles
+    queryFn: getAllRoles,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
   })
-
-
 
   const { mutate } = useMutation({
 
@@ -168,7 +168,9 @@ export default function Register() {
                   label: items.role_name,
                   value: items.id
                 }))}
+
                 {...register("role", { required: "El role es requerido" })}
+
               />
 
               {errors.role && <p className="text-red-500">{errors.role.message}</p>}

@@ -2,7 +2,7 @@ import React from "react";
 
 type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
   defaultValue?: string;
-  options?: { value: number; label: string }[];
+  options?: { value: number | string; label: string }[];
   placeholder?: string;
   className?: string;
   twMerge?: (...classes: string[]) => string;

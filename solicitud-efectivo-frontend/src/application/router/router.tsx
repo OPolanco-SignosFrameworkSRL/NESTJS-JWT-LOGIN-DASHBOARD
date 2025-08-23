@@ -5,11 +5,11 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Home from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import SolicitudGastos from '../pages/SolicitudGastos';
-import CreateEmployee from '../pages/Admin/Employees/CreateEmployee';
-import NewRequest from '../pages/Request/NewRequest';
+import CreateEmployee from '../pages/Admin/employees/CreateEmployee';
+import NewRequest from '../pages/request/NewRequest';
 import Disbursement from '../pages/Disbursement';
 import { ProtectedRoute } from '@/application/layout/ProtectedRoute';
-import EditEmployee from '../pages/Admin/Employees/EditEmployee';
+import EditEmployee from '../pages/Admin/employees/EditEmployee';
 import Admin from '../pages/Admin/Admin';
 
 

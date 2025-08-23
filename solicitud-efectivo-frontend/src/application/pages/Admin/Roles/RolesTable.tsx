@@ -1,39 +1,38 @@
-
-
-import SkeletonGetUsers from "@/application/components/Admin/SkeletonTable";
-import { deleteEmployee, getAllEmployees } from "@/infrastructure/api/admin/admin";
+import { deleteEmployee, getAllRoles } from "@/infrastructure/api/admin/admin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { TbEdit } from "react-icons/tb";
 import { FaRegTrashAlt } from "react-icons/fa";
 import Container from "@/application/ui/Container/Container";
-import Pagination from "@/application/components/Pagination";
+//import Pagination from "@/application/components/Pagination";
 import Select from "@/application/ui/Select/Select";
 import Input from "@/application/ui/Input/Input";
 import { twMerge } from "tailwind-merge";
-import { getUrlParams } from "@/shared/utilts/GetUrlParams";
+//import { getUrlParams } from "@/shared/utilts/GetUrlParams";
 import { useAppStore } from "@/application/store/useAppStore";
 import ConfirmEliminationModal from "@/application/components/ConfirmEliminationModal";
 import toast from "react-hot-toast";
+import SkeletonTable from "@/application/components/skeletons/TableSkeleton";
+import ErrorTable from "@/application/components/admin/ErrorTable";
 
 
 export default function RolesTable() {
 
-  const pageNumber = getUrlParams("pageNumber") || 1
+  //const pageNumber = getUrlParams("pageNumber") || 1
 
   const navigate = useNavigate()
 
   const queryClient = useQueryClient()
 
-  const limit = 10 /* Cambiar a un select para ver cantidad de registros */
+  //const limit = 10 /* Cambiar a un select para ver cantidad de registros */
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["employees", Number(pageNumber), limit],
-    queryFn: () => getAllEmployees({page: Number(pageNumber), limit}),
-    staleTime: 2 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  })
-
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ['roles'],
+    queryFn: getAllRoles,
+    staleTime: 5 * 60 * 1000,
+    initialData: () => queryClient.getQueryData(['roles']),
+  });
+  
   const tableCssHeader = 'text-sm sm:text-base h-12 px-4 text-left align-middle [&:has([role=checkbox])]:pr-0 w-[120px] font-semibold text-black'
   const tableCss = 'text-sm sm:text-base p-4 align-middle [&:has([role=checkbox])]:pr-0'
 
@@ -65,7 +64,9 @@ export default function RolesTable() {
 
   let employeeId : number
 
-  if(isLoading) return <SkeletonGetUsers/>  
+  if(isLoading) return <SkeletonTable/>  
+
+  if(isError) return <ErrorTable/>
   
   if(data) return (
     
@@ -132,8 +133,8 @@ export default function RolesTable() {
     
                 {data.data.map((data, index) => (
                   <tr key={index} className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                      <td className={tableCss}> {data.fullname}</td>
-                      <td className={tableCss}> {data.cedula}</td>
+                      <td className={tableCss}> {data.role_name}</td>
+                      <td className={tableCss}> {data.valido}</td>
                       <td className={`${tableCss} flex items-center space-x-2`}>
                         <button
                           onClick={() => onClick(data.id)}
@@ -159,7 +160,7 @@ export default function RolesTable() {
       </Container>
 
 
-      <Pagination totalRecords={data.total} pageSize={data.limit}/>
+      {/*<Pagination totalRecords={data.total} pageSize={data.limit}/>*/}
 
       <ConfirmEliminationModal onClickCloseModalArgs="adminTable" handleDelete={() => handleDeleteEmployee(employeeId)}/>
 

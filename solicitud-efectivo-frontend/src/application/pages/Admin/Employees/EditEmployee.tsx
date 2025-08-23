@@ -1,5 +1,6 @@
 import Input from "@/application/ui/Input/Input";
-import { updateEmployee, getEmployeeById } from "@/infrastructure/api/admin/admin";
+import Select from "@/application/ui/Select/Select";
+import { updateEmployee, getEmployeeById, getAllRoles } from "@/infrastructure/api/admin/admin";
 import type { CreateEmployee } from "@/infrastructure/schemas/admin/admin";
 import { hashPassword } from "@/shared/utilts/convertToSha256";
 import { getUrlParams } from "@/shared/utilts/GetUrlParams";
@@ -17,12 +18,19 @@ export default function EditEmployee() {
   const employeeId = getUrlParams('employeeId')
 
   const navigate = useNavigate()
+
+  const { data: rolesData } = useQuery({
+    queryKey: ['roles'],
+    queryFn: getAllRoles,
+    staleTime: 5 * 60 * 1000,
+    initialData: () => queryClient.getQueryData(['roles']),
+  });
   
   const { data } = useQuery({
     queryKey:['editEmployee', employeeId],
     queryFn: () => getEmployeeById(Number(employeeId)),
-    staleTime: 2 * 60 * 1000,
     refetchOnWindowFocus: false,
+    staleTime: 2 * 60 * 1000,
     enabled: !!employeeId
   })
   
@@ -31,6 +39,7 @@ export default function EditEmployee() {
     mutationFn: (data: CreateEmployee) => updateEmployee(Number(employeeId), data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] })
+      //queryClient.invalidateQueries({ queryKey: ["editEmployee", String(employeeId)] })
       toast.success("Información actualizada correctamente!")
       navigate("/admin")
     },
@@ -149,14 +158,20 @@ export default function EditEmployee() {
 
             <div>
               <label className="text-gray-800" htmlFor="rol">Role:</label>
-              <Input
+
+              <Select
                 id="rol"
-                type="text"
-                className="mt-2"
-                placeholder="pedro@gmail.com"
+                placeholder="Selecciona un rol"
+                options={rolesData?.data.map(item => ({
+                  label: item.role_name,
+                  value: item.id
+                }))}
+               
                 {...register("role", { required: "El role es requerido" })}
               />
+
               {errors.role && <p className="text-red-500">{errors.role.message}</p>}
+
             </div>
 
             <div>

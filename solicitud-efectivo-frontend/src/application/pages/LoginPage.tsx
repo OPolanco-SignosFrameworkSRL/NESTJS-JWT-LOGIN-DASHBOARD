@@ -7,10 +7,10 @@ import type { LoginFormSchema } from '@/infrastructure/schemas/auth/auth';
 
 import { GoPersonFill } from "react-icons/go";
 import Input from '../ui/Input/Input';
-import { hashPassword } from '@/shared/utilts/convertToSha256';
 import { useLogin } from '../hooks/auth';
 import { useEffect } from 'react';
 
+import sha256 from 'crypto-js/sha256';
 
 
 const LoginPage = () => {
@@ -37,12 +37,16 @@ const LoginPage = () => {
 
   const onSubmit = async (data: LoginFormSchema) => {
 
-    const hashedPassword =  await hashPassword(data.cedula, data.password);
+    const hashedPassword = sha256(data.cedula + data.password).toString()
+
+    console.log(hashedPassword)
+
 
     loginMutation.mutate({
       cedula: data.cedula,
       password: hashedPassword
     })
+    
  
   }
 

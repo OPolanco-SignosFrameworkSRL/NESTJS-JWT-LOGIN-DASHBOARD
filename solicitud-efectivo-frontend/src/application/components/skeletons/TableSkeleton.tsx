@@ -1,6 +1,6 @@
 import Container from "@/application/ui/Container/Container"
 
-const SkeletonTable = () => {
+const tableSkeleton = () => {
 
   const tableCssHeader = `text-sm sm:text-base h-12 px-4 text-left align-middle [&:has([role=checkbox])]:pr-0 w-[120px] 
   font-semibold text-black`
@@ -62,6 +62,9 @@ const SkeletonTable = () => {
                     <Container className="h-4 bg-gray-200 rounded animate-pulse w-4/6"></Container>
                   </th>
                   <th className={`${tableCssHeader}`}>
+                    <Container className="h-4 bg-gray-200 rounded animate-pulse w-4/6"></Container>
+                  </th>
+                  <th className={`${tableCssHeader}`}>
                     <Container className="h-4 bg-gray-200 rounded animate-pulse w-2/4"></Container>
                   </th>
                 </tr>
@@ -80,6 +83,9 @@ const SkeletonTable = () => {
                       </td>
                       <td className={tableCss}>
                         <Container className="h-4 bg-gray-200 rounded animate-pulse w-1/3"></Container>
+                      </td>
+                      <td className={tableCss}>
+                        <Container className="h-4 bg-gray-200 rounded animate-pulse w-2/3"></Container>
                       </td>
                       <td className={tableCss}>
                         <Container className="h-4 bg-gray-200 rounded animate-pulse w-2/3"></Container>
@@ -108,4 +114,4 @@ const SkeletonTable = () => {
   
 }
 
-export default SkeletonTable
+export default tableSkeleton
