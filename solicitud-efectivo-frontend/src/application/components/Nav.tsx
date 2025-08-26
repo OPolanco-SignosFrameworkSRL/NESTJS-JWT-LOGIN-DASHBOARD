@@ -1,5 +1,4 @@
 import { SiCashapp } from "react-icons/si";
-import { IoPeopleSharp } from "react-icons/io5";
 import { FaRegMoneyBillAlt } from "react-icons/fa";
 import { IoHomeSharp } from "react-icons/io5";
 import { LuActivity } from "react-icons/lu";
@@ -29,7 +28,6 @@ const Nav = () => {
             {label: "Desembolso", path: "/Disbursement", icon: <CiMoneyBill size={24} />},
         ]},
         {label: "Estadísticas", path: "/estadisticas", icon: <PiChartLineUpBold size={26} />},
-        {label: "Recursos Humanos", path: "/recursos-humanos", icon: <IoPeopleSharp size={26} />},
         {label: "Caja Chica", path: "/caja-chica", icon: <FaRegMoneyBillAlt size={26} />},
         {label: "Administración", path: "/admin", icon: <IoIosSettings size={26} />},
     ]

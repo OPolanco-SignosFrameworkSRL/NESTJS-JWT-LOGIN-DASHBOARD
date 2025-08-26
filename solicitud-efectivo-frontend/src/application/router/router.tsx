@@ -1,6 +1,5 @@
 import { Suspense } from 'react';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-//import { ProtectedRoute } from '../layout/AuthLayout';
 
 import Home from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
@@ -11,6 +10,7 @@ import Disbursement from '../pages/Disbursement';
 import { ProtectedRoute } from '@/application/layout/ProtectedRoute';
 import EditEmployee from '../pages/Admin/employees/EditEmployee';
 import Admin from '../pages/Admin/Admin';
+import PaymentSettle from '../pages/PaymentSettle';
 
 
 const RouterComponent = () => {
@@ -55,6 +55,10 @@ const RouterComponent = () => {
         {
           path: '/edit-employee',
           element: <EditEmployee/>
+        },
+        {
+          path: '/payment-settle',
+          element: <PaymentSettle/>
         },
         {
           path: '/admin',
