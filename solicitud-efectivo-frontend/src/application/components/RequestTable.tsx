@@ -1,23 +1,15 @@
-import { RiArrowRightSLine } from "react-icons/ri";
-import { RiArrowLeftSLine } from "react-icons/ri";
 import Input from "../ui/Input/Input";
 import Select from "../ui/Select/Select";
 import { twMerge } from 'tailwind-merge'
 import Container from "../ui/Container/Container";
+import Pagination from "./Pagination";
+import Text from "../ui/Text/Text";
 
 
 const RequestTable = () => {
 
     const tableCssHeader = 'text-sm sm:text-base h-12 px-4 text-left align-middle [&:has([role=checkbox])]:pr-0 w-[120px] font-semibold text-black'
     const tableCss = 'text-sm sm:text-base p-4 align-middle [&:has([role=checkbox])]:pr-0 truncate'
-
-    const numerosItems = [
-        {number: "1"},
-        {number: "2"},
-        {number: "3"},
-        {number: "4"},
-        {number: "5"},
-    ]
 
   return (
 
@@ -36,9 +28,10 @@ const RequestTable = () => {
 
             <Container className="flex flex-col md:flex-row gap-3 md:gap-5 px-10 py-5 w-full">
 
-                <Container className="flex items-center gap-2 w-full md:flex-grow">
+                <Container className="flex flex-col gap-2 w-full">
 
                     <span className="text-sm sm:text-base text-gray-800 font-semibold">Buscar:</span>
+
                     <Input
                         type="text"
                         placeholder="Buscar"
@@ -47,7 +40,7 @@ const RequestTable = () => {
 
                 </Container>
 
-                <Container className="flex items-center gap-2 w-full md:w-1/2 lg:w-3/6 xl:w-2/6  ">
+                <Container className="flex flex-col gap-2 w-full md:w-1/2 lg:w-3/6 xl:w-2/6  ">
 
                     <span className="text-sm sm:text-base text-gray-800 font-semibold whitespace-nowrap">Estado:</span>
 
@@ -106,29 +99,14 @@ const RequestTable = () => {
 
                 </Container>
 
+                <div className="flex  mb-5">
+                    <Pagination totalRecords={200} pageSize={10}/>
+                </div>
+
+
             </Container>
 
-            <Container className="flex w-full items-center justify-center mt-5 gap-2">
-
-                <Container className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground border h-10 w-10 bg-white border-emerald-200 hover:bg-emerald-50 cursor-pointer">
-                    <RiArrowLeftSLine/>
-                </Container>
-
-                <Container className="flex gap-2">
-
-                    {numerosItems.map((item, index) => (
-                        <span key={index} className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center bg-white gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 bg-background hover:text-accent-foreground border w-8 h-8 border-emerald-200 hover:bg-emerald-50 cursor-pointer">
-                            {item.number}
-                        </span>
-                    ))}
-
-                </Container>
-
-                <Container className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none bg-white disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground border h-10 w-10 border-emerald-200 hover:bg-emerald-50 cursor-pointer ">
-                    <RiArrowRightSLine/>
-                </Container>
-                
-        </Container>
+          
 
     </>
 

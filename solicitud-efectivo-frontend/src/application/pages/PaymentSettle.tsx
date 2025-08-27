@@ -10,6 +10,11 @@ import { MdFileUpload } from "react-icons/md";
 import Text from "../ui/Text/Text";
 import { MdOutlineFileUpload } from "react-icons/md";
 
+import React, {useCallback} from 'react'
+import {useDropzone, type FileWithPath} from 'react-dropzone'
+import type { File } from "node:buffer";
+
+
 
 
 
@@ -18,6 +23,12 @@ const PaymentSettle = () => {
 
 
   const { handleSubmit} = useForm({})
+
+  const onDrop = useCallback((acceptedFiles: FileWithPath[]) => {
+    console.log(acceptedFiles)
+  }, [])
+
+  const {getRootProps, getInputProps, isDragActive, acceptedFiles} = useDropzone({onDrop})
 
   const onSubmit = (data: any) => {
     console.log(data)
@@ -190,29 +201,53 @@ const PaymentSettle = () => {
                     <label htmlFor="amount" className="text-xs sm:text-base text-gray-700 font-medium flex items-center gap-2">
                         <MdFileUpload className="w-5 h-5 text-black" />
                         Adjuntar Documentos
+                        <span className="text-red-500 ml-1">*</span>
                     </label>
 
                 </div>
 
-                <div className="h-64  border-2 border-green-300 rounded-md ">
+                <div className="h-64 border-2 border-green-300 rounded-md" {...getRootProps()}>
 
-                    <div className="m-5 h-54 border-2 border-dashed border-green-200 items-center flex">
+                    <div className="m-5 h-54 border-2 border-dashed border-green-200 items-center flex relative">
 
                         <div className="flex flex-col w-full items-center">
 
-                            <MdOutlineFileUpload className="text-5xl sm:text-6xl"/>
+                            <div className="flex  flex-col  items-center z-9999">
+
+                                <MdOutlineFileUpload className="text-5xl sm:text-6xl"/>
 
 
-                            <Text text="Arrastra y suelta archivos aquí" />
-                            <Text text="o haz clic para seleccionar archivo" />
+                                <Text text="Arrastra y suelta archivos aquí"/>
+                                <Text text="o haz clic para seleccionar archivo"/>
 
-                            <input id="fileUpload" type="file" className="hidden" />
+                            </div>
 
-                            <label htmlFor="fileUpload"  className="cursor-pointer bg-green-500 text-white px-4 py-2 rounded mt-2">
-                             Subir archivo
-                            </label>
+                      
 
-                            <Text text="Formatos soportados: PDF, DOC, DOCX, JPG ,PNG" className="mt-2" />
+                            <div>
+                                <input id="fileUpload" {...getInputProps()} />
+                                {
+                                    isDragActive ?
+                                    <div className="border-2 border-dashed animate-pulse border-green-200 absolute top-0 left-0 right-0 bottom-0 w-full h-54 bg-gray-100"></div>  :
+                                    <div className="flex">
+                                        <label htmlFor="fileUpload"  className="cursor-pointer bg-green-500 text-white px-4 py-2 rounded mt-2">
+                                            Subir archivo
+                                        </label>
+                                    </div>
+                                }
+                            </div>
+
+
+
+                            <div className="flex flex-col items-center z-9999">
+
+                               
+
+                                <Text text="Formatos soportados: PDF, DOC, DOCX, JPG ,PNG" className="mt-2" />
+
+                            </div>
+
+
 
                         </div>
 
