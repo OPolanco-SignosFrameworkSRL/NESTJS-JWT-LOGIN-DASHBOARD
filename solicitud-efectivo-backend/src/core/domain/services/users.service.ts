@@ -1,17 +1,18 @@
 import { Injectable, NotFoundException, Logger, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, SelectQueryBuilder } from 'typeorm';
+import { DataSource, Repository, SelectQueryBuilder, In } from 'typeorm';
 import { UserEntity } from '../../../infrastructure/database/entities/user.entity';
 import { UserWriteEntity } from '../../../infrastructure/database/entities/user-write.entity';
+import { UsuarioRolEntity } from '../../../infrastructure/database/entities/usuario-rol.entity';
+import { RoleEntity } from '../../../infrastructure/database/entities/role.entity';
 import { CryptoService } from '../../../infrastructure/services/crypto.service';
 import {
   IUserResponse,
   IUserStats,
   IUserFilters,
   IUserUpdateData,
-  UserRole,
   //} from '../user.interface';
-} from '../interfaces/user.interface';
+} from '../user.interface';
 import { PaginationDto, PaginatedResponseDto } from '../../application/dto/pagination.dto';
 
 @Injectable()
@@ -23,51 +24,41 @@ export class UsersService {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(UserWriteEntity)
     private readonly userWriteRepository: Repository<UserWriteEntity>,
+    @InjectRepository(UsuarioRolEntity)
+    private readonly usuarioRolRepository: Repository<UsuarioRolEntity>,
+    @InjectRepository(RoleEntity)
+    private readonly roleRepository: Repository<RoleEntity>,
     private readonly dataSource: DataSource,
     private readonly cryptoService: CryptoService,
   ) { }
 
   /**
-   * Obtiene todos los usuarios activos con paginación
+   * Obtiene todos los usuarios con paginación y filtros
    */
   async findAll(filters?: IUserFilters): Promise<PaginatedResponseDto<IUserResponse>> {
     try {
-      const { page = 1, limit = 10, ...otherFilters } = filters || {};
+      const { page = 1, limit = 10 } = filters || {};
       const skip = (page - 1) * limit;
 
-      const queryBuilder = this.userRepository
-        .createQueryBuilder('user')
-        .where('user.valido = :valido', { valido: '1' });
-
-      if (otherFilters?.role) {
-        queryBuilder.andWhere('user.role = :role', { role: otherFilters.role });
-      }
-
-      if (otherFilters?.division) {
-        queryBuilder.andWhere('user.division = :division', { division: otherFilters.division });
-      }
-
-      if (otherFilters?.search) {
-        queryBuilder.andWhere(
-          '(user.nombre LIKE :search OR user.apellido LIKE :search OR user.cedula LIKE :search)',
-          { search: `%${otherFilters.search}%` }
-        );
-      }
+      const queryBuilder = this.createQueryBuilder(filters);
 
       // Obtener total de registros
       const total = await queryBuilder.getCount();
 
       // Aplicar paginación
       const users = await queryBuilder
-        .orderBy('user.nombre', 'DESC')
         .skip(skip)
         .take(limit)
         .getMany();
 
       const totalPages = Math.ceil(total / limit);
 
+      const mappedUsers = await Promise.all(
+        users.map(user => this.mapToUserResponse(user))
+      );
+
       return {
-        data: users.map(user => this.mapToUserResponse(user)),
+        data: mappedUsers,
         total,
         page,
         limit,
@@ -87,14 +78,14 @@ export class UsersService {
   async findOne(id: number): Promise<IUserResponse> {
     try {
       const user = await this.userRepository.findOne({
-        where: { id, valido: '1' },
+        where: { id, valido: true }
       });
 
       if (!user) {
         throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
       }
 
-      return this.mapToUserResponseWithNames(user);
+      return await this.mapToUserResponse(user);
     } catch (error) {
       this.logger.error(`Error obteniendo usuario ${id}:`, error);
       throw error;
@@ -107,7 +98,7 @@ export class UsersService {
   async findByCedula(cedula: string): Promise<IUserResponse> {
     try {
       const user = await this.userRepository.findOne({
-        where: { cedula, valido: '1' },
+        where: { cedula, valido: true }
       });
 
       if (!user) {
@@ -116,7 +107,7 @@ export class UsersService {
         );
       }
 
-      return this.mapToUserResponse(user);
+      return await this.mapToUserResponse(user);
     } catch (error) {
       this.logger.error(
         `Error obteniendo usuario por cédula ${cedula}:`,
@@ -133,7 +124,7 @@ export class UsersService {
     id: number,
      //updateData: IUserUpdateData,
     updateData: any,
-    currentUser?: { id: number; role: UserRole },
+    currentUser?: { id: number; role: number },
   ): Promise<IUserResponse> {
     try {
       // Buscar usuario en la tabla real
@@ -146,8 +137,8 @@ export class UsersService {
       }
 
       // Verificar permisos: Admin puede actualizar cualquier usuario, Usuario solo puede actualizar sus propios datos
-      //if (currentUser && currentUser.role !== UserRole.Admin && currentUser.id !== id) {
-      if (currentUser && currentUser.role !== 'Admin' && currentUser.id !== id) {
+      //if (currentUser && currentUser.role !== 1 && currentUser.id !== id) {
+      if (currentUser && currentUser.role !== 1 && currentUser.id !== id) {
         throw new UnauthorizedException('No tienes permisos para actualizar este usuario');
       }
 
@@ -155,7 +146,23 @@ export class UsersService {
       if (updateData.nombre) userWrite.nombre = updateData.nombre;
       if (updateData.apellido) userWrite.apellido = updateData.apellido;
       if (updateData.cedula) userWrite.cedula = updateData.cedula;
-      if (updateData.role) userWrite.role = updateData.role;
+      if (updateData.role) {
+        // Actualizar rol en UsuariosRoles, no en Appusuarios
+        const existing = await this.usuarioRolRepository.findOne({ where: { idUsuario: userWrite.id } });
+        if (existing) {
+          existing.idRol = updateData.role;
+          existing.userMod = currentUser?.id || null;
+          await this.usuarioRolRepository.save(existing);
+        } else {
+          const newLink = this.usuarioRolRepository.create({
+            idUsuario: userWrite.id,
+            idRol: updateData.role,
+            rowActive: true,
+            userAdd: currentUser?.id || userWrite.id,
+          });
+          await this.usuarioRolRepository.save(newLink);
+        }
+      }
       if (updateData.user_email) userWrite.user_email = updateData.user_email;
       if (updateData.telefono) userWrite.telefono = updateData.telefono;
       if (updateData.celular) userWrite.celular = updateData.celular;
@@ -238,7 +245,8 @@ export class UsersService {
 
       // Obtener datos actualizados desde la vista
       const updatedUser = await this.userRepository.findOne({
-        where: { id, valido: '1' }
+        where: { id, valido: true },
+
       });
 
       if (!updatedUser) {
@@ -246,7 +254,7 @@ export class UsersService {
       }
 
       this.logger.log(`Usuario ${id} actualizado exitosamente`);
-      return this.mapToUserResponse(updatedUser);
+      return await this.mapToUserResponse(updatedUser);
     } catch (error) {
       this.logger.error(`Error actualizando usuario ${id}:`, error);
       throw error;
@@ -262,7 +270,7 @@ export class UsersService {
     confirmPermanentDelete: boolean = false,
     reason?: string
   ): Promise<{ message: string; type: 'soft' | 'permanent'; user: any }> { */
-    currentUser?: { id: number; role: UserRole }
+    currentUser?: { id: number; role: number }
   ): Promise<{ message: string; user: any }> {
     try {
       // Buscar usuario en la tabla real
@@ -278,9 +286,9 @@ export class UsersService {
       await this.validateUserDeletion(userWrite, currentUser);
 
       // Soft delete (solo marcar como eliminado)
-      userWrite.valido = '0';
+      userWrite.valido = 0;
       userWrite.deleted_at = new Date();
-      userWrite.deleted_by = currentUser?.id || null;
+      userWrite.deleted_by = currentUser?.id || 0;
 
       await this.userWriteRepository.save(userWrite);
 
@@ -304,11 +312,15 @@ export class UsersService {
   /**
    * Valida si un usuario puede ser eliminado
    */
-  private async validateUserDeletion(user: UserWriteEntity, currentUser?: { id: number; role: UserRole }): Promise<void> {
-    // Verificar si es el último administrador
-    if (user.role === 'Admin') {
-      const adminCount = await this.userWriteRepository.count({
-        where: { role: 'Admin', valido: '1' }
+  private async validateUserDeletion(user: UserWriteEntity, currentUser?: { id: number; role: number }): Promise<void> {
+    // Verificar si es el último administrador - obtener rol desde UsuariosRoles
+    const usuarioRol = await this.usuarioRolRepository.findOne({
+      where: { idUsuario: user.id, rowActive: true }
+    });
+    
+    if (usuarioRol?.idRol === 1) {
+      const adminCount = await this.usuarioRolRepository.count({
+        where: { idRol: 1, rowActive: true }
       });
 
       if (adminCount <= 1) {
@@ -330,7 +342,7 @@ export class UsersService {
   /**
    * Restaura un usuario eliminado (soft delete)
    */
-  async restore(id: number, currentUser?: { id: number; role: UserRole }): Promise<{ message: string; user: any }> {
+  async restore(id: number, currentUser?: { id: number; role: number }): Promise<{ message: string; user: any }> {
     try {
       const userWrite = await this.userWriteRepository.findOne({
         where: { id }
@@ -340,12 +352,12 @@ export class UsersService {
         throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
       }
 
-      if (userWrite.valido === '1') {
+      if (userWrite.valido === 1) {
         throw new BadRequestException('El usuario ya está activo');
       }
 
       // Restaurar usuario
-      userWrite.valido = '1';
+      userWrite.valido = 1;
       userWrite.deleted_at = null;
       userWrite.deleted_by = null;
 
@@ -369,38 +381,17 @@ export class UsersService {
   async findDeleted(): Promise<IUserResponse[]> {
     try {
       const deletedUsers = await this.userWriteRepository.find({
-        where: { valido: '0' },
+        where: { valido: 0 },
         order: { deleted_at: 'DESC' }
       });
 
       return deletedUsers.map(user => ({
         id: user.id,
         cedula: user.cedula,
-        nombre: user.nombre,
-        apellido: user.apellido,
         fullname: user.getFullName(),
-        role: user.role as UserRole,
+        rolesUsuario: [], // Los usuarios eliminados no tienen roles activos
         user_email: user.user_email,
-        telefono: user.telefono,
-        direccion: user.direccion,
-        celular: user.celular,
-        /*
-        user_status: user.user_status,
-        caja_id: user.caja_id,
-        tienda_id: user.tienda_id,
-        allow_multi_tienda: user.allow_multi_tienda,
-        max_descuento: user.max_descuento,
-        close_caja: user.close_caja,
-        user_account_email: user.user_account_email,
-        comision_porciento: user.comision_porciento,
-        default_portalid: user.default_portalid,
-        nuevocampo: user.nuevocampo,
-        encargadoId: user.encargadoId,
-        valido: user.valido,
-        deleted_at: user.deleted_at,
-        deleted_by: user.deleted_by
-        */
-        valido: user.valido === '1'
+        valido: user.valido === 1 ? 1 : 0
       }));
     } catch (error) {
       this.logger.error('Error obteniendo usuarios eliminados:', error);
@@ -419,7 +410,7 @@ export class UsersService {
     try {
       const users = await this.userRepository
         .createQueryBuilder('user')
-        .where('user.valido = :valido', { valido: '1' })
+        .where('user.valido = :valido', { valido: true })
         .andWhere(
           '(user.nombre LIKE :term OR user.apellido LIKE :term OR user.cedula LIKE :term)',
           { term: `%${term}%` },
@@ -427,7 +418,7 @@ export class UsersService {
         .orderBy('user.nombre', 'DESC')
         .getMany();
 
-      return users.map(user => this.mapToUserResponse(user));
+      return await Promise.all(users.map(user => this.mapToUserResponse(user)));
     } catch (error) {
       this.logger.error(
         `Error buscando usuarios con término "${term}":`,
@@ -440,14 +431,25 @@ export class UsersService {
   /**
    * Obtiene usuarios por rol
    */
-  async findByRole(role: UserRole): Promise<IUserResponse[]> {
+  async findByRole(role: number): Promise<IUserResponse[]> {
     try {
-      const users = await this.userRepository.find({
-        where: { role: role as string, valido: '1' },
-        order: { nombre: 'DESC' },
+      // Buscar usuarios por rol desde UsuariosRoles
+      const usuariosRoles = await this.usuarioRolRepository.find({
+        where: { idRol: role, rowActive: true }
       });
 
-      return users.map(user => this.mapToUserResponse(user));
+      const userIds = usuariosRoles.map(ur => ur.idUsuario);
+      
+      if (userIds.length === 0) {
+        return [];
+      }
+
+      const users = await this.userRepository.find({
+        where: { id: In(userIds), valido: true },
+        order: { nombre: 'DESC' }
+      });
+
+      return await Promise.all(users.map(user => this.mapToUserResponse(user)));
     } catch (error) {
       this.logger.error(`Error obteniendo usuarios por rol ${role}:`, error);
       throw error;
@@ -458,13 +460,17 @@ export class UsersService {
    * Obtiene usuarios por división
    */
   async findByDivision(division: string): Promise<IUserResponse[]> {
+    // Temporalmente deshabilitado - campo division no existe en Appusuarios
+    return [];
+    /*
     try {
       const users = await this.userRepository.find({
-        where: { division, valido: '1' },
+        where: { division, valido: true },
         order: { nombre: 'DESC' },
+
       });
 
-      return users.map(user => this.mapToUserResponse(user));
+      return await Promise.all(users.map(user => this.mapToUserResponse(user)));
     } catch (error) {
       this.logger.error(
         `Error obteniendo usuarios por división ${division}:`,
@@ -472,6 +478,7 @@ export class UsersService {
       );
       throw error;
     }
+    */
   }
 
   /**
@@ -480,36 +487,32 @@ export class UsersService {
   async getStats(): Promise<IUserStats> {
     try {
       const totalUsers = await this.userRepository.count({
-        where: { valido: '1' },
+        where: { valido: true },
       });
 
-      const usersByRole = await this.userRepository
-        .createQueryBuilder('user')
-        .select('user.role', 'role')
-        .addSelect('COUNT(*)', 'count')
-        .where('user.valido = :valido', { valido: '1' })
-        .groupBy('user.role')
-        .getRawMany();
+      // Temporalmente deshabilitado - el rol se obtiene desde UsuariosRoles
+      // const usersByRole = await this.userRepository
+      //   .createQueryBuilder('user')
+      //   .select('user.role', 'role')
+      //   .addSelect('COUNT(*)', 'count')
+      //   .where('user.valido = :valido', { valido: true })
+      //   .groupBy('user.role')
+      //   .getRawMany();
+      const usersByRole = [];
 
-      const usersByDivision = await this.userRepository
-        .createQueryBuilder('user')
-        .select('user.division', 'division')
-        .addSelect('COUNT(*)', 'count')
-        .where('user.valido = :valido', { valido: '1' })
-        .groupBy('user.division')
-        .getRawMany();
+      // Temporalmente deshabilitado - campo division no existe en Appusuarios
+      // const usersByDivision = await this.userRepository
+      //   .createQueryBuilder('user')
+      //   .select('user.division', 'division')
+      //   .addSelect('COUNT(*)', 'count')
+      //   .where('user.valido = :valido', { valido: true })
+      //   .groupBy('user.division')
+      //   .getRawMany();
 
       return {
-        /*
         totalUsers,
-        usersByRole,
-        usersByDivision,
-        */
-        total: totalUsers,
-        active: totalUsers, // Simplificación - todos los usuarios obtenidos están activos
-        inactive: 0,
-        byRole: usersByRole.reduce((acc, item) => ({ ...acc, [item.role]: parseInt(item.count) }), {} as Record<UserRole, number>),
-        byDivision: usersByDivision.reduce((acc, item) => ({ ...acc, [item.division]: parseInt(item.count) }), {} as Record<string, number>),
+        usersByRole: usersByRole.map(item => ({ role: item.role, count: parseInt(item.count) })),
+        usersByDivision: [], // Temporalmente vacío
       };
     } catch (error) {
       this.logger.error('Error obteniendo estadísticas de usuarios:', error);
@@ -523,7 +526,7 @@ export class UsersService {
   async exists(cedula: string): Promise<boolean> {
     try {
       const count = await this.userRepository.count({
-        where: { cedula, valido: '1' },
+        where: { cedula, valido: true },
       });
       return count > 0;
     } catch (error) {
@@ -557,7 +560,7 @@ export class UsersService {
         where: {
           cedula,
           password: passwordHash,
-          valido: '1'
+          valido: 1
         },
       });
 
@@ -601,20 +604,33 @@ export class UsersService {
    */
   private createQueryBuilder(filters?: IUserFilters): SelectQueryBuilder<UserEntity> {
     const queryBuilder = this.userRepository
-      .createQueryBuilder('user')
-      .where('user.valido = :valido', { valido: '1' });
+      .createQueryBuilder('user');
 
-    if (filters?.role) {
-      queryBuilder.andWhere('user.role = :role', {
-        role: filters.role as string,
+    // Filtro por validez del usuario
+    // Si active no está definido: traer TODOS los usuarios (activos e inactivos)
+    // Si active es true: traer solo válidos (valido = 1)
+    // Si active es false: traer solo inválidos (valido = 0)
+    if (filters?.active !== undefined) {
+      queryBuilder.where('user.valido = :valido', {
+        valido: filters.active ? true : false  // Convertir explícitamente a booleano
       });
+      
     }
+    // Si no se especifica active, NO aplicar filtro de valido (traer todos)
 
-    if (filters?.division) {
-      queryBuilder.andWhere('user.division = :division', {
-        division: filters.division,
-      });
-    }
+    // Temporalmente deshabilitado - el rol se obtiene desde UsuariosRoles
+    // if (filters?.role) {
+    //   queryBuilder.andWhere('user.role = :role', {
+    //     role: filters.role,
+    //   });
+    // }
+
+    // Temporalmente deshabilitado - campo division no existe en Appusuarios
+    // if (filters?.division) {
+    //   queryBuilder.andWhere('user.division = :division', {
+    //     division: filters.division,
+    //   });
+    // }
 
     if (filters?.search) {
       queryBuilder.andWhere(
@@ -623,64 +639,36 @@ export class UsersService {
       );
     }
 
-    if (filters?.active !== undefined) {
-      queryBuilder.andWhere('user.estado = :estado', {
-        estado: filters.active ? 'ACTIVO' : 'INACTIVO',
-      });
-    }
-
     return queryBuilder.orderBy('user.nombre', 'DESC');
   }
+
+
 
   /**
    * Mapea la entidad User a IUserResponse
    */
-  private mapToUserResponse(user: UserEntity): IUserResponse {
+  private async mapToUserResponse(user: UserEntity): Promise<IUserResponse> {
+    // Obtener todos los roles del usuario desde UsuariosRoles
+    const usuariosRoles = await this.usuarioRolRepository.find({
+      where: { idUsuario: user.id, rowActive: true },
+      relations: ['roleEntity']
+    });
+
+    // Construir array de rolesUsuario
+    const rolesUsuario = usuariosRoles.map(ur => ({
+      id: ur.roleEntity.id,
+      roleName: ur.roleEntity.roleName
+    }));
+
     return {
       id: user.id,
       cedula: user.cedula,
-      nombre: user.nombre,
-      apellido: user.apellido,
       fullname: user.getFullName(),
-      role: user.role as UserRole,
+      rolesUsuario: rolesUsuario,
       user_email: user.user_email,
-      /*
-      telefono: user.telefono,
-      direccion: '',
-      celular: '',
-      user_status: 1,
-      caja_id: '',
-      tienda_id: '',
-      allow_multi_tienda: '0',
-      max_descuento: '',
-      close_caja: '0',
-      user_account_email: '',
-      comision_porciento: '',
-      default_portalid: '',
-      nuevocampo: '',
-      encargadoId: '', 
-      valido: user.valido,
-      telefono: user.telefono,
-      direccion: user.direccion,
-      celular: user.celular,
-      */
-      valido: user.valido === '1',
+      valido: user.valido ? 1 : 0
     };
   }
 
-  private mapToUserResponseWithNames(user: UserEntity): IUserResponse {
-    return {
-      id: user.id,
-      cedula: user.cedula,
-      nombre: user.nombre,
-      apellido: user.apellido,
-      //fullname: user.getFullName(),
-      role: user.role as UserRole,
-      user_email: user.user_email,
-      telefono: user.telefono,
-      direccion: user.direccion,
-      celular: user.celular,
-      valido: user.valido === '1',
-    };
-  }
+
 }

@@ -1,17 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsEnum, IsString, IsBoolean, IsInt, Min, Max } from 'class-validator';
-import { UserRole } from '../../domain/user.interface';
-import { Type } from 'class-transformer';
+import { IsOptional, IsEnum, IsString, IsBoolean, IsInt, Min, Max, IsNumber } from 'class-validator';
+import { Type, Transform } from 'class-transformer';
+import { UserRole } from '../../domain/interfaces/user.interface';
 
 export class UserFiltersDto {
   @ApiProperty({
-    description: 'Filtrar por rol',
-    enum: UserRole,
+    description: 'ID del rol del usuario (1=Admin, 2=Usuario, 3=Manager, 4=Supervisor)',
+    example: 1,
+    enum: [1, 2, 3, 4],
     required: false,
   })
   @IsOptional()
-  @IsEnum(UserRole, { message: 'El rol debe ser válido' })
-  role?: UserRole;
+  @IsNumber({}, { message: 'El rol debe ser un número' })
+  role?: number;
 
   @ApiProperty({
     description: 'Filtrar por división',
@@ -32,12 +33,21 @@ export class UserFiltersDto {
   search?: string;
 
   @ApiProperty({
-    description: 'Filtrar solo usuarios activos',
+    description: 'Filtrar usuarios por estado de validez. true: solo válidos, false: solo inválidos, undefined: todos',
     example: true,
     required: false,
   })
   @IsOptional()
   @IsBoolean({ message: 'El campo active debe ser un booleano' })
+  @Transform(({ value }) => {
+    if (value === undefined || value === null || value === '') return undefined;
+    if (typeof value === 'boolean') return value;
+    if (typeof value === 'number') return value === 1;
+    const v = String(value).toLowerCase();
+    if (v === 'true' || v === '1') return true;
+    if (v === 'false' || v === '0') return false;
+    return undefined;
+  })
   active?: boolean;
 
   // Campos de paginación

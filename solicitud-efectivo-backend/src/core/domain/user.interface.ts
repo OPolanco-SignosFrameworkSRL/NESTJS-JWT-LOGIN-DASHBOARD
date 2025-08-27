@@ -11,7 +11,7 @@ export interface IUser {
   nombre: string;
   apellido: string;
   fullname: string;
-  role: UserRole;
+  role: number; // Cambiar de UserRole a number
   user_email: string;
   /*
   division: string;
@@ -28,9 +28,9 @@ export interface IUserPayload {
   cedula: string;
   sub: number;       // ID del usuario (JWT standard)
   fullname: string;
-  role: UserRole;
-  email: string;  // ← Agregar esta línea
-  valido: string;
+  rolesUsuario: Array<{ id: number; roleName: string }>; // Array de roles del usuario
+  email: string;
+  valido: boolean;
 }
 
 export interface ILoginResponse {
@@ -40,7 +40,7 @@ export interface ILoginResponse {
     cedula: string;
     fullname: string;
     apellido: string;
-    role: UserRole;
+    role: number; // Cambiar de UserRole a number
     user_email: string;
     //division: string;
     //cargo: string;
@@ -58,7 +58,7 @@ export interface IUserCreateData {
   fullname: string;
   password: string;
   clave: string;
-  role?: UserRole;
+  role?: number; // Cambiar de UserRole a number
   user_email?: string;
   telefono?: string;
   direccion?: string;
@@ -80,7 +80,7 @@ export interface IUserCreateData {
 export interface IUserUpdateData {
   nombre?: string;
   apellido?: string;
-  role?: UserRole;
+  role?: number; // Cambiar de UserRole a number
   user_email?: string;
   telefono?: string;
   direccion?: string;
@@ -104,13 +104,13 @@ export interface IUserResponse {
   id: number;
   cedula: string;
   fullname: string;
-  role: UserRole;
+  rolesUsuario: Array<{ id: number; roleName: string }>; // Array de roles del usuario
   user_email: string;
-  valido: string;
+  valido: number;
 }
 
 export interface IUserFilters {
-  role?: UserRole;
+  role?: number; // Cambiar de UserRole a number
   division?: string;
   search?: string;
   active?: boolean;

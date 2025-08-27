@@ -58,6 +58,52 @@ export class AuthController {
   }
 
   /**
+   * ENDPOINT TEMPORAL - Crear usuario inicial sin autenticación
+   * ⚠️ SOLO PARA DESARROLLO - Eliminar en producción
+   */
+  /* @Post('create-initial-user')
+  @ApiOperation({ summary: 'Crear usuario inicial (temporal)' })
+  @ApiResponse({ status: 201, description: 'Usuario inicial creado' })
+  async createInitialUser() {
+    const userData = {
+      cedula: "40208712480",
+      nombre: "Admin",
+      apellido: "Sistema",
+      fullname: "Admin Sistema",
+      password: "123456",
+      clave: "0000",
+      user_email: "admin@sistema.com",
+      telefono: "8091234567",
+      direccion: "Oficina Central",
+      celular: "8091234567",
+      user_status: 1,
+      caja_id: "1",
+      tienda_id: "1",
+      allow_multi_tienda: "0",
+      max_descuento: "0",
+      close_caja: "1",
+      user_account_email: "admin@sistema.com",
+      user_account_email_passw: "123456",
+      comision_porciento: "0",
+      default_portalid: "1",
+      nuevocampo: "",
+      encargadoId: "1"
+    };
+
+    return await this.authService.createUser(userData);
+  } */
+
+  /**
+   * ENDPOINT TEMPORAL - Verificar usuario sin autenticación
+   * ⚠️ SOLO PARA DESARROLLO - Eliminar en producción
+   
+  @Post('check-user')
+  @ApiOperation({ summary: 'Verificar usuario (temporal)' })
+  async checkUser(@Body() body: { cedula: string }) {
+    return await this.authService.checkUserInfo(body.cedula);
+  }
+*/
+  /**
    * Verifica el token JWT y retorna información del usuario
    */
   @Post('verify')

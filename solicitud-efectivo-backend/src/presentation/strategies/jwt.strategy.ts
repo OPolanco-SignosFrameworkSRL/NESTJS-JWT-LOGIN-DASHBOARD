@@ -16,12 +16,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: any): Promise<IUserPayload> {
     return {
-      id: payload.sub,        // El ID del usuario está en payload.sub
+      id: payload.sub,
       cedula: payload.cedula,
       sub: payload.sub,
       fullname: payload.fullname,
-      role: payload.role,
-      email: payload.email,  // ← Agregar esta línea
+      rolesUsuario: payload.rolesUsuario || [],
+      email: payload.email,
       valido: payload.valido,
     };
   }

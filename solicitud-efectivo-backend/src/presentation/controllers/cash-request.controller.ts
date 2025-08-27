@@ -148,7 +148,7 @@ export class CashRequestController {
     status: 200,
     description: 'Estadísticas obtenidas exitosamente',
   })
-  @Roles('Admin')
+  @Roles(1) // Admin
   async getStats(): Promise<ICashRequestStats> {
     return await this.cashRequestService.getStats();
   }
@@ -162,7 +162,7 @@ export class CashRequestController {
     status: 200,
     description: 'Lista de solicitudes pendientes obtenida exitosamente',
   })
-  @Roles('Admin', 'Manager', 'Supervisor')
+  @Roles(1, 3, 4) // Admin, Manager, Supervisor
   async findPendingRequests(): Promise<ICashRequestResponse[]> {
     return await this.cashRequestService.findPendingRequests();
   }
@@ -176,7 +176,7 @@ export class CashRequestController {
     status: 200,
     description: 'Lista de solicitudes eliminadas obtenida exitosamente',
   })
-  @Roles('Admin')
+  @Roles(1) // Admin
   async findDeleted(): Promise<ICashRequestResponse[]> {
     return await this.cashRequestService.findDeleted();
   }
@@ -259,7 +259,7 @@ export class CashRequestController {
     status: 403,
     description: 'No tienes permisos para aprobar solicitudes',
   })
-  @Roles('Admin', 'Manager', 'Supervisor')
+  @Roles(1, 3, 4) // Admin, Manager, Supervisor
   async approve(
     @Param('id', ParseIntPipe) id: number,
     @Body() approveCashRequestDto: ApproveCashRequestDto,
@@ -282,7 +282,7 @@ export class CashRequestController {
     status: 403,
     description: 'No tienes permisos para rechazar solicitudes',
   })
-  @Roles('Admin', 'Manager', 'Supervisor')
+  @Roles(1, 3, 4) // Admin, Manager, Supervisor
   async reject(
     @Param('id', ParseIntPipe) id: number,
     @Body() approveCashRequestDto: ApproveCashRequestDto,
@@ -305,7 +305,7 @@ export class CashRequestController {
     status: 403,
     description: 'Solo los administradores pueden restaurar solicitudes',
   })
-  @Roles('Admin')
+  @Roles(1) // Admin
   async restore(
     @Param('id', ParseIntPipe) id: number,
     @Req() req: any
