@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { UserEntity } from '../../../infrastructure/database/entities/user.entity';
 import { UserWriteEntity } from '../../../infrastructure/database/entities/user-write.entity';
+import { UsuarioRolEntity } from '../../../infrastructure/database/entities/usuario-rol.entity';
 import {
   IUser,
   IUserPayload,
@@ -13,6 +14,8 @@ import {
 } from '../user.interface';
 import { CryptoService } from '../../../infrastructure/services/crypto.service';
 import { ConfigService } from '@nestjs/config';
+import { Transform } from 'class-transformer';
+import { IsOptional, IsBoolean } from 'class-validator';
 
 @Injectable()
 export class AuthService {
@@ -27,6 +30,8 @@ export class AuthService {
     private readonly userRepository: Repository<UserEntity>,
     @InjectRepository(UserWriteEntity)
     private readonly userWriteRepository: Repository<UserWriteEntity>,
+    @InjectRepository(UsuarioRolEntity)
+    private readonly usuarioRolRepository: Repository<UsuarioRolEntity>,
     private readonly dataSource: DataSource,
   ) {}
 
@@ -45,10 +50,15 @@ export class AuthService {
     }
 
     try {
+      this.logger.log(`=== VALIDANDO USUARIO ${cedula} ===`);
+      
       // Buscar usuario en la vista para obtener datos completos
+      this.logger.log('Ejecutando consulta userRepository.findOne...');
       const user = await this.userRepository.findOne({
-        where: { cedula, valido: '1' },
+        where: { cedula, valido: true }
       });
+      
+      this.logger.log(`Usuario encontrado: ${user ? 'SI' : 'NO'}`);
 
       if (!user) {
         this.logger.warn(`Usuario no encontrado: ${cedula}`);
@@ -56,9 +66,12 @@ export class AuthService {
       }
 
       // Buscar usuario en la tabla real para obtener la contraseña
+      this.logger.log('Ejecutando consulta userWriteRepository.findOne...');
       const userWrite = await this.userWriteRepository.findOne({
         where: { cedula },
       });
+      
+      this.logger.log(`Usuario en tabla escritura encontrado: ${userWrite ? 'SI' : 'NO'}`);
 
       if (!userWrite) {
         this.logger.warn(
@@ -92,6 +105,14 @@ export class AuthService {
       // Si el 'codigo' se usará para alguna otra validación (ej. 2FA, API Key),
       // esa lógica debería implementarse en un punto separado o con un DTO de login diferente.
 
+      // Obtener rol desde UsuariosRoles
+      this.logger.log('Ejecutando consulta usuarioRolRepository.findOne...');
+      const usuarioRol = await this.usuarioRolRepository.findOne({
+        where: { idUsuario: user.id, rowActive: true }
+      });
+      
+      this.logger.log(`Rol encontrado: ${usuarioRol ? 'SI' : 'NO'}`);
+
       // Usuario válido
       const userData: any = {
         id: user.id,
@@ -99,13 +120,8 @@ export class AuthService {
         nombre: user.nombre,
         apellido: user.apellido,
         fullname: user.getFullName(),
-        role: user.role as UserRole,
+        role: usuarioRol?.idRol || 2, // El role desde UsuariosRoles, default: Usuario (ID 2)
         user_email: user.user_email,
-        division: user.division,
-        cargo: user.cargo,
-        dependencia: user.dependencia,
-        recinto: user.recinto,
-        estado: user.estado,
         valido: user.valido,
       };
 
@@ -159,31 +175,42 @@ export class AuthService {
         cedula: data.cedula,
         nombre: data.nombre,
         apellido: data.apellido,
-        // fullname no es un campo válido en UserWriteEntity, así que lo eliminamos para evitar el error de tipado
         codigo: codigoHash,
-        password: hashedPassword, // Usar hashedPassword, no codigoHash
-        role: data.role || 'Usuario',
+        password: hashedPassword,
         user_email: data.user_email,
         telefono: data.telefono,
         direccion: data.direccion,
         celular: data.celular,
         user_status: data.user_status || 1,
-        caja_id: data.caja_id,
-        tienda_id: data.tienda_id,
-        allow_multi_tienda: data.allow_multi_tienda || '0',
-        max_descuento: data.max_descuento,
-        close_caja: data.close_caja || '0',
+        caja_id: data.caja_id?.toString(),
+        tienda_id: data.tienda_id?.toString(),
+        allow_multi_tienda: (data.allow_multi_tienda || 0).toString(),
+        max_descuento: data.max_descuento?.toString(),
+        close_caja: (data.close_caja || 0).toString(),
         user_account_email: data.user_account_email,
         user_account_email_passw: data.user_account_email_passw,
-        comision_porciento: data.comision_porciento,
-        default_portalid: data.default_portalid,
+        comision_porciento: data.comision_porciento?.toString(),
+        default_portalid: data.default_portalid?.toString(),
         nuevocampo: data.nuevocampo,
-        encargadoId: data.encargadoId,
+        encargadoId: data.encargadoId?.toString(),
         passwchanged: '0',
-        valido: '1',
+        valido: 1,
       });
+      
 
       const savedUser = await this.userWriteRepository.save(newUser);
+
+      // Insertar en UsuariosRoles SOLO si viene data.role
+      if (data.role) {
+        await this.usuarioRolRepository.save(
+          this.usuarioRolRepository.create({
+            idUsuario: savedUser.id,
+            idRol: data.role,
+            rowActive: true,
+            userAdd: savedUser.id,
+          }),
+        );
+      }
 
       this.logger.log(`Usuario creado exitosamente: ${data.cedula} con ID: ${savedUser.id}`);
 
@@ -191,6 +218,7 @@ export class AuthService {
         success: true,
         message: 'Usuario creado exitosamente',
         userId: savedUser.id,  // ← Usar savedUser.id directamente
+      // ← Usar savedUser.id directamente
       };
     } catch (error) {
       this.logger.error(`Error creando usuario ${data.cedula}:`, error);
@@ -214,14 +242,26 @@ export class AuthService {
    * Genera el token JWT para el usuario autenticado
    */
   async login(user: IUser): Promise<ILoginResponse> {
+    // Obtener roles del usuario desde UsuariosRoles
+    const usuariosRoles = await this.usuarioRolRepository.find({
+      where: { idUsuario: user.id, rowActive: true },
+      relations: ['roleEntity']
+    });
+
+    // Construir array de rolesUsuario
+    const rolesUsuario = usuariosRoles.map(ur => ({
+      id: ur.roleEntity.id,
+      roleName: ur.roleEntity.roleName
+    }));
+
     const payload: IUserPayload = {
-      id: user.id,        // Agregar el campo id
+      id: user.id,
       cedula: user.cedula,
       sub: user.id,
       fullname: user.fullname,
-      role: user.role,
-      email: user.user_email,  // ← Agregar esta línea
-      valido: user.valido,
+      rolesUsuario: rolesUsuario,
+      email: user.user_email,
+      valido: Boolean(user.valido),
     };
 
     const token = this.jwtService.sign(payload);
@@ -238,11 +278,7 @@ export class AuthService {
         apellido: user.apellido,
         role: user.role,
         user_email: user.user_email,
-        valido: user.valido,
-        //division: user.division,
-        //cargo: user.cargo,
-        //dependencia: user.dependencia,
-        //recinto: user.recinto,
+        valido: (user.valido ? 1 : 0).toString(),
       },
       expires_in: this.parseExpiresIn(expiresIn),
     };
@@ -254,11 +290,19 @@ export class AuthService {
    */
   async checkUserInfo(cedula: string): Promise<any> {
     try {
-      const user = await this.userRepository.findOne({ where: { cedula } });
+      const user = await this.userRepository.findOne({ 
+        where: { cedula },
+
+      });
 
       if (!user) {
         return { error: 'Usuario no encontrado' };
       }
+
+      // Obtener rol desde UsuariosRoles
+      const usuarioRol = await this.usuarioRolRepository.findOne({
+        where: { idUsuario: user.id, rowActive: true }
+      });
 
       // No podemos recrear el 'expectedHash' para 'codigo' aquí sin la 'clave' original
       // que fue proporcionada durante el registro.
@@ -271,13 +315,8 @@ export class AuthService {
         apellido: user.apellido,
         codigo: user.codigo, // Este es ahora el hash de (cedula + clave_proporcionada_en_registro)
         valido: user.valido,
-        role: user.role,
+        role: usuarioRol?.idRol || 2,
         user_email: user.user_email,
-        division: user.division,
-        cargo: user.cargo,
-        dependencia: user.dependencia,
-        recinto: user.recinto,
-        estado: user.estado,
         debug: {
           message:
             'El campo "codigo" ahora contiene el hash de la combinación de la cédula y la clave proporcionada por el usuario durante el registro.',
@@ -517,7 +556,7 @@ export class AuthService {
         where: { 
           cedula,
           password: passwordHash,
-          valido: '1' 
+          valido: 1
         },
       });
 
@@ -554,5 +593,22 @@ export class AuthService {
       
       throw new UnauthorizedException('Error interno del servidor');
     }
+  }
+
+  /**
+   * Mapea nombres de roles a IDs según la tabla approles-new
+   */
+  private mapRoleNameToId(roleName: string): number {
+    const roleMap: Record<string, number> = {
+      'ADMINISTRADOR': 1,
+      'Admin': 1,
+      'CONTABLE': 2,
+      'Usuario': 2,
+      'MANAGER': 3,
+      'Manager': 3,
+      'ENCARGADO CONTABILIDAD': 4,
+      'Supervisor': 4,
+    };
+    return roleMap[roleName] || 2; // Default: Usuario (ID 2)
   }
 }

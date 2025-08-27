@@ -12,6 +12,7 @@ import { CryptoService } from '../../infrastructure/services/crypto.service';
 // Entidades de base de datos
 import { UserEntity } from '../../infrastructure/database/entities/user.entity';
 import { UserWriteEntity } from '../../infrastructure/database/entities/user-write.entity';
+import { UsuarioRolEntity } from '../../infrastructure/database/entities/usuario-rol.entity';
 
 // Casos de uso y servicios
 import { ApplicationModule } from '../../core/application/application.module';
@@ -27,7 +28,7 @@ import { ApplicationModule } from '../../core/application/application.module';
     
     // Módulos de NestJS
     PassportModule,
-    TypeOrmModule.forFeature([UserEntity, UserWriteEntity]),
+    TypeOrmModule.forFeature([UserEntity, UserWriteEntity, UsuarioRolEntity]),
     
     // Configuración JWT
     JwtModule.registerAsync({

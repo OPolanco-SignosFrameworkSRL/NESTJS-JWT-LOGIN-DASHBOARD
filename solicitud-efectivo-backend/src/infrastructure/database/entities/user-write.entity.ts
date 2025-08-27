@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 
-@Entity('appusuarios')
+@Entity('Appusuarios')
 @Index(['cedula'], { unique: true })
 export class UserWriteEntity {
   @ApiProperty({
@@ -18,7 +18,7 @@ export class UserWriteEntity {
     minLength: 11,
     maxLength: 11,
   })
-  @Column({ length: 11 })
+  @Column({ name: 'cedula', length: 25 })
   @Index()
   cedula: string;
 
@@ -27,7 +27,7 @@ export class UserWriteEntity {
     example: 'Raul',
     maxLength: 100,
   })
-  @Column({ length: 100 })
+  @Column({ name: 'nombre', length: 255 })
   nombre: string;
 
   @ApiProperty({
@@ -35,14 +35,14 @@ export class UserWriteEntity {
     example: 'Vargas',
     maxLength: 100,
   })
-  @Column({ length: 100 })
+  @Column({ name: 'apellido', length: 255 })
   apellido: string;
 
   @ApiProperty({
     description: 'Hash SHA-256 del código de usuario',
     example: '896ece9b8a314e6922783f9938ad8b1ad95cda0d11ece5902b36a2e879ccbaa2',
   })
-  @Column({ length: 64 })
+  @Column({ name: 'codigo', length: 100, nullable: true })
   @Exclude()
   codigo: string;
 
@@ -50,25 +50,18 @@ export class UserWriteEntity {
     description: 'Hash SHA-256 de la contraseña del usuario',
     example: '896ece9b8a314e6922783f9938ad8b1ad95cda0d11ece5902b36a2e879ccbaa2',
   })
-  @Column({ length: 64 })
+  @Column({ name: 'password', length: 100, nullable: true })
   @Exclude()
   password: string;
 
-  @ApiProperty({
-    description: 'Rol del usuario en el sistema',
-    example: 'Usuario',
-    enum: ['Admin', 'Usuario', 'Supervisor', 'Manager'],
-    default: 'Usuario',
-  })
-  @Column({ length: 50, default: 'Usuario' })
-  role: string;
+  // El rol se almacena en la tabla UsuariosRoles, no en Appusuarios
 
   @ApiProperty({
     description: 'Email del usuario',
     example: 'Raul.Vargas@grupoastro.com.do',
     maxLength: 255,
   })
-  @Column({ length: 255, nullable: true })
+  @Column({ name: 'user_email', length: 255, nullable: true })
   user_email: string;
 
   @ApiProperty({
@@ -76,7 +69,7 @@ export class UserWriteEntity {
     example: '8091234567',
     maxLength: 20,
   })
-  @Column({ length: 20, nullable: true })
+  @Column({ name: 'telefono', length: 20, nullable: true })
   telefono: string;
 
   @ApiProperty({
@@ -84,7 +77,7 @@ export class UserWriteEntity {
     example: 'Calle Principal #123',
     maxLength: 255,
   })
-  @Column({ length: 255, nullable: true })
+  @Column({ name: 'direccion', length: 255, nullable: true })
   direccion: string;
 
   @ApiProperty({
@@ -92,14 +85,14 @@ export class UserWriteEntity {
     example: '8091234567',
     maxLength: 20,
   })
-  @Column({ length: 20, nullable: true })
+  @Column({ name: 'celular', length: 20, nullable: true })
   celular: string;
 
   @ApiProperty({
     description: 'Estado del usuario',
     example: 1,
   })
-  @Column({ type: 'bigint', default: 1 })
+  @Column({ name: 'user_status', type: 'tinyint', nullable: true })
   user_status: number;
 
   @ApiProperty({
@@ -107,7 +100,7 @@ export class UserWriteEntity {
     example: '1',
     maxLength: 50,
   })
-  @Column({ length: 50, nullable: true })
+  @Column({ name: 'caja_id', type: 'int', nullable: true })
   caja_id: string;
 
   @ApiProperty({
@@ -115,7 +108,7 @@ export class UserWriteEntity {
     example: '1',
     maxLength: 50,
   })
-  @Column({ length: 50, nullable: true })
+  @Column({ name: 'tienda_id', type: 'int', nullable: true })
   tienda_id: string;
 
   @ApiProperty({
@@ -123,7 +116,7 @@ export class UserWriteEntity {
     example: '0',
     maxLength: 1,
   })
-  @Column({ length: 1, default: '0' })
+  @Column({ name: 'allow_multi_tienda', type: 'bit', default: () => '(0)', nullable: true })
   allow_multi_tienda: string;
 
   @ApiProperty({
@@ -131,7 +124,7 @@ export class UserWriteEntity {
     example: '10.5',
     maxLength: 10,
   })
-  @Column({ length: 10, nullable: true })
+  @Column({ name: 'max_descuento', type: 'decimal', precision: 5, scale: 2, nullable: true })
   max_descuento: string;
 
   @ApiProperty({
@@ -139,14 +132,14 @@ export class UserWriteEntity {
     example: '0',
     maxLength: 1,
   })
-  @Column({ length: 1, default: '0' })
+  @Column({ name: 'close_caja', type: 'bit', default: () => '(0)', nullable: true })
   close_caja: string;
 
   @ApiProperty({
     description: 'Fecha y hora del último login',
     example: '2024-01-01T00:00:00.000Z',
   })
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ name: 'LastLoginDateTime', type: 'datetime2', nullable: true })
   lastlogindatetime: Date;
 
   @ApiProperty({
@@ -154,7 +147,7 @@ export class UserWriteEntity {
     example: '192.168.1.1',
     maxLength: 50,
   })
-  @Column({ length: 50, nullable: true })
+  @Column({ name: 'LastLoginIP', length: 45, nullable: true })
   lastloginip: string;
 
   @ApiProperty({
@@ -162,7 +155,7 @@ export class UserWriteEntity {
     example: '192.168.1.1',
     maxLength: 50,
   })
-  @Column({ length: 50, nullable: true })
+  @Column({ name: 'user_ip', length: 45, nullable: true })
   user_ip: string;
 
   @ApiProperty({
@@ -170,7 +163,7 @@ export class UserWriteEntity {
     example: 'usuario@email.com',
     maxLength: 255,
   })
-  @Column({ length: 255, nullable: true })
+  @Column({ name: 'user_account_email', length: 255, nullable: true })
   user_account_email: string;
 
   @ApiProperty({
@@ -178,7 +171,7 @@ export class UserWriteEntity {
     example: 'password123',
     maxLength: 255,
   })
-  @Column({ length: 255, nullable: true })
+  @Column({ name: 'user_account_email_passw', length: 20, nullable: true })
   user_account_email_passw: string;
 
   @ApiProperty({
@@ -186,7 +179,7 @@ export class UserWriteEntity {
     example: '5.5',
     maxLength: 10,
   })
-  @Column({ length: 10, nullable: true })
+  @Column({ name: 'comision_porciento', type: 'decimal', precision: 5, scale: 2, nullable: true })
   comision_porciento: string;
 
   @ApiProperty({
@@ -194,7 +187,7 @@ export class UserWriteEntity {
     example: '1',
     maxLength: 50,
   })
-  @Column({ length: 50, nullable: true })
+  @Column({ name: 'Default_PortalId', type: 'int', nullable: true })
   default_portalid: string;
 
   @ApiProperty({
@@ -202,7 +195,7 @@ export class UserWriteEntity {
     example: 'valor',
     maxLength: 255,
   })
-  @Column({ length: 255, nullable: true })
+  @Column({ name: 'NuevoCampo', length: 300, nullable: true })
   nuevocampo: string;
 
   @ApiProperty({
@@ -210,7 +203,7 @@ export class UserWriteEntity {
     example: '1',
     maxLength: 50,
   })
-  @Column({ length: 50, nullable: true })
+  @Column({ name: 'encargadoId', type: 'int', nullable: true })
   encargadoId: string;
 
   @ApiProperty({
@@ -218,23 +211,22 @@ export class UserWriteEntity {
     example: '0',
     maxLength: 1,
   })
-  @Column({ length: 1, default: '0' })
+  @Column({ name: 'passwchanged', type: 'bit', default: () => '(0)', nullable: true })
   passwchanged: string;
 
   @ApiProperty({
-    description: 'Indica si el usuario está activo',
-    example: '1',
-    maxLength: 1,
+    description: 'Estado de validez del usuario (1=activo, 0=inactivo)',
+    example: 1,
   })
-  @Column({ length: 1, default: '1' })
-  valido: string;
+  @Column({ name: 'valido', type: 'bit', default: () => '(1)' })
+  valido: number;
 
   @ApiProperty({
     description: 'Fecha de eliminación (soft delete)',
     example: '2024-01-01T00:00:00.000Z',
     nullable: true,
   })
-  @Column({ type: 'datetime', nullable: true })
+  @Column({ name: 'deleted_at', type: 'datetime', nullable: true })
   deleted_at: Date;
 
   @ApiProperty({
@@ -242,7 +234,7 @@ export class UserWriteEntity {
     example: 1,
     nullable: true,
   })
-  @Column({ type: 'int', nullable: true })
+  @Column({ name: 'deleted_by', type: 'int', nullable: true })
   deleted_by: number;
 
   getFullName(): string {
@@ -253,11 +245,14 @@ export class UserWriteEntity {
     return `${this.apellido}`.trim();
   }
 
-  isActive(): boolean {
-    return this.valido === '1';
+  isActive(): number {
+    // Devuelve 1 si el usuario está activo, 0 si no
+    return this.valido === 1 ? 1 : 0;
   }
 
-  hasRole(role: string): boolean {
-    return this.role === role;
+  hasRole(roleId: number): boolean {
+    // El rol se obtiene desde UsuariosRoles, no directamente de UserWriteEntity
+    // Este método se mantiene por compatibilidad pero siempre retorna false
+    return false;
   }
 } 

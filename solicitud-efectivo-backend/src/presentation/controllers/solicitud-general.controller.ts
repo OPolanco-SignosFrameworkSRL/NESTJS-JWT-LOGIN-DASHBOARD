@@ -107,7 +107,7 @@ export class SolicitudGeneralController {
     status: 200,
     description: 'Estadísticas obtenidas exitosamente',
   })
-  @Roles(UserRole.Admin)
+  @Roles(1) // Admin
   async getStats(): Promise<ISolicitudGeneralStats> {
     return await this.solicitudGeneralService.getStats();
   }
@@ -144,7 +144,7 @@ export class SolicitudGeneralController {
     status: 403,
     description: 'Solo los administradores pueden aprobar solicitudes',
   })
-  @Roles(UserRole.Admin)
+  @Roles(1) // Admin
   async approve(
     @Param('id', ParseIntPipe) id: number,
     @Body() approveSolicitudDto: ApproveSolicitudGeneralDto,
@@ -167,7 +167,7 @@ export class SolicitudGeneralController {
     status: 403,
     description: 'Solo los administradores pueden rechazar solicitudes',
   })
-  @Roles(UserRole.Admin)
+  @Roles(1) // Admin
   async reject(
     @Param('id', ParseIntPipe) id: number,
     @Body() approveSolicitudDto: ApproveSolicitudGeneralDto,

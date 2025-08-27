@@ -25,7 +25,7 @@ export interface IUserRepository {
   /**
    * Encuentra usuarios por rol
    */
-  findByRole(role: string): Promise<User[]>;
+  findByRole(roleId: number): Promise<User[]>;
 
   /**
    * Encuentra usuarios por división

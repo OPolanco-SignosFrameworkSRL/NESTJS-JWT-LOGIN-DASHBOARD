@@ -60,7 +60,7 @@ export class RolesController {
   ) {}
 
   @Post()
-  @Roles('Admin')
+  @Roles(1) // Admin
   @ApiOperation({ 
     summary: 'Crear un nuevo rol',
     description: 'Crea un nuevo rol en el sistema. Solo usuarios administradores pueden acceder.'
@@ -95,7 +95,7 @@ export class RolesController {
   }
 
   @Get()
-  @Roles('Admin', 'Supervisor')
+  @Roles(1, 4) // Admin, Supervisor
   @ApiOperation({ 
     summary: 'Obtener todos los roles',
     description: 'Obtiene la lista de roles con filtros opcionales y paginación'
@@ -140,7 +140,7 @@ export class RolesController {
   }
 
   @Get('active')
-  @Roles('Admin','Supervisor', 'Usuario')
+  @Roles(1, 4, 2) // Admin, Supervisor, Usuario
   @ApiOperation({ 
     summary: 'Obtener roles activos',
     description: 'Obtiene solo los roles que están activos en el sistema'
@@ -179,7 +179,7 @@ export class RolesController {
   } */
 
   @Get(':id')
-  @Roles('Admin','Supervisor')
+  @Roles(1, 4) // Admin, Supervisor
   @ApiOperation({ 
     summary: 'Obtener un rol por ID',
     description: 'Obtiene los detalles de un rol específico por su ID'
@@ -213,7 +213,7 @@ export class RolesController {
 
   //@Patch(':id')
   @Put(':id')
-  @Roles('Admin')
+  @Roles(1) // Admin
   @ApiOperation({ 
     summary: 'Actualizar un rol',
     description: 'Actualiza los datos de un rol existente. Solo usuarios administradores pueden acceder.'
@@ -256,7 +256,7 @@ export class RolesController {
   }
 
   @Delete(':id')
-  @Roles('Admin')
+  @Roles(1) // Admin
   @ApiOperation({ 
     summary: 'Desactivar un rol',
     description: 'Desactiva un rol (soft delete). Solo usuarios administradores pueden acceder.'
@@ -296,7 +296,7 @@ export class RolesController {
 
   //@Patch(':id/restore')
   @Put(':id/restore')
-  @Roles('Admin')
+  @Roles(1) // Admin
   @ApiOperation({ 
     summary: 'Restaurar un rol',
     description: 'Reactiva un rol desactivado. Solo usuarios administradores pueden acceder.'

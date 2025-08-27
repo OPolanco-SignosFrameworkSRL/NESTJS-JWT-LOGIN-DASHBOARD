@@ -19,7 +19,7 @@ export class DesembolsoController {
   ) {}
 
   @Post()
-  @Roles('Admin', 'Administrator')
+  @Roles(1) // Admin
   @ApiOperation({ summary: 'Crear un nuevo desembolso' })
   @ApiResponse({ 
     status: 201, 
@@ -53,7 +53,7 @@ export class DesembolsoController {
   }
 
   @Get()
-  @Roles('Admin', 'Administrator')
+  @Roles(1) // Admin
   @ApiOperation({ summary: 'Obtener todos los desembolsos' })
   @ApiResponse({ status: 200, description: 'Lista de desembolsos obtenida exitosamente' })
   async findAll() {
@@ -61,7 +61,7 @@ export class DesembolsoController {
   }
 
   @Get(':id')
-  @Roles('Admin', 'Administrator')
+  @Roles(1) // Admin
   @ApiOperation({ summary: 'Obtener un desembolso por ID' })
   @ApiParam({ name: 'id', description: 'ID del desembolso', example: 1 })
   @ApiResponse({ status: 200, description: 'Desembolso obtenido exitosamente' })
@@ -71,7 +71,7 @@ export class DesembolsoController {
   }
 
   @Get('solicitud/:solicitudId')
-  @Roles('Admin', 'Administrator')
+  @Roles(1) // Admin
   @ApiOperation({ summary: 'Obtener desembolsos por solicitud' })
   @ApiParam({ name: 'solicitudId', description: 'ID de la solicitud', example: 5 })
   @ApiResponse({ status: 200, description: 'Desembolsos de la solicitud obtenidos exitosamente' })
@@ -80,7 +80,7 @@ export class DesembolsoController {
   }
 
   @Get('responsable/:responsableId')
-  @Roles('Admin', 'Administrator')
+  @Roles(1) // Admin
   @ApiOperation({ summary: 'Obtener desembolsos por responsable' })
   @ApiParam({ name: 'responsableId', description: 'ID del responsable', example: 30 })
   @ApiResponse({ status: 200, description: 'Desembolsos del responsable obtenidos exitosamente' })

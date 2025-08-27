@@ -11,6 +11,7 @@ import {
   IRolePaginatedResponse, 
   IRoleStats 
 } from '../../core/domain/interfaces/role.interface';
+import { UserRole } from '../../core/domain/user.interface';
 
 @Injectable()
 export class RoleRepository implements IRoleRepository {
@@ -23,26 +24,19 @@ export class RoleRepository implements IRoleRepository {
     const queryBuilder = this.roleRepository.createQueryBuilder('role');
 
     if (filters?.role_name) {
-      queryBuilder.andWhere('role.role_name LIKE :role_name', { 
+      queryBuilder.andWhere('role.roleName LIKE :role_name', { 
         role_name: `%${filters.role_name}%` 
       });
     }
 
-    if (filters?.role_desc) {
-      queryBuilder.andWhere('role.role_desc LIKE :role_desc', { 
-        role_desc: `%${filters.role_desc}%` 
-      });
-    }
+    // Nota: role_desc no existe en la entidad/tabla actual
 
     if (filters?.valido !== undefined) {
-      queryBuilder.andWhere('role.valido = :valido', { valido: filters.valido });
+      queryBuilder.andWhere('role.rowActive = :valido', { valido: filters.valido });
     }
 
     if (filters?.search) {
-      queryBuilder.andWhere(
-        '(role.role_name LIKE :search OR role.role_desc LIKE :search)',
-        { search: `%${filters.search}%` }
-      );
+      queryBuilder.andWhere('role.roleName LIKE :search', { search: `%${filters.search}%` });
     }
 
     queryBuilder.orderBy('role.id', 'DESC');
@@ -59,26 +53,19 @@ export class RoleRepository implements IRoleRepository {
     const queryBuilder = this.roleRepository.createQueryBuilder('role');
 
     if (filters?.role_name) {
-      queryBuilder.andWhere('role.role_name LIKE :role_name', { 
+      queryBuilder.andWhere('role.roleName LIKE :role_name', { 
         role_name: `%${filters.role_name}%` 
       });
     }
 
-    if (filters?.role_desc) {
-      queryBuilder.andWhere('role.role_desc LIKE :role_desc', { 
-        role_desc: `%${filters.role_desc}%` 
-      });
-    }
+    // Nota: role_desc no existe en la entidad/tabla actual
 
     if (filters?.valido !== undefined) {
-      queryBuilder.andWhere('role.valido = :valido', { valido: filters.valido });
+      queryBuilder.andWhere('role.rowActive = :valido', { valido: filters.valido });
     }
 
     if (filters?.search) {
-      queryBuilder.andWhere(
-        '(role.role_name LIKE :search OR role.role_desc LIKE :search)',
-        { search: `%${filters.search}%` }
-      );
+      queryBuilder.andWhere('role.roleName LIKE :search', { search: `%${filters.search}%` });
     }
 
     queryBuilder.orderBy('role.id', 'DESC');
@@ -105,19 +92,30 @@ export class RoleRepository implements IRoleRepository {
 
   async findByName(roleName: string): Promise<Role | null> {
     const entity = await this.roleRepository.findOne({ 
-      where: { role_name: roleName } 
+      where: { roleName: roleName } 
     });
     return entity ? this.mapToDomain(entity) : null;
   }
 
   async create(roleData: ICreateRoleData): Promise<Role> {
-    const entity = this.roleRepository.create(roleData);
+    const entity = this.roleRepository.create({
+      roleName: roleData.role_name,
+      rowActive: roleData.valido ?? true,
+    });
     const savedEntity = await this.roleRepository.save(entity);
     return this.mapToDomain(savedEntity);
   }
 
   async update(id: number, roleData: IUpdateRoleData): Promise<Role | null> {
-    const updateResult = await this.roleRepository.update(id, roleData);
+    const updatePayload: Partial<RoleEntity> = {};
+    if (roleData.role_name !== undefined) {
+      updatePayload.roleName = roleData.role_name;
+    }
+    if (roleData.valido !== undefined) {
+      updatePayload.rowActive = roleData.valido;
+    }
+
+    const updateResult = await this.roleRepository.update(id, updatePayload);
     
     if (updateResult.affected === 0) {
       return null;
@@ -127,12 +125,12 @@ export class RoleRepository implements IRoleRepository {
   }
 
   async delete(id: number): Promise<boolean> {
-    const updateResult = await this.roleRepository.update(id, { valido: false });
+    const updateResult = await this.roleRepository.update(id, { rowActive: false });
     return updateResult.affected > 0;
   }
 
   async restore(id: number): Promise<boolean> {
-    const updateResult = await this.roleRepository.update(id, { valido: true });
+    const updateResult = await this.roleRepository.update(id, { rowActive: true });
     return updateResult.affected > 0;
   }
 
@@ -143,7 +141,7 @@ export class RoleRepository implements IRoleRepository {
 
   async existsByName(roleName: string, excludeId?: number): Promise<boolean> {
     const queryBuilder = this.roleRepository.createQueryBuilder('role')
-      .where('role.role_name = :roleName', { roleName });
+      .where('role.roleName = :roleName', { roleName });
 
     if (excludeId) {
       queryBuilder.andWhere('role.id != :excludeId', { excludeId });
@@ -155,14 +153,14 @@ export class RoleRepository implements IRoleRepository {
 
   async getStats(): Promise<IRoleStats> {
     const totalRoles = await this.roleRepository.count();
-    const activeRoles = await this.roleRepository.count({ where: { valido: true } });
+    const activeRoles = await this.roleRepository.count({ where: { rowActive: true } });
     const inactiveRoles = totalRoles - activeRoles;
 
     // Contar roles administrativos
     const administrativeRoles = await this.roleRepository.count({ 
       where: { 
-        role_name: ILike('%administrador%'),
-        valido: true 
+        roleName: ILike('%administrador%'),
+        rowActive: true 
       } 
     });
 
@@ -179,7 +177,7 @@ export class RoleRepository implements IRoleRepository {
 
   async findActiveRoles(): Promise<Role[]> {
     const entities = await this.roleRepository.find({ 
-      where: { valido: true },
+      where: { rowActive: true },
       order: { id: 'ASC' }
     });
     return entities.map(this.mapToDomain);
@@ -187,7 +185,7 @@ export class RoleRepository implements IRoleRepository {
 
   async findInactiveRoles(): Promise<Role[]> {
     const entities = await this.roleRepository.find({ 
-      where: { valido: false },
+      where: { rowActive: false },
       order: { id: 'ASC' }
     });
     return entities.map(this.mapToDomain);
@@ -196,8 +194,7 @@ export class RoleRepository implements IRoleRepository {
   async searchByText(searchText: string): Promise<Role[]> {
     const entities = await this.roleRepository.find({
       where: [
-        { role_name: ILike(`%${searchText}%`) },
-        { role_desc: ILike(`%${searchText}%`) }
+        { roleName: ILike(`%${searchText}%`) }
       ],
       order: { id: 'ASC' }
     });
@@ -208,26 +205,19 @@ export class RoleRepository implements IRoleRepository {
     const queryBuilder = this.roleRepository.createQueryBuilder('role');
 
     if (filters?.role_name) {
-      queryBuilder.andWhere('role.role_name LIKE :role_name', { 
+      queryBuilder.andWhere('role.roleName LIKE :role_name', { 
         role_name: `%${filters.role_name}%` 
       });
     }
 
-    if (filters?.role_desc) {
-      queryBuilder.andWhere('role.role_desc LIKE :role_desc', { 
-        role_desc: `%${filters.role_desc}%` 
-      });
-    }
+    // Nota: role_desc no existe en la entidad/tabla actual
 
     if (filters?.valido !== undefined) {
-      queryBuilder.andWhere('role.valido = :valido', { valido: filters.valido });
+      queryBuilder.andWhere('role.rowActive = :valido', { valido: filters.valido });
     }
 
     if (filters?.search) {
-      queryBuilder.andWhere(
-        '(role.role_name LIKE :search OR role.role_desc LIKE :search)',
-        { search: `%${filters.search}%` }
-      );
+      queryBuilder.andWhere('role.roleName LIKE :search', { search: `%${filters.search}%` });
     }
 
     return queryBuilder.getCount();
@@ -239,9 +229,9 @@ export class RoleRepository implements IRoleRepository {
   private mapToDomain(entity: RoleEntity): Role {
     return new Role(
       entity.id,
-      entity.role_name,
-      entity.role_desc,
-      entity.valido,
+      entity.roleName,
+      '', // role_desc ya no existe en la BD
+      entity.rowActive,
     );
   }
 }

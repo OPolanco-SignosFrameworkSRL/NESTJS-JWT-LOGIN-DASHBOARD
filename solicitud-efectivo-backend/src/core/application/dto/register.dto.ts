@@ -69,16 +69,14 @@ export class RegisterDto {
   clave: string;
 
   @ApiProperty({
-    description: 'Rol del usuario en el sistema',
-    example: 'Usuario',
-    enum: ['Admin', 'Usuario', 'Supervisor', 'Manager'],
-    default: 'Usuario',
+    description: 'ID del rol del usuario en el sistema',
+    example: 1,
+    enum: [1, 2, 3, 4],
+    default: 2,
   })
   @IsOptional()
-  @IsEnum(UserRole, {
-    message: 'El rol debe ser uno de: Admin, Usuario, Supervisor, Manager',
-  })
-  role?: UserRole;
+  @IsNumber({}, { message: 'El rol debe ser un número' })
+  role?: number;
 
   @ApiProperty({
     description: 'Email del usuario',
