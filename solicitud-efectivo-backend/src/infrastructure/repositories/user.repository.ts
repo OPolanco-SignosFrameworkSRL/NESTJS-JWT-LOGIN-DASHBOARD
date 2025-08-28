@@ -178,21 +178,10 @@ export class UserRepository implements IUserRepository {
    * Elimina un usuario (soft delete)
    */
   async delete(id: number): Promise<void> {
-    await this.userWriteRepository.update(id, { valido: 0 });
+    await this.userWriteRepository.update(id, { valido: false });
   }
 
-  /**
-   * Restaura un usuario eliminado
-   */
-  async restore(id: number): Promise<User> {
-    await this.userWriteRepository.update(id, { valido: 1 });
-    
-    const restoredUser = await this.userReadRepository.findOne({ 
-      where: { id },
 
-    });
-    return this.mapToDomain(restoredUser!);
-  }
 
   /**
    * Encuentra usuarios eliminados
@@ -284,7 +273,7 @@ export class UserRepository implements IUserRepository {
     try {
       // Buscar usuario en la tabla de escritura para obtener la contraseña
       const userWrite = await this.userWriteRepository.findOne({
-        where: { cedula, valido: 1 },
+        where: { cedula, valido: true },
       });
 
       if (!userWrite) {

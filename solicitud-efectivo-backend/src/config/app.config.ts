@@ -20,3 +20,11 @@ export const appConfig = registerAs('app', () => ({
     path: process.env.SWAGGER_PATH || 'api',
   },
 }));
+
+// Configuración JWT separada
+export const jwtConfig = registerAs('jwt', () => ({
+  secret: process.env.JWT_SECRET || 'mi_clave_secreta_super_segura_para_jwt',
+  expiresIn: process.env.JWT_EXPIRES_IN || '24h',
+  issuer: process.env.JWT_ISSUER || 'solicitud-efectivo-api',
+  audience: process.env.JWT_AUDIENCE || 'solicitud-efectivo-users',
+}));
