@@ -2,7 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 
-@Entity('vappusuarios')
+@Entity('Appusuarios')
 @Index(['cedula'], { unique: true })
 export class UserEntity {
   @ApiProperty({
@@ -18,7 +18,7 @@ export class UserEntity {
     minLength: 11,
     maxLength: 11,
   })
-  @Column({ length: 11 })
+  @Column({ name: 'cedula', length: 25 })
   @Index()
   cedula: string;
 
@@ -27,7 +27,7 @@ export class UserEntity {
     example: 'Raul',
     maxLength: 100,
   })
-  @Column({ length: 100 })
+  @Column({ name: 'nombre', length: 255 })
   nombre: string;
 
   @ApiProperty({
@@ -35,32 +35,33 @@ export class UserEntity {
     example: 'Vargas',
     maxLength: 100,
   })
-  @Column({ length: 100 })
+  @Column({ name: 'apellido', length: 255 })
   apellido: string;
 
   @ApiProperty({
     description: 'Hash SHA-256 del código de usuario',
     example: '896ece9b8a314e6922783f9938ad8b1ad95cda0d11ece5902b36a2e879ccbaa2',
   })
-  @Column({ length: 64 })
+  @Column({ name: 'codigo', length: 100, nullable: true })
   @Exclude()
   codigo: string;
 
   @ApiProperty({
-    description: 'Rol del usuario en el sistema',
-    example: 'Usuario',
-    enum: ['Admin', 'Usuario', 'Supervisor', 'Manager'],
-    default: 'Usuario',
+    description: 'Hash SHA-256 de la contraseña del usuario',
+    example: '896ece9b8a314e6922783f9938ad8b1ad95cda0d11ece5902b36a2e879ccbaa2',
   })
-  @Column({ length: 50, default: 'Usuario' })
-  role: string;
+  @Column({ name: 'password', length: 100, nullable: true })
+  @Exclude()
+  password: string;
+
+  // El rol se obtiene desde UsuariosRoles, no directamente de Appusuarios
 
   @ApiProperty({
     description: 'Email del usuario',
     example: 'Raul.Vargas@grupoastro.com.do',
     maxLength: 255,
   })
-  @Column({ length: 255, nullable: true })
+  @Column({ name: 'user_email', length: 255, nullable: true })
   user_email: string;
 
   @ApiProperty({
@@ -68,7 +69,7 @@ export class UserEntity {
     example: '8091234567',
     maxLength: 20,
   })
-  @Column({ length: 20, nullable: true })
+  @Column({ name: 'telefono', length: 20, nullable: true })
   telefono: string;
 
   @ApiProperty({
@@ -76,7 +77,7 @@ export class UserEntity {
     example: '8091234567',
     maxLength: 20,
   })
-  @Column({ length: 20, nullable: true })
+  @Column({ name: 'celular', length: 20, nullable: true })
   celular: string;
 
   @ApiProperty({
@@ -84,56 +85,17 @@ export class UserEntity {
     example: 'Calle Principal #123',
     maxLength: 255,
   })
-  @Column({ length: 255, nullable: true })
+  @Column({ name: 'direccion', length: 255, nullable: true })
   direccion: string;
 
   @ApiProperty({
     description: 'Indica si el usuario está activo',
-    example: '1',
-    maxLength: 1,
+    example: true,
   })
-  @Column({ length: 1, default: '1' })
-  valido: string;
+  @Column({ name: 'valido', type: 'bit', default: () => '(1)' })
+  valido: boolean;
 
-  @ApiProperty({
-    description: 'División del usuario',
-    example: 'TI',
-    nullable: true,
-  })
-  @Column({ length: 100, nullable: true })
-  division: string;
 
-  @ApiProperty({
-    description: 'Cargo del usuario',
-    example: 'Desarrollador',
-    nullable: true,
-  })
-  @Column({ length: 100, nullable: true })
-  cargo: string;
-
-  @ApiProperty({
-    description: 'Dependencia del usuario',
-    example: 'Sistemas',
-    nullable: true,
-  })
-  @Column({ length: 100, nullable: true })
-  dependencia: string;
-
-  @ApiProperty({
-    description: 'Recinto del usuario',
-    example: 'Santo Domingo',
-    nullable: true,
-  })
-  @Column({ length: 100, nullable: true })
-  recinto: string;
-
-  @ApiProperty({
-    description: 'Estado del usuario',
-    example: 'ACTIVO',
-    nullable: true,
-  })
-  @Column({ length: 50, nullable: true })
-  estado: string;
 
   getFullName(): string {
     return `${this.nombre} ${this.apellido}`.trim();
@@ -144,10 +106,12 @@ export class UserEntity {
   }
 
   isActive(): boolean {
-    return this.valido === '1' && this.estado === 'ACTIVO';
+    return this.valido;
   }
 
-  hasRole(role: string): boolean {
-    return this.role === role;
+  hasRole(roleId: number): boolean {
+    // Este método ya no es válido porque el rol se obtiene desde UsuariosRoles
+    // Se mantiene por compatibilidad pero siempre retorna false
+    return false;
   }
 } 

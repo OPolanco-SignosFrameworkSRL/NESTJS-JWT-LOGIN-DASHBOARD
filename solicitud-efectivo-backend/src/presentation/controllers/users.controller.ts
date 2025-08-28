@@ -47,7 +47,7 @@ export class UsersController {
   ) { }
 
   @Post()
-  @Roles(UserRole.Admin)
+  @Roles(1) // ID 1 = ADMINISTRADOR
   @ApiOperation({ summary: 'Crear un nuevo usuario' })
   @ApiResponse({
     status: HttpStatus.CREATED,
@@ -76,7 +76,7 @@ export class UsersController {
   
   @Get()
   @ApiOperation({ summary: 'Obtener todos los usuarios' })
-  @ApiQuery({ name: 'role', required: false, enum: UserRole })
+  @ApiQuery({ name: 'role', required: false, enum: [1, 2, 3, 4], description: '1=Admin, 2=Usuario, 3=Manager, 4=Supervisor' })
   @ApiQuery({ name: 'division', required: false, type: String })
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'active', required: false, type: Boolean })
@@ -288,7 +288,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.Admin)
+  @Roles(1) // ID 1 = ADMINISTRADOR
   @ApiOperation({
     /* summary: 'Eliminar un usuario (soft delete por defecto, eliminación física con confirmación)',
     description: 'Por defecto realiza soft delete. Para eliminación física permanente, enviar confirmPermanentDelete: true y confirmText: "SI, ELIMINAR PERMANENTEMENTE"'
@@ -349,7 +349,7 @@ export class UsersController {
   }
 
   @Put(':id/restore')
-  @Roles(UserRole.Admin)
+  @Roles(1) // ID 1 = ADMINISTRADOR
   @ApiOperation({ summary: 'Restaurar un usuario eliminado (soft delete)' })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({

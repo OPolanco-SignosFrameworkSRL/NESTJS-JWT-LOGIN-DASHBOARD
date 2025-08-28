@@ -29,16 +29,29 @@ export class UserRepository implements IUserRepository {
       userEntity.cedula,
       userEntity.nombre,
       userEntity.apellido,
-      userEntity.role as UserRole,
+      'Usuario', // El rol se obtiene desde UsuariosRoles, no de UserEntity
       userEntity.user_email,
       userEntity.telefono,
-      userEntity.valido === '1',
-      userEntity.division,
-      userEntity.cargo,
-      userEntity.dependencia,
-      userEntity.recinto,
-      userEntity.estado,
+      userEntity.valido,
+      '', // division - no existe en Appusuarios
+      '', // cargo - no existe en Appusuarios
+      '', // dependencia - no existe en Appusuarios
+      '', // recinto - no existe en Appusuarios
+      '', // estado - no existe en Appusuarios
     );
+  }
+
+  /**
+   * Mapea ID del rol a nombre del rol
+   */
+  private mapRoleIdToName(roleId: number): UserRole {
+    const roleMap: Record<number, UserRole> = {
+      1: 'Admin',
+      2: 'Usuario', 
+      3: 'Manager',
+      4: 'Supervisor',
+    };
+    return roleMap[roleId] || 'Usuario';
   }
 
   /**
@@ -51,9 +64,9 @@ export class UserRepository implements IUserRepository {
       query.andWhere('user.role = :role', { role: filters.role });
     }
 
-    if (filters?.division) {
-      query.andWhere('user.division = :division', { division: filters.division });
-    }
+    // if (filters?.division) {
+    //   query.andWhere('user.division = :division', { division: filters.division });
+    // }
 
     if (filters?.search) {
       query.andWhere(
@@ -78,7 +91,9 @@ export class UserRepository implements IUserRepository {
    * Encuentra un usuario por ID
    */
   async findById(id: number): Promise<User | null> {
-    const user = await this.userReadRepository.findOne({ where: { id } });
+    const user = await this.userReadRepository.findOne({ 
+      where: { id }
+    });
     return user ? this.mapToDomain(user) : null;
   }
 
@@ -86,24 +101,32 @@ export class UserRepository implements IUserRepository {
    * Encuentra un usuario por cédula
    */
   async findByCedula(cedula: string): Promise<User | null> {
-    const user = await this.userReadRepository.findOne({ where: { cedula } });
+    const user = await this.userReadRepository.findOne({ 
+      where: { cedula },
+
+    });
     return user ? this.mapToDomain(user) : null;
   }
 
   /**
    * Encuentra usuarios por rol
    */
-  async findByRole(role: string): Promise<User[]> {
-    const users = await this.userReadRepository.find({ where: { role } });
-    return users.map(user => this.mapToDomain(user));
+  async findByRole(roleId: number): Promise<User[]> {
+    // Este método ya no es funcional porque el rol se obtiene desde UsuariosRoles
+    // Retorna array vacío por compatibilidad
+    return [];
   }
 
   /**
    * Encuentra usuarios por división
    */
   async findByDivision(division: string): Promise<User[]> {
-    const users = await this.userReadRepository.find({ where: { division } });
-    return users.map(user => this.mapToDomain(user));
+    // Temporalmente deshabilitado - campo division no existe en Appusuarios
+    return [];
+    // const users = await this.userReadRepository.find({ 
+    //   where: { division },
+    // });
+    // return users.map(user => this.mapToDomain(user));
   }
 
   /**
@@ -130,7 +153,8 @@ export class UserRepository implements IUserRepository {
     
     // Obtener el usuario creado desde la vista de lectura usando la cédula
     const createdUser = await this.userReadRepository.findOne({ 
-      where: { cedula: userData.cedula } 
+      where: { cedula: userData.cedula },
+
     });
     
     return this.mapToDomain(createdUser!);
@@ -143,7 +167,10 @@ export class UserRepository implements IUserRepository {
     await this.userWriteRepository.update(id, userData);
     
     // Obtener el usuario actualizado desde la vista de lectura
-    const updatedUser = await this.userReadRepository.findOne({ where: { id } });
+    const updatedUser = await this.userReadRepository.findOne({ 
+      where: { id },
+
+    });
     return this.mapToDomain(updatedUser!);
   }
 
@@ -151,16 +178,19 @@ export class UserRepository implements IUserRepository {
    * Elimina un usuario (soft delete)
    */
   async delete(id: number): Promise<void> {
-    await this.userWriteRepository.update(id, { valido: '0' });
+    await this.userWriteRepository.update(id, { valido: 0 });
   }
 
   /**
    * Restaura un usuario eliminado
    */
   async restore(id: number): Promise<User> {
-    await this.userWriteRepository.update(id, { valido: '1' });
+    await this.userWriteRepository.update(id, { valido: 1 });
     
-    const restoredUser = await this.userReadRepository.findOne({ where: { id } });
+    const restoredUser = await this.userReadRepository.findOne({ 
+      where: { id },
+
+    });
     return this.mapToDomain(restoredUser!);
   }
 
@@ -168,7 +198,10 @@ export class UserRepository implements IUserRepository {
    * Encuentra usuarios eliminados
    */
   async findDeleted(): Promise<User[]> {
-    const users = await this.userReadRepository.find({ where: { valido: '0' } });
+    const users = await this.userReadRepository.find({ 
+      where: { valido: false },
+
+    });
     return users.map(user => this.mapToDomain(user));
   }
 
@@ -185,8 +218,8 @@ export class UserRepository implements IUserRepository {
    */
   async getStats(): Promise<IUserStats> {
     const total = await this.userReadRepository.count();
-    const active = await this.userReadRepository.count({ where: { valido: '1' } });
-    const inactive = await this.userReadRepository.count({ where: { valido: '0' } });
+    const active = await this.userReadRepository.count({ where: { valido: true } });
+    const inactive = await this.userReadRepository.count({ where: { valido: false } });
 
     // Estadísticas por rol
     const roleStats = await this.userReadRepository
@@ -209,18 +242,18 @@ export class UserRepository implements IUserRepository {
       byRole[stat.role as UserRole] = parseInt(stat.count);
     });
 
-    // Estadísticas por división
-    const divisionStats = await this.userReadRepository
-      .createQueryBuilder('user')
-      .select('user.division', 'division')
-      .addSelect('COUNT(*)', 'count')
-      .groupBy('user.division')
-      .getRawMany();
+    // Estadísticas por división - temporalmente deshabilitado
+    // const divisionStats = await this.userReadRepository
+    //   .createQueryBuilder('user')
+    //   .select('user.division', 'division')
+    //   .addSelect('COUNT(*)', 'count')
+    //   .groupBy('user.division')
+    //   .getRawMany();
 
     const byDivision: Record<string, number> = {};
-    divisionStats.forEach(stat => {
-      byDivision[stat.division] = parseInt(stat.count);
-    });
+    // divisionStats.forEach(stat => {
+    //   byDivision[stat.division] = parseInt(stat.count);
+    // });
 
     return {
       total,
@@ -237,7 +270,10 @@ export class UserRepository implements IUserRepository {
   async updatePhone(cedula: string, telefono: string): Promise<User> {
     await this.userWriteRepository.update({ cedula }, { telefono });
     
-    const updatedUser = await this.userReadRepository.findOne({ where: { cedula } });
+    const updatedUser = await this.userReadRepository.findOne({ 
+      where: { cedula },
+
+    });
     return this.mapToDomain(updatedUser!);
   }
 
@@ -248,7 +284,7 @@ export class UserRepository implements IUserRepository {
     try {
       // Buscar usuario en la tabla de escritura para obtener la contraseña
       const userWrite = await this.userWriteRepository.findOne({
-        where: { cedula, valido: '1' },
+        where: { cedula, valido: 1 },
       });
 
       if (!userWrite) {

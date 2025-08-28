@@ -17,7 +17,7 @@ export class AdminRequestController {
   ) {}
 
   @Post('status')
-  @Roles('Admin', 'Administrator')
+  @Roles(1) // Admin
   @ApiOperation({
     summary: 'Actualizar estado de una solicitud',
     description: 'Permite a los administradores aprobar, autorizar o rechazar solicitudes',
