@@ -1,14 +1,42 @@
 import Input from "@/application/ui/Input/Input";
-import Select from "@/application/ui/Select/Select";
 import { createEmployee, getAllRoles } from "@/infrastructure/api/admin/admin";
 import type { CreateEmployee } from "@/infrastructure/schemas/admin/admin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import SelectLibrary from 'react-select'
 
 export default function Register() {
 
-  const { register, handleSubmit, formState: { errors } } = useForm<CreateEmployee>()
+  const { control, register, handleSubmit, formState: { errors } } = useForm<CreateEmployee>(
+    {
+      defaultValues: {
+        cedula: "",
+        nombre: "",
+        apellido: "",
+        fullname: "",
+        password: "",        
+        clave: "MiClaveSecreta2024",
+        roles: [],            
+        user_email: "",
+        telefono: "",
+        direccion: "",
+        celular: "",
+        user_status: 0,      
+        caja_id: "1",
+        tienda_id: "1",
+        allow_multi_tienda: "0",
+        max_descuento: "0.5",
+        close_caja: "0",
+        user_account_email: "prueba@gmail.com",
+        user_account_email_passw: "MiClaveSecreta2024",
+        comision_porciento: "5.5",
+        default_portalid: "1",
+        nuevocampo: "valor",
+        encargadoId: "1",
+      }
+    }
+  )
 
   const queryClient = useQueryClient()
 
@@ -33,25 +61,17 @@ export default function Register() {
   const onSubmit = (data: CreateEmployee) => {
 
     data.fullname = `${data.nombre} ${data.apellido}`
-    data.clave = "MiClaveSecreta2024"
-    data.user_status = 1
-    data.caja_id = "1"
-    data.tienda_id = "1"
-    data.allow_multi_tienda = "0"
-    data.max_descuento = "10.5"
-    data.close_caja = "0"
-    data.user_account_email = "pedro@gmail.com"
-    data.user_account_email_passw = "MiClaveSecreta2024"
-    data.comision_porciento = "5.5"
-    data.default_portalid = "1"
-    data.nuevocampo = "valor"
-    data.encargadoId = "1"
 
-    data.role = Number(data.role)
+
+    console.log(data)
 
     mutate(data)
 
   }
+
+  type Roles = { id: number, role_name: string };
+  
+  const options: Roles[] = data?.data || []
 
   return (
     <>
@@ -156,24 +176,117 @@ export default function Register() {
 
             <div>
 
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 ">
                 <label className="text-gray-800" htmlFor="rol">Role:</label>
                 <span className="text-red-500">*</span>
               </div>
 
-              <Select
-                id="rol"
-                placeholder="Selecciona un rol"
-                options={data?.data.map(items => ({
-                  label: items.role_name,
-                  value: items.id
-                }))}
-
-                {...register("role", { required: "El role es requerido" })}
-
+              <Controller
+                name="roles"
+                control={control}
+                render={({ field }) => (
+                  <SelectLibrary<Roles, true>
+                    isMulti
+                    options={options}
+                    getOptionValue={(o) => String(o.id)}    
+                    getOptionLabel={(o) => o.role_name}       
+                    onChange={(vals) =>
+                      field.onChange((vals as Roles[]).map(v => ({ id: v.id })))
+                    }
+                    value={options.filter(opt =>
+                      field.value?.some((v: { id: number }) => v.id === opt.id)
+                    )}
+                    placeholder="Seleccionar roles..."
+                    styles={{
+                      control: (provided, state) => ({
+                        ...provided,
+                        width: '100%',
+                        minHeight: '44px', 
+                        border: '2px solid #86efac', 
+                        borderRadius: '6px', 
+                        backgroundColor: 'white',
+                        paddingLeft: '8px', 
+                        paddingRight: '8px',
+                        fontSize: '16px', 
+                        boxShadow: state.isFocused ? '0 0 0 1px #86efac' : 'none', 
+                        borderColor: state.isFocused ? '#86efac' : '#86efac',
+                        '&:hover': {
+                          borderColor: '#86efac'
+                        }
+                      }),
+                      valueContainer: (provided) => ({
+                        ...provided,
+                        padding: '0 4px',
+                        minHeight: '40px'
+                      }),
+                      input: (provided) => ({
+                        ...provided,
+                        margin: '0',
+                        paddingTop: '0',
+                        paddingBottom: '0',
+                        fontSize: '16px'
+                      }),
+                      placeholder: (provided) => ({
+                        ...provided,
+                        color: '#9ca3af', 
+                        fontSize: '16px'
+                      }),
+                      indicatorsContainer: (provided) => ({
+                        ...provided,
+                        paddingRight: '4px'
+                      }),
+                      dropdownIndicator: (provided) => ({
+                        ...provided,
+                        color: '#9ca3af', 
+                        '&:hover': {
+                          color: '#9ca3af'
+                        }
+                      }),
+                      menu: (provided) => ({
+                        ...provided,
+                        border: '2px solid #86efac',
+                        borderRadius: '6px',
+                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      }),
+                      option: (provided, state) => ({
+                        ...provided,
+                        backgroundColor: state.isSelected 
+                          ? '#16a34a' 
+                          : state.isFocused 
+                          ? '#dcfce7' 
+                          : 'white',
+                        color: state.isSelected ? 'white' : '#374151', 
+                        fontSize: '16px',
+                        '&:hover': {
+                          backgroundColor: state.isSelected ? '#16a34a' : '#dcfce7'
+                        }
+                      }),
+                      multiValue: (provided) => ({
+                        ...provided,
+                        backgroundColor: '#dcfce7', 
+                        borderRadius: '4px',
+                        border: '1px solid #86efac' 
+                      }),
+                      multiValueLabel: (provided) => ({
+                        ...provided,
+                        color: '#166534', 
+                        fontSize: '14px',
+                        fontWeight: '500'
+                      }),
+                      multiValueRemove: (provided) => ({
+                        ...provided,
+                        color: '#166534', 
+                        '&:hover': {
+                          backgroundColor: '#16a34a', 
+                          color: 'white'
+                        }
+                      })
+                    }}
+                  />
+                )}
               />
 
-              {errors.role && <p className="text-red-500">{errors.role.message}</p>}
+              {errors.roles && <p className="text-red-500">{errors.roles.message}</p>}
 
             </div>
 

@@ -1,14 +1,16 @@
 import Input from "@/application/ui/Input/Input";
 import Select from "@/application/ui/Select/Select";
 import { updateEmployee, getEmployeeById, getAllRoles } from "@/infrastructure/api/admin/admin";
-import type { CreateEmployee } from "@/infrastructure/schemas/admin/admin";
+import type { CreateEmployee, UpdateEmployee } from "@/infrastructure/schemas/admin/admin";
 import { hashPassword } from "@/shared/utilts/convertToSha256";
 import { getUrlParams } from "@/shared/utilts/GetUrlParams";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { Link, useNavigate } from "react-router-dom";
+import SelectLibrary from 'react-select'
+
 
 export default function EditEmployee() {
 
@@ -36,7 +38,7 @@ export default function EditEmployee() {
   
   const { mutate } = useMutation({
 
-    mutationFn: (data: CreateEmployee) => updateEmployee(Number(employeeId), data),
+    mutationFn: (data: UpdateEmployee) => updateEmployee(Number(employeeId), data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] })
       //queryClient.invalidateQueries({ queryKey: ["editEmployee", String(employeeId)] })
@@ -48,9 +50,9 @@ export default function EditEmployee() {
     }
   })
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateEmployee>({})
+  const { control, register, handleSubmit, reset, formState: { errors } } = useForm<UpdateEmployee>({})
 
-  const onSubmit = async (data: CreateEmployee) => {
+  const onSubmit = async (data: UpdateEmployee) => {
 
     if(data.password && data.password !== "") {
       const hashedPassword = await hashPassword(data.cedula, data.password);
@@ -70,7 +72,7 @@ export default function EditEmployee() {
         apellido: data.data.apellido,
         password: "",
         cedula: data.data.cedula,
-        role: Number(data.data.role),
+        roles: data.data.rolesUsuario.map(item => ({ id: item.id, roleName: item.roleName })),
         user_email: data.data.user_email,
         telefono: data.data.telefono,
         direccion: data.data.direccion,
@@ -78,6 +80,10 @@ export default function EditEmployee() {
       })
     }
   }, [data, reset])
+
+  type Roles = { id: number, role_name: string };
+  
+  const options: Roles[] = rolesData?.data || []
 
   if(data) return (
     <>
@@ -157,22 +163,121 @@ export default function EditEmployee() {
             </div>
 
             <div>
+
+            <div className="flex items-center gap-2 ">
               <label className="text-gray-800" htmlFor="rol">Role:</label>
+              <span className="text-red-500">*</span>
+            </div>
 
-              <Select
-                id="rol"
-                placeholder="Selecciona un rol"
-                options={rolesData?.data.map(item => ({
-                  label: item.role_name,
-                  value: item.id
-                }))}
-               
-                {...register("role", { required: "El role es requerido" })}
-              />
+            <Controller
+              name="roles"
+              control={control}
+              render={({ field }) => (
+                <SelectLibrary<Roles, true>
+                  isMulti
+                  options={options}
+                  getOptionValue={(o) => String(o.id)}    
+                  getOptionLabel={(o) => o.role_name}       
+                  onChange={(vals) =>
+                    field.onChange((vals as Roles[]).map(v => ({ id: v.id })))
+                  }
+                  value={options.filter(opt =>
+                    field.value?.some((v: { id: number }) => v.id === opt.id)
+                  )}
+                  placeholder="Seleccionar roles..."
+                  styles={{
+                    control: (provided, state) => ({
+                      ...provided,
+                      width: '100%',
+                      minHeight: '44px', 
+                      border: '2px solid #86efac', 
+                      borderRadius: '6px', 
+                      backgroundColor: 'white',
+                      paddingLeft: '8px', 
+                      paddingRight: '8px',
+                      fontSize: '16px', 
+                      boxShadow: state.isFocused ? '0 0 0 1px #86efac' : 'none', 
+                      borderColor: state.isFocused ? '#86efac' : '#86efac',
+                      '&:hover': {
+                        borderColor: '#86efac'
+                      }
+                    }),
+                    valueContainer: (provided) => ({
+                      ...provided,
+                      padding: '0 4px',
+                      minHeight: '40px'
+                    }),
+                    input: (provided) => ({
+                      ...provided,
+                      margin: '0',
+                      paddingTop: '0',
+                      paddingBottom: '0',
+                      fontSize: '16px'
+                    }),
+                    placeholder: (provided) => ({
+                      ...provided,
+                      color: '#9ca3af', 
+                      fontSize: '16px'
+                    }),
+                    indicatorsContainer: (provided) => ({
+                      ...provided,
+                      paddingRight: '4px'
+                    }),
+                    dropdownIndicator: (provided) => ({
+                      ...provided,
+                      color: '#9ca3af', 
+                      '&:hover': {
+                        color: '#9ca3af'
+                      }
+                    }),
+                    menu: (provided) => ({
+                      ...provided,
+                      border: '2px solid #86efac',
+                      borderRadius: '6px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }),
+                    option: (provided, state) => ({
+                      ...provided,
+                      backgroundColor: state.isSelected 
+                        ? '#16a34a' 
+                        : state.isFocused 
+                        ? '#dcfce7' 
+                        : 'white',
+                      color: state.isSelected ? 'white' : '#374151', 
+                      fontSize: '16px',
+                      '&:hover': {
+                        backgroundColor: state.isSelected ? '#16a34a' : '#dcfce7'
+                      }
+                    }),
+                    multiValue: (provided) => ({
+                      ...provided,
+                      backgroundColor: '#dcfce7', 
+                      borderRadius: '4px',
+                      border: '1px solid #86efac' 
+                    }),
+                    multiValueLabel: (provided) => ({
+                      ...provided,
+                      color: '#166534', 
+                      fontSize: '14px',
+                      fontWeight: '500'
+                    }),
+                    multiValueRemove: (provided) => ({
+                      ...provided,
+                      color: '#166534', 
+                      '&:hover': {
+                        backgroundColor: '#16a34a', 
+                        color: 'white'
+                      }
+                    })
+                  }}
+                />
+              )}
+            />
 
-              {errors.role && <p className="text-red-500">{errors.role.message}</p>}
+            {errors.roles && <p className="text-red-500">{errors.roles.message}</p>}
 
             </div>
+
 
             <div>
               <label className="text-gray-800" htmlFor="email">Email:</label>

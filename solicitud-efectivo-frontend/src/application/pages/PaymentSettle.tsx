@@ -10,14 +10,8 @@ import { MdFileUpload } from "react-icons/md";
 import Text from "../ui/Text/Text";
 import { MdOutlineFileUpload } from "react-icons/md";
 
-import React, {useCallback} from 'react'
+import {useCallback} from 'react'
 import {useDropzone, type FileWithPath} from 'react-dropzone'
-import type { File } from "node:buffer";
-
-
-
-
-
 
 const PaymentSettle = () => {
 

@@ -87,9 +87,9 @@ const Pagination = ({totalRecords, pageSize, onPageChange}: PaginationProps) => 
     return (
 
 
-        <div className="flex flex-col sm:flex-row items-center px-10 w-full">
+        <div className="flex flex-col sm:flex-row items-center w-full">
 
-            <div className="flex justify-start bg-red-500 w-1/6">
+            <div className="flex justify-start  w-1/6">
 
                 <div className="mb-5 sm:mb-0">Mostrando 1 de 10 registros</div>
             </div>
@@ -97,7 +97,7 @@ const Pagination = ({totalRecords, pageSize, onPageChange}: PaginationProps) => 
 
             <div className="flex justify-end w-full gap-2  ">
 
-                <div className="flex items-center gap-5 w-2/6 ">
+                <div className="flex items-center gap-5 w-60 ">
                     <div className="">Mostrar</div>
                     <Select
                         options={numbers.map((items, index) => ({
@@ -109,7 +109,7 @@ const Pagination = ({totalRecords, pageSize, onPageChange}: PaginationProps) => 
                     <div className="">Registros</div>
                 </div>
 
-                <div className="flex  w-1/6 ">
+                <div className="flex items-center gap-2">
 
                     <div 
                         className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground border h-10 w-10 bg-white border-emerald-200 hover:bg-emerald-50 cursor-pointer"
@@ -124,7 +124,7 @@ const Pagination = ({totalRecords, pageSize, onPageChange}: PaginationProps) => 
                             <button
                                 key={number}
                                 onClick={() => handlePageChange(number)}
-                                className={` border-2 border-emerald-200 rounded-md px-2.5 py-1 cursor-pointer ${
+                                className={` border-2 border-emerald-200 rounded-md w-10 h-10 flex items-center justify-center cursor-pointer ${
                                     currentPage === number ? "bg-emerald-50" : ""
                                 }`}
                             >

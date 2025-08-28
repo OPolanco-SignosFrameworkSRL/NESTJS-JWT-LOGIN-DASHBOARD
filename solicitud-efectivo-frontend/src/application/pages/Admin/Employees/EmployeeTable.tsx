@@ -138,7 +138,7 @@ export default function EmployeeTable() {
                   <tr key={index} className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                     <td className={tableCss}> {data.cedula}</td>
                     <td className={tableCss}> {data.fullname}</td>
-                    <td className={tableCss}> {data.role}</td>
+                    <td className={tableCss}> {data.rolesUsuario.map(item => item.roleName).join(", ")}</td>
                     <td className={tableCss}> {data.user_email}</td>
                     <td className={`${tableCss}`}> 
                       {data.valido.toString() === "true" ? (
