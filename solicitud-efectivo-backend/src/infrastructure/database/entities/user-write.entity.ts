@@ -18,7 +18,7 @@ export class UserWriteEntity {
     minLength: 11,
     maxLength: 11,
   })
-  @Column({ name: 'cedula', length: 25 })
+  @Column({ name: 'cedula', length: 11 })
   @Index()
   cedula: string;
 
@@ -166,13 +166,7 @@ export class UserWriteEntity {
   @Column({ name: 'user_account_email', length: 255, nullable: true })
   user_account_email: string;
 
-  @ApiProperty({
-    description: 'Contraseña del email de la cuenta',
-    example: 'password123',
-    maxLength: 255,
-  })
-  @Column({ name: 'user_account_email_passw', length: 20, nullable: true })
-  user_account_email_passw: string;
+  // Campo user_account_email_passw removido - no existe en la tabla real
 
   @ApiProperty({
     description: 'Porcentaje de comisión',
@@ -190,43 +184,37 @@ export class UserWriteEntity {
   @Column({ name: 'Default_PortalId', type: 'int', nullable: true })
   default_portalid: string;
 
-  @ApiProperty({
-    description: 'Nuevo campo',
-    example: 'valor',
-    maxLength: 255,
-  })
-  @Column({ name: 'NuevoCampo', length: 300, nullable: true })
-  nuevocampo: string;
+  // Campo NuevoCampo removido - no existe en la tabla real
 
   @ApiProperty({
     description: 'ID del encargado',
     example: '1',
     maxLength: 50,
   })
-  @Column({ name: 'encargadoId', type: 'int', nullable: true })
-  encargadoId: string;
+  @Column({ name: 'EncargadoId', type: 'int', nullable: true })
+  encargadoId: number;
 
   @ApiProperty({
     description: 'Indica si la contraseña ha sido cambiada',
     example: '0',
     maxLength: 1,
   })
-  @Column({ name: 'passwchanged', type: 'bit', default: () => '(0)', nullable: true })
-  passwchanged: string;
+  @Column({ name: 'PasswChanged', type: 'bit', default: () => '(0)', nullable: true })
+  passwchanged: boolean;
 
   @ApiProperty({
     description: 'Estado de validez del usuario (1=activo, 0=inactivo)',
     example: 1,
   })
-  @Column({ name: 'valido', type: 'bit', default: () => '(1)' })
-  valido: number;
+  @Column({ name: 'Valido', type: 'bit', default: () => '(1)' })
+  valido: boolean;
 
   @ApiProperty({
     description: 'Fecha de eliminación (soft delete)',
     example: '2024-01-01T00:00:00.000Z',
     nullable: true,
   })
-  @Column({ name: 'deleted_at', type: 'datetime', nullable: true })
+  @Column({ name: 'Deleted_At', type: 'datetime2', nullable: true })
   deleted_at: Date;
 
   @ApiProperty({
@@ -234,7 +222,7 @@ export class UserWriteEntity {
     example: 1,
     nullable: true,
   })
-  @Column({ name: 'deleted_by', type: 'int', nullable: true })
+  @Column({ name: 'Deleted_By', type: 'int', nullable: true })
   deleted_by: number;
 
   getFullName(): string {
@@ -245,9 +233,9 @@ export class UserWriteEntity {
     return `${this.apellido}`.trim();
   }
 
-  isActive(): number {
-    // Devuelve 1 si el usuario está activo, 0 si no
-    return this.valido === 1 ? 1 : 0;
+  isActive(): boolean {
+    // Devuelve true si el usuario está activo
+    return this.valido === true;
   }
 
   hasRole(roleId: number): boolean {

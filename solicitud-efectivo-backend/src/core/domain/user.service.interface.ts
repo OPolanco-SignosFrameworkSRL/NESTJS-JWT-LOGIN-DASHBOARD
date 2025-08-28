@@ -18,10 +18,7 @@ export interface IUserService {
   ): Promise<{ message: string; type: 'soft' | 'permanent'; user: any }>; */
     currentUser?: { id: number; role: UserRole }
   ): Promise<{ message: string; user: any }>;
-  restore(
-    id: number, 
-    currentUser?: { id: number; role: UserRole }
-  ): Promise<{ message: string; user: any }>;
+
   findDeleted(): Promise<IUserResponse[]>;
   searchByTerm(term: string): Promise<IUserResponse[]>;
   findByRole(role: UserRole): Promise<IUserResponse[]>;

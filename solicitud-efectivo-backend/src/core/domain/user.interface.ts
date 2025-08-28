@@ -30,7 +30,7 @@ export interface IUserPayload {
   fullname: string;
   rolesUsuario: Array<{ id: number; roleName: string }>; // Array de roles del usuario
   email: string;
-  valido: boolean;
+  valido: boolean;   // true = activo, false = inactivo
 }
 
 export interface ILoginResponse {
@@ -40,13 +40,13 @@ export interface ILoginResponse {
     cedula: string;
     fullname: string;
     apellido: string;
-    role: number; // Cambiar de UserRole a number
+    rolesUsuario: Array<{ id: number; roleName: string }>; // Array de roles del usuario
     user_email: string;
     //division: string;
     //cargo: string;
     //dependencia: string;
     //recinto: string;
-    valido: string;
+    valido: boolean;   // true = activo, false = inactivo
   };
   expires_in: number;
 }
@@ -59,6 +59,7 @@ export interface IUserCreateData {
   password: string;
   clave: string;
   role?: number; // Cambiar de UserRole a number
+  roles?: Array<{ id: number }>; // Array de roles para el usuario
   user_email?: string;
   telefono?: string;
   direccion?: string;
@@ -101,13 +102,36 @@ export interface IUserUpdateData {
 }
 
 export interface IUserResponse {
-  id: number;
-  cedula: string;
+  id?: number;
+  nombre?: string;
+  apellido?: string;
   fullname: string;
-  rolesUsuario: Array<{ id: number; roleName: string }>; // Array de roles del usuario
+  cedula: string;
+  roles: Array<{ id: number; roleName?: string }>; // Array de roles del usuario
+  password?: string; // Contraseña hasheada (solo para endpoints específicos)
+  //role?: string; // Rol principal para compatibilidad
   user_email: string;
-  valido: number;
+  telefono?: string;
+  celular?: string;
+  direccion?: string;
+  valido: boolean;   // true = activo, false = inactivo
 }
+
+/* export interface IUserIdResponse {
+  id?: number;
+  nombre: string; // Nombre completo combinado (nombre + apellido)
+  apellido: string;
+  fullname?: string;   
+  cedula: string;
+  roles: Array<{ id: number; roleName?: string }>; // Array de roles del usuario
+  password?: string; // Contraseña hasheada (solo para endpoints específicos)
+  //role?: string; // Rol principal para compatibilidad
+  user_email: string;
+  telefono?: string;
+  celular?: string;
+  direccion?: string;
+  valido: boolean;   // true = activo, false = inactivo
+} */
 
 export interface IUserFilters {
   role?: number; // Cambiar de UserRole a number
@@ -116,6 +140,7 @@ export interface IUserFilters {
   active?: boolean;
   page?: number;
   limit?: number;
+  fullname?: string;
 }
 
 export interface IUserStats {

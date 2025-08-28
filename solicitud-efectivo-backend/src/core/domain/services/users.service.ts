@@ -54,7 +54,7 @@ export class UsersService {
       const totalPages = Math.ceil(total / limit);
 
       const mappedUsers = await Promise.all(
-        users.map(user => this.mapToUserResponse(user))
+        users.map(user => this.mapToUserResponse(user, false)) // Sin contraseña para findAll
       );
 
       return {
@@ -77,15 +77,16 @@ export class UsersService {
    */
   async findOne(id: number): Promise<IUserResponse> {
     try {
+      // Buscar usuario sin filtrar por valido para poder ver usuarios inactivos también
       const user = await this.userRepository.findOne({
-        where: { id, valido: true }
+        where: { id }
       });
 
       if (!user) {
         throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
       }
 
-      return await this.mapToUserResponse(user);
+      return await this.mapToUserResponse(user, true); // Incluir contraseña para findOne
     } catch (error) {
       this.logger.error(`Error obteniendo usuario ${id}:`, error);
       throw error;
@@ -97,8 +98,9 @@ export class UsersService {
    */
   async findByCedula(cedula: string): Promise<IUserResponse> {
     try {
+      // Buscar usuario sin filtrar por valido para poder ver usuarios inactivos también
       const user = await this.userRepository.findOne({
-        where: { cedula, valido: true }
+        where: { cedula }
       });
 
       if (!user) {
@@ -107,7 +109,7 @@ export class UsersService {
         );
       }
 
-      return await this.mapToUserResponse(user);
+      return await this.mapToUserResponse(user, true); // Incluir contraseña para findByCedula
     } catch (error) {
       this.logger.error(
         `Error obteniendo usuario por cédula ${cedula}:`,
@@ -122,7 +124,7 @@ export class UsersService {
    */
   async update(
     id: number,
-     //updateData: IUserUpdateData,
+    //updateData: IUserUpdateData,
     updateData: any,
     currentUser?: { id: number; role: number },
   ): Promise<IUserResponse> {
@@ -137,8 +139,9 @@ export class UsersService {
       }
 
       // Verificar permisos: Admin puede actualizar cualquier usuario, Usuario solo puede actualizar sus propios datos
-      //if (currentUser && currentUser.role !== 1 && currentUser.id !== id) {
-      if (currentUser && currentUser.role !== 1 && currentUser.id !== id) {
+      const isAdmin = currentUser?.rolesUsuario?.some(role => role.id === 1) || false;
+      
+      if (currentUser && !isAdmin && currentUser.id !== id) {
         throw new UnauthorizedException('No tienes permisos para actualizar este usuario');
       }
 
@@ -146,8 +149,29 @@ export class UsersService {
       if (updateData.nombre) userWrite.nombre = updateData.nombre;
       if (updateData.apellido) userWrite.apellido = updateData.apellido;
       if (updateData.cedula) userWrite.cedula = updateData.cedula;
+
+      // Manejar roles (array de objetos con id)
+      if (updateData.roles && Array.isArray(updateData.roles)) {
+        // Eliminar roles existentes
+        await this.usuarioRolRepository.delete({ idUsuario: userWrite.id });
+
+        // Agregar nuevos roles
+        for (const role of updateData.roles) {
+          if (role.id) {
+            const newRole = this.usuarioRolRepository.create({
+              idUsuario: userWrite.id,
+              idRol: role.id,
+              rowActive: true,
+              userAdd: currentUser?.id || userWrite.id,
+            });
+            await this.usuarioRolRepository.save(newRole);
+          }
+        }
+        this.logger.log(`Roles actualizados para usuario ${userWrite.id}: ${updateData.roles.map(r => r.id).join(', ')}`);
+      }
+
+      // Manejar rol individual (para compatibilidad)
       if (updateData.role) {
-        // Actualizar rol en UsuariosRoles, no en Appusuarios
         const existing = await this.usuarioRolRepository.findOne({ where: { idUsuario: userWrite.id } });
         if (existing) {
           existing.idRol = updateData.role;
@@ -163,10 +187,23 @@ export class UsersService {
           await this.usuarioRolRepository.save(newLink);
         }
       }
+
       if (updateData.user_email) userWrite.user_email = updateData.user_email;
       if (updateData.telefono) userWrite.telefono = updateData.telefono;
       if (updateData.celular) userWrite.celular = updateData.celular;
       if (updateData.direccion) userWrite.direccion = updateData.direccion;
+
+      // Manejar campo valida (restaurar usuario si se pone true)
+      if (updateData.valido !== undefined) {
+        userWrite.valido = Boolean(updateData.valido);
+
+        // Si se está restaurando (valida: true), limpiar campos de soft delete
+        if (updateData.Valido === true) {
+          userWrite.deleted_at = null;
+          userWrite.deleted_by = null;
+          this.logger.log(`Usuario ${userWrite.id} restaurado automáticamente via actualización`);
+        }
+      }
       /*
       if (updateData.celular) userWrite.celular = updateData.celular;
       if (updateData.user_status) userWrite.user_status = updateData.user_status;
@@ -206,27 +243,8 @@ export class UsersService {
         userWrite.password = passwordHash;
       }
       */
-/*  // Actualizar contraseña solo si se proporciona y no está vacía
- if (updateData.password && updateData.password.trim() !== '') {
-  let passwordHash;
-  
-  // Si ya es un hash (64 caracteres hexadecimales), usarlo directamente
-  if (/^[a-f0-9]{64}$/i.test(updateData.password)) {
-    passwordHash = updateData.password;
-  } else {
-    // Si es texto plano, generar el hash
-    passwordHash = this.cryptoService.calculateSHA256(userWrite.cedula + updateData.password);
-  }
-  
-  userWrite.password = passwordHash;
-}
-      
-      // Actualizar contraseña solo si se proporciona y no está vacía
-      if (updateData.password && updateData.password.trim() !== '') {
-        // Generar hash de la contraseña (cedula + clave)
-        const passwordHash = this.cryptoService.calculateSHA256(userWrite.cedula + updateData.password); */
-      // VERSIÓN FUNCIONAL - Actualizar contraseña solo si se proporciona y no está vacía
-      if (updateData.password && updateData.password.trim() !== '') {
+      /*  // Actualizar contraseña solo si se proporciona y no está vacía
+       if (updateData.password && updateData.password.trim() !== '') {
         let passwordHash;
         
         // Si ya es un hash (64 caracteres hexadecimales), usarlo directamente
@@ -239,14 +257,32 @@ export class UsersService {
         
         userWrite.password = passwordHash;
       }
+            
+            // Actualizar contraseña solo si se proporciona y no está vacía
+            if (updateData.password && updateData.password.trim() !== '') {
+              // Generar hash de la contraseña (cedula + clave)
+              const passwordHash = this.cryptoService.calculateSHA256(userWrite.cedula + updateData.password); */
+      // VERSIÓN FUNCIONAL - Actualizar contraseña solo si se proporciona y no está vacía
+      if (updateData.password && updateData.password.trim() !== '') {
+        let passwordHash;
+
+        // Si ya es un hash (64 caracteres hexadecimales), usarlo directamente
+        if (/^[a-f0-9]{64}$/i.test(updateData.password)) {
+          passwordHash = updateData.password;
+        } else {
+          // Si es texto plano, generar el hash
+          passwordHash = this.cryptoService.calculateSHA256(userWrite.cedula + updateData.password);
+        }
+
+        userWrite.password = passwordHash;
+      }
 
       // Guardar cambios
       await this.userWriteRepository.save(userWrite);
 
-      // Obtener datos actualizados desde la vista
+      // Obtener datos actualizados desde la vista (sin filtrar por valido para poder obtener usuarios restaurados)
       const updatedUser = await this.userRepository.findOne({
-        where: { id, valido: true },
-
+        where: { id },
       });
 
       if (!updatedUser) {
@@ -254,7 +290,7 @@ export class UsersService {
       }
 
       this.logger.log(`Usuario ${id} actualizado exitosamente`);
-      return await this.mapToUserResponse(updatedUser);
+      return await this.mapToUserResponse(updatedUser, false); // Sin contraseña para update
     } catch (error) {
       this.logger.error(`Error actualizando usuario ${id}:`, error);
       throw error;
@@ -286,7 +322,7 @@ export class UsersService {
       await this.validateUserDeletion(userWrite, currentUser);
 
       // Soft delete (solo marcar como eliminado)
-      userWrite.valido = 0;
+      userWrite.valido = false;
       userWrite.deleted_at = new Date();
       userWrite.deleted_by = currentUser?.id || 0;
 
@@ -296,11 +332,11 @@ export class UsersService {
 
       return {
         message: 'Usuario marcado como eliminado exitosamente',
-        user: { 
-          id: userWrite.id, 
-          cedula: userWrite.cedula, 
-          nombre: userWrite.nombre, 
-          apellido: userWrite.apellido 
+        user: {
+          id: userWrite.id,
+          cedula: userWrite.cedula,
+          nombre: userWrite.nombre,
+          apellido: userWrite.apellido
         }
       };
     } catch (error) {
@@ -317,7 +353,7 @@ export class UsersService {
     const usuarioRol = await this.usuarioRolRepository.findOne({
       where: { idUsuario: user.id, rowActive: true }
     });
-    
+
     if (usuarioRol?.idRol === 1) {
       const adminCount = await this.usuarioRolRepository.count({
         where: { idRol: 1, rowActive: true }
@@ -339,41 +375,7 @@ export class UsersService {
     // - etc.
   }
 
-  /**
-   * Restaura un usuario eliminado (soft delete)
-   */
-  async restore(id: number, currentUser?: { id: number; role: number }): Promise<{ message: string; user: any }> {
-    try {
-      const userWrite = await this.userWriteRepository.findOne({
-        where: { id }
-      });
 
-      if (!userWrite) {
-        throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
-      }
-
-      if (userWrite.valido === 1) {
-        throw new BadRequestException('El usuario ya está activo');
-      }
-
-      // Restaurar usuario
-      userWrite.valido = 1;
-      userWrite.deleted_at = null;
-      userWrite.deleted_by = null;
-
-      await this.userWriteRepository.save(userWrite);
-
-      this.logger.log(`Usuario ${id} restaurado por ${currentUser?.id || 'sistema'}`);
-
-      return {
-        message: 'Usuario restaurado exitosamente',
-        user: { id: userWrite.id, cedula: userWrite.cedula, nombre: userWrite.nombre, apellido: userWrite.apellido }
-      };
-    } catch (error) {
-      this.logger.error(`Error restaurando usuario ${id}:`, error);
-      throw error;
-    }
-  }
 
   /**
    * Obtiene usuarios eliminados (soft delete)
@@ -381,18 +383,15 @@ export class UsersService {
   async findDeleted(): Promise<IUserResponse[]> {
     try {
       const deletedUsers = await this.userWriteRepository.find({
-        where: { valido: 0 },
+        where: { valido: false },
         order: { deleted_at: 'DESC' }
       });
 
-      return deletedUsers.map(user => ({
-        id: user.id,
-        cedula: user.cedula,
-        fullname: user.getFullName(),
-        rolesUsuario: [], // Los usuarios eliminados no tienen roles activos
-        user_email: user.user_email,
-        valido: user.valido === 1 ? 1 : 0
-      }));
+      // Mapear usuarios eliminados usando el método estándar
+      const mappedUsers = await Promise.all(
+        deletedUsers.map(user => this.mapToUserResponse(user, false)) // Sin contraseña para deleted
+      );
+      return mappedUsers;
     } catch (error) {
       this.logger.error('Error obteniendo usuarios eliminados:', error);
       throw error;
@@ -418,7 +417,7 @@ export class UsersService {
         .orderBy('user.nombre', 'DESC')
         .getMany();
 
-      return await Promise.all(users.map(user => this.mapToUserResponse(user)));
+      return await Promise.all(users.map(user => this.mapToUserResponse(user, false)));
     } catch (error) {
       this.logger.error(
         `Error buscando usuarios con término "${term}":`,
@@ -439,7 +438,7 @@ export class UsersService {
       });
 
       const userIds = usuariosRoles.map(ur => ur.idUsuario);
-      
+
       if (userIds.length === 0) {
         return [];
       }
@@ -449,7 +448,7 @@ export class UsersService {
         order: { nombre: 'DESC' }
       });
 
-      return await Promise.all(users.map(user => this.mapToUserResponse(user)));
+      return await Promise.all(users.map(user => this.mapToUserResponse(user, false)));
     } catch (error) {
       this.logger.error(`Error obteniendo usuarios por rol ${role}:`, error);
       throw error;
@@ -470,7 +469,7 @@ export class UsersService {
 
       });
 
-      return await Promise.all(users.map(user => this.mapToUserResponse(user)));
+      return await Promise.all(users.map(user => this.mapToUserResponse(user, false)));
     } catch (error) {
       this.logger.error(
         `Error obteniendo usuarios por división ${division}:`,
@@ -560,7 +559,7 @@ export class UsersService {
         where: {
           cedula,
           password: passwordHash,
-          valido: 1
+          valido: true
         },
       });
 
@@ -607,16 +606,17 @@ export class UsersService {
       .createQueryBuilder('user');
 
     // Filtro por validez del usuario
-    // Si active no está definido: traer TODOS los usuarios (activos e inactivos)
-    // Si active es true: traer solo válidos (valido = 1)
-    // Si active es false: traer solo inválidos (valido = 0)
+    // COMPORTAMIENTO POR DEFECTO: traer TODOS los usuarios (activos e inactivos)
+    // Solo filtrar si se especifica explícitamente el parámetro active
     if (filters?.active !== undefined) {
       queryBuilder.where('user.valido = :valido', {
         valido: filters.active ? true : false  // Convertir explícitamente a booleano
       });
-      
+      this.logger.log(`Aplicando filtro de usuario activo: ${filters.active}`);
+    } else {
+      // SIN FILTROS - Mostrar TODOS los usuarios por defecto
+      this.logger.log('Sin filtro de valido - mostrando todos los usuarios (activos e inactivos)');
     }
-    // Si no se especifica active, NO aplicar filtro de valido (traer todos)
 
     // Temporalmente deshabilitado - el rol se obtiene desde UsuariosRoles
     // if (filters?.role) {
@@ -645,28 +645,59 @@ export class UsersService {
 
 
   /**
-   * Mapea la entidad User a IUserResponse
+   * Mapea la entidad User a IUserResponse con estructura completa
    */
-  private async mapToUserResponse(user: UserEntity): Promise<IUserResponse> {
+  private async mapToUserResponse(user: UserEntity, includePassword: boolean = false): Promise<IUserResponse> {
     // Obtener todos los roles del usuario desde UsuariosRoles
     const usuariosRoles = await this.usuarioRolRepository.find({
       where: { idUsuario: user.id, rowActive: true },
       relations: ['roleEntity']
     });
 
-    // Construir array de rolesUsuario
-    const rolesUsuario = usuariosRoles.map(ur => ({
+    // Construir array de roles
+    const roles = usuariosRoles.map(ur => ({
       id: ur.roleEntity.id,
       roleName: ur.roleEntity.roleName
     }));
 
+    // Obtener rol principal (primer rol o por defecto)
+    const rolePrincipal = roles.length > 0 ? roles[0].roleName : 'Usuario';
+
+    // Obtener datos adicionales de la tabla de escritura si se necesita la contraseña
+    let password: string | undefined;
+    let telefono: string | undefined;
+    let celular: string | undefined;
+    let direccion: string | undefined;
+
+    if (includePassword || true) { // Siempre obtener datos completos
+      const userWrite = await this.userWriteRepository.findOne({
+        where: { id: user.id }
+      });
+
+      if (userWrite) {
+        if (includePassword) {
+          password = userWrite.password;
+        }
+        telefono = userWrite.telefono;
+        celular = userWrite.celular;
+        direccion = userWrite.direccion;
+      }
+    }
+
     return {
       id: user.id,
+      fullname: user.getFullName(), // Combinar nombre + apellido
+      apellido: user.apellido,
+      nombre: user.nombre,
       cedula: user.cedula,
-      fullname: user.getFullName(),
-      rolesUsuario: rolesUsuario,
+      roles: roles,
+      // password: password,
+      // role: rolePrincipal, // Activar rol principal
       user_email: user.user_email,
-      valido: user.valido ? 1 : 0
+      telefono: telefono,
+      celular: celular,
+      direccion: direccion,
+      valido: Boolean(user.valido)
     };
   }
 

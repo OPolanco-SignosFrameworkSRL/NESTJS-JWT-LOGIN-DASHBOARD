@@ -36,6 +36,7 @@ export interface IUserCreateData {
   password: string;
   clave: string;
   role?: UserRole;
+  roles?: Array<{ id: number }>; // Array de roles para el usuario
   user_email?: string;
   telefono?: string;
   direccion?: string;
