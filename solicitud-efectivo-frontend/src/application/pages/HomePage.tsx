@@ -19,7 +19,7 @@ const Home = () => {
 
           <Container>
 
-            <Title text="Listado de Solicitudes --- 5444666test"/>
+            <Title text="Listado de Solicitudes --- 444666test"/>
 
             <Title text="Gestiona y visualiza todas las solicitudes de efectivo" isTitle={false}/>
 
