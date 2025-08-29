@@ -26,6 +26,7 @@ import { UsersService } from '../../core/domain/services/users.service';
 import { AuthService } from '../../core/domain/services/auth.service';
 import { UpdateUserDto } from '../../core/application/dto/update-user.dto';
 import { RegisterDto } from '../../core/application/dto/register.dto';
+import { CreateUserDto } from '../../core/application/dto/create-user.dto';
 import { UserFiltersDto } from '../../core/application/dto/user-filters.dto';
 import { UpdatePhoneDto } from '../../core/application/dto/update-phone.dto';
 //import { DeleteUserDto } from '../../core/application/dto/delete-user.dto';
@@ -68,8 +69,8 @@ export class UsersController {
     status: HttpStatus.CONFLICT,
     description: 'El usuario ya existe',
   })
-  async create(@Body() registerDto: RegisterDto) {
-    return await this.authService.createUser(registerDto);
+  async create(@Body() createUserDto: CreateUserDto) {
+    return await this.authService.createUser(createUserDto);
   }
 
   // ❌ ENDPOINT DESHABILITADO - Obtener todos los usuarios
@@ -348,41 +349,7 @@ export class UsersController {
     return await this.usersService.remove(id, currentUser);
   }
 
-  @Put(':id/restore')
-  @Roles(1) // ID 1 = ADMINISTRADOR
-  @ApiOperation({ summary: 'Restaurar un usuario eliminado (soft delete)' })
-  @ApiParam({ name: 'id', type: Number })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Usuario restaurado exitosamente',
-    schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', example: 'Usuario restaurado exitosamente' },
-        user: {
-          type: 'object',
-          properties: {
-            id: { type: 'number', example: 1 },
-            cedula: { type: 'string', example: '40245980129' },
-            nombre: { type: 'string', example: 'Raul' },
-            apellido: { type: 'string', example: 'Vargas' },
-          },
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Usuario no encontrado',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'El usuario ya está activo',
-  })
-  async restore(@Param('id', ParseIntPipe) id: number, @Request() req) {
-    const currentUser = req.user;
-    return await this.usersService.restore(id, currentUser);
-  }
+
   // ❌ ENDPOINT DESHABILITADO - Obtener lista de usuarios eliminados (soft delete)
   /*
     @Get('deleted/list')

@@ -92,7 +92,7 @@ export class UserEntity {
     description: 'Indica si el usuario está activo',
     example: true,
   })
-  @Column({ name: 'valido', type: 'bit', default: () => '(1)' })
+  @Column({ name: 'Valido', type: 'bit', default: () => '(1)' })
   valido: boolean;
 
 
@@ -106,7 +106,7 @@ export class UserEntity {
   }
 
   isActive(): boolean {
-    return this.valido;
+    return this.valido === true;
   }
 
   hasRole(roleId: number): boolean {
@@ -114,4 +114,5 @@ export class UserEntity {
     // Se mantiene por compatibilidad pero siempre retorna false
     return false;
   }
-} 
+
+}

@@ -40,13 +40,22 @@ export class UserFiltersDto {
   @IsOptional()
   @IsBoolean({ message: 'El campo active debe ser un booleano' })
   @Transform(({ value }) => {
-    if (value === undefined || value === null || value === '') return undefined;
-    if (typeof value === 'boolean') return value;
-    if (typeof value === 'number') return value === 1;
+    console.log('🔍 Transform recibió:', value, typeof value);
+    if (value === undefined || value === 'false' || value === 'true' || value === null || value === '') return undefined;
     const v = String(value).toLowerCase();
-    if (v === 'true' || v === '1') return true;
-    if (v === 'false' || v === '0') return false;
+    console.log('🔍 Valor convertido:', v);
+    if (v === 'true' || v === '1') {
+      console.log('❌ Retornando false');
+      return false ;
+    }
+    else if (v === 'true' || v === '0') {
+      console.log('✅ Retornando true');
+      return true;
+    }
+    else if (v === 'true' || v=== 'false' || v === '1' || v === '0') {
+    console.log('⚠️ Retornando undefined');
     return undefined;
+    }
   })
   active?: boolean;
 

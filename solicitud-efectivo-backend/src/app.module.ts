@@ -11,13 +11,13 @@ import { DesembolsoModule } from './presentation/modules/desembolso.module';
 import { AdminRequestModule } from './presentation/modules/admin-request.module';
 import { AppController } from './app.controller';
 import { getDatabaseConfig } from './config/database.config';
-import { appConfig } from './config/app.config';
+import { appConfig, jwtConfig } from './config/app.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig],
+      load: [appConfig, jwtConfig],
       envFilePath: ['.env.local', '.env'],
     }),
     TypeOrmModule.forRootAsync({

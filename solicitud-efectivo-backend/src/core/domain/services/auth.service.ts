@@ -14,8 +14,6 @@ import {
 } from '../user.interface';
 import { CryptoService } from '../../../infrastructure/services/crypto.service';
 import { ConfigService } from '@nestjs/config';
-import { Transform } from 'class-transformer';
-import { IsOptional, IsBoolean } from 'class-validator';
 
 @Injectable()
 export class AuthService {
@@ -182,34 +180,34 @@ export class AuthService {
         direccion: data.direccion,
         celular: data.celular,
         user_status: data.user_status || 1,
-        caja_id: data.caja_id?.toString(),
-        tienda_id: data.tienda_id?.toString(),
-        allow_multi_tienda: (data.allow_multi_tienda || 0).toString(),
-        max_descuento: data.max_descuento?.toString(),
-        close_caja: (data.close_caja || 0).toString(),
+        caja_id: data.caja_id || null,
+        tienda_id: data.tienda_id || null,
+        allow_multi_tienda: data.allow_multi_tienda || '0',
+        max_descuento: data.max_descuento || null,
+        close_caja: data.close_caja || '0',
         user_account_email: data.user_account_email,
-        user_account_email_passw: data.user_account_email_passw,
-        comision_porciento: data.comision_porciento?.toString(),
-        default_portalid: data.default_portalid?.toString(),
-        nuevocampo: data.nuevocampo,
-        encargadoId: data.encargadoId?.toString(),
-        passwchanged: '0',
-        valido: 1,
+        comision_porciento: data.comision_porciento || null,
+        default_portalid: data.default_portalid || null,
+        encargadoId: parseInt(data.encargadoId) || null,
+        passwchanged: false,
+        valido: true,
       });
       
-
       const savedUser = await this.userWriteRepository.save(newUser);
 
-      // Insertar en UsuariosRoles SOLO si viene data.role
-      if (data.role) {
-        await this.usuarioRolRepository.save(
-          this.usuarioRolRepository.create({
-            idUsuario: savedUser.id,
-            idRol: data.role,
-            rowActive: true,
-            userAdd: savedUser.id,
-          }),
-        );
+      // Insertar en UsuariosRoles todos los roles enviados
+      if (data.roles && data.roles.length > 0) {
+        for (const role of data.roles) {
+          await this.usuarioRolRepository.save(
+            this.usuarioRolRepository.create({
+              idUsuario: savedUser.id,
+              idRol: role.id,
+              rowActive: true,
+              userAdd: savedUser.id,
+            }),
+          );
+        }
+        this.logger.log(`Asignados ${data.roles.length} roles al usuario ${data.cedula}`);
       }
 
       this.logger.log(`Usuario creado exitosamente: ${data.cedula} con ID: ${savedUser.id}`);
@@ -265,7 +263,7 @@ export class AuthService {
     };
 
     const token = this.jwtService.sign(payload);
-    const expiresIn = this.configService.get<string>('JWT_EXPIRES_IN', '24h');
+    const expiresIn = this.configService.get<string>('jwt.expiresIn', '24h');
 
     this.logger.log(`Login exitoso para usuario: ${user.cedula}`);
 
@@ -276,9 +274,9 @@ export class AuthService {
         cedula: user.cedula,
         fullname: user.fullname,
         apellido: user.apellido,
-        role: user.role,
+        rolesUsuario: rolesUsuario,
         user_email: user.user_email,
-        valido: (user.valido ? 1 : 0).toString(),
+        valido: Boolean(user.valido),
       },
       expires_in: this.parseExpiresIn(expiresIn),
     };
@@ -556,7 +554,7 @@ export class AuthService {
         where: { 
           cedula,
           password: passwordHash,
-          valido: 1
+          valido: true
         },
       });
 

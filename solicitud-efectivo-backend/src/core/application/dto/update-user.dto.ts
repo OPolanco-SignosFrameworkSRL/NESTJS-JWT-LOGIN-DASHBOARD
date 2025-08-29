@@ -1,301 +1,157 @@
 import { ApiProperty } from '@nestjs/swagger';
-/*
 import {
   IsString,
   IsOptional,
+  Length,
+  Matches,
   IsEmail,
   IsEnum,
-  IsNumber,
-  Length,
+  IsArray,
+  ValidateNested,
+  IsBoolean,
 } from 'class-validator';
-import { UserRole } from '../../domain/user.interface';
-*/
-import { IsOptional, IsString, IsEmail, MinLength, MaxLength, Matches, ValidateIf } from 'class-validator';
+import { Type } from 'class-transformer';
+import {  } from '../../domain/user.interface';
+
+class RoleUpdateDto {
+  @ApiProperty({ description: 'ID del rol', example: 1 })
+  @IsOptional()
+  id?: number;
+
+  @ApiProperty({ 
+    description: 'Nombre del rol (opcional)', 
+    example: 'maracuya',
+    required: false 
+  })
+  @IsOptional()
+  @IsString({ message: 'El nombre del rol debe ser una cadena de texto' })
+  roleName?: string;
+}
 
 export class UpdateUserDto {
   @ApiProperty({
     description: 'Nombre del usuario',
-    /*
     example: 'Raul',
     maxLength: 100,
-    */ 
-    example: 'Raul',
     required: false,
   })
   @IsOptional()
   @IsString({ message: 'El nombre debe ser una cadena de texto' })
-  /*
   @Length(2, 100, { message: 'El nombre debe tener entre 2 y 100 caracteres' })
-  */
-  @MinLength(2, { message: 'El nombre debe tener al menos 2 caracteres' })
-  @MaxLength(50, { message: 'El nombre no puede exceder 50 caracteres' })
   nombre?: string;
 
   @ApiProperty({
     description: 'Apellido del usuario',
-    /*
-    example: 'Vargas',
-    maxLength: 100,
-    */
     example: 'Enriquez',
+    maxLength: 100,
     required: false,
   })
   @IsOptional()
   @IsString({ message: 'El apellido debe ser una cadena de texto' })
-/*
-@Length(2, 100, { message: 'El apellido debe tener entre 2 y 100 caracteres' }) 
-*/
-  @MinLength(2, { message: 'El apellido debe tener al menos 2 caracteres' })
-  @MaxLength(50, { message: 'El apellido no puede exceder 50 caracteres' })
+  @Length(2, 100, {
+    message: 'El apellido debe tener entre 2 y 100 caracteres',
+  })
   apellido?: string;
 
   @ApiProperty({
-    /*
-    description: 'Rol del usuario en el sistema',
-    example: 'Usuario',
-    enum: ['Admin', 'Usuario', 'Supervisor', 'Manager'],
-    */description: 'Cédula del usuario',
+    description: 'Número de cédula del usuario (11 dígitos)',
     example: '40245980129',
+    minLength: 11,
+    maxLength: 11,
     required: false,
   })
   @IsOptional()
-  /*
-  @IsEnum(UserRole, {
-    message: 'El rol debe ser uno de: Admin, Usuario, Supervisor, Manager',
-  })
-  role?: UserRole;
-  */
   @IsString({ message: 'La cédula debe ser una cadena de texto' })
-  @Matches(/^\d{11}$/, { message: 'La cédula debe tener exactamente 11 dígitos' })
+  @Length(11, 11, { message: 'La cédula debe tener exactamente 11 dígitos' })
+  @Matches(/^\d{11}$/, { message: 'La cédula debe contener solo números' })
   cedula?: string;
 
   @ApiProperty({
-    /*
-    description: 'Email del usuario',
-    example: 'raul.vargas@grupoastro.com.do',
-    maxLength: 255,
-    */description: 'Contraseña del usuario (opcional)',
-    example: 'nuevaContraseña123',
+    description: 'Roles del usuario (array de objetos con ID de rol)',
+    type: [RoleUpdateDto],
+    example: [{ id: 1 }, { id: 2 }, { id: 3, roleName: 'maracuya' }],
     required: false,
   })
   @IsOptional()
-  /*
-  @IsEmail({}, { message: 'El email debe tener un formato válido' })
-  @Length(5, 255, { message: 'El email debe tener entre 5 y 255 caracteres' })
-  user_email?: string;
-  */
- @ValidateIf((o) => o.password && o.password.length > 0)
- @IsString({ message: 'La contraseña debe ser una cadena de texto' })
-  @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
-  password?: string;
+  @IsArray({ message: 'Los roles deben ser un array' })
+  @ValidateNested({ each: true })
+  @Type(() => RoleUpdateDto)
+  roles?: RoleUpdateDto[];
 
   @ApiProperty({
-    /*
-    description: 'Número de teléfono del usuario',
-    example: '8091234567',
-    maxLength: 20,
-    */description: 'Rol del usuario',
+    description: 'Nueva contraseña del usuario',
+    example: 'nuevaContraseña123',
+    minLength: 4,
+    maxLength: 50,
+    required: false,
+  })
+  @IsOptional()
+  @IsString({ message: 'La contraseña debe ser una cadena de texto' })
+  @Length(4, 50, {
+    message: 'La contraseña debe tener entre 4 y 50 caracteres',
+  })
+  password?: string;
+
+ /*  @ApiProperty({
+    description: 'Rol del usuario en el sistema (para compatibilidad)',
+    enum: ,
     example: 'Usuario',
     required: false,
   })
   @IsOptional()
-  /*
-  @IsString({ message: 'El teléfono debe ser una cadena de texto' })
-  @Length(10, 20, { message: 'El teléfono debe tener entre 10 y 20 caracteres' })
-  telefono?: string;
-  */@IsString({ message: 'El rol debe ser una cadena de texto' })
-  role?: string;
+  @IsEnum(, { message: 'El rol debe ser uno de los valores permitidos' })
+  role?: ; */
 
   @ApiProperty({
-    /*
-    description: 'Dirección del usuario',
-    example: 'Calle Principal #123',
-    maxLength: 255,
-    */description: 'Email del usuario',
+    description: 'Email del usuario',
     example: 'pedro@gmail.com',
+    maxLength: 255,
     required: false,
   })
   @IsOptional()
-  /*
-  @IsString({ message: 'La dirección debe ser una cadena de texto' })
-  @Length(5, 255, { message: 'La dirección debe tener entre 5 y 255 caracteres' })
-  direccion?: string;
-  */
- @IsEmail({}, { message: 'Debe ser un email válido' })
+  @IsEmail({}, { message: 'El email debe tener un formato válido' })
+  @Length(5, 255, { message: 'El email debe tener entre 5 y 255 caracteres' })
   user_email?: string;
 
   @ApiProperty({
-    /*
-    description: 'Número de celular del usuario',
-    example: '8091234567',
-    maxLength: 20,
-    */
-   description: 'Teléfono del usuario',
+    description: 'Número de teléfono del usuario',
     example: '04145980129',
+    maxLength: 20,
     required: false,
   })
   @IsOptional()
-/*
-@IsString({ message: 'El celular debe ser una cadena de texto' })
-  @Length(10, 20, { message: 'El celular debe tener entre 10 y 20 caracteres' })
-  celular?: string;
-*/  @IsString({ message: 'El teléfono debe ser una cadena de texto' })
+  @IsString({ message: 'El teléfono debe ser una cadena de texto' })
+  @Length(10, 20, { message: 'El teléfono debe tener entre 10 y 20 caracteres' })
   telefono?: string;
 
   @ApiProperty({
-/*
-description: 'Estado del usuario',
-    example: 1, 
-*/    description: 'Celular del usuario',
+    description: 'Número de celular del usuario',
     example: '04145980129',
+    maxLength: 20,
     required: false,
   })
   @IsOptional()
-  /*
-   @IsNumber({}, { message: 'El estado debe ser un número' })
-  user_status?: number;
-  */
   @IsString({ message: 'El celular debe ser una cadena de texto' })
+  @Length(10, 20, { message: 'El celular debe tener entre 10 y 20 caracteres' })
   celular?: string;
 
   @ApiProperty({
-/*
- description: 'ID de la caja asignada',
-    example: '1',
-    maxLength: 50,
-*/    description: 'Dirección del usuario',
+    description: 'Dirección del usuario',
     example: 'Calle 123, Ciudad',
-    required: false,
-  })
-  @IsOptional()
-
-/*
-@IsString({ message: 'El ID de caja debe ser una cadena de texto' })
-  @Length(1, 50, { message: 'El ID de caja debe tener entre 1 y 50 caracteres' })
-  caja_id?: string;
-  @ApiProperty({
-    description: 'ID de la tienda asignada',
-    example: '1',
-    maxLength: 50,
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'El ID de tienda debe ser una cadena de texto' })
-  @Length(1, 50, { message: 'El ID de tienda debe tener entre 1 y 50 caracteres' })
-  tienda_id?: string;
-
-  @ApiProperty({
-    description: 'Permite múltiples tiendas (0=No, 1=Sí)',
-    example: '0',
-    maxLength: 1,
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'El campo allow_multi_tienda debe ser una cadena de texto' })
-  @Length(1, 1, { message: 'El campo allow_multi_tienda debe tener exactamente 1 carácter' })
-  allow_multi_tienda?: string;
-
-  @ApiProperty({
-    description: 'Descuento máximo permitido',
-    example: '10.5',
-    maxLength: 10,
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'El descuento máximo debe ser una cadena de texto' })
-  @Length(1, 10, { message: 'El descuento máximo debe tener entre 1 y 10 caracteres' })
-  max_descuento?: string;
-
-  @ApiProperty({
-    description: 'Permite cerrar caja (0=No, 1=Sí)',
-    example: '0',
-    maxLength: 1,
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'El campo close_caja debe ser una cadena de texto' })
-  @Length(1, 1, { message: 'El campo close_caja debe tener exactamente 1 carácter' })
-  close_caja?: string;
-
-  @ApiProperty({
-    description: 'Email de la cuenta del usuario',
-    example: 'usuario@email.com',
     maxLength: 255,
     required: false,
   })
   @IsOptional()
-  @IsEmail({}, { message: 'El email de cuenta debe tener un formato válido' })
-  @Length(5, 255, { message: 'El email de cuenta debe tener entre 5 y 255 caracteres' })
-  user_account_email?: string;
-
-  @ApiProperty({
-    description: 'Contraseña del email de la cuenta',
-    example: 'password123',
-    maxLength: 255,
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'La contraseña del email debe ser una cadena de texto' })
-  @Length(4, 255, { message: 'La contraseña del email debe tener entre 4 y 255 caracteres' })
-  user_account_email_passw?: string;
-
-  @ApiProperty({
-    description: 'Porcentaje de comisión',
-    example: '5.5',
-    maxLength: 10,
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'El porcentaje de comisión debe ser una cadena de texto' })
-  @Length(1, 10, { message: 'El porcentaje de comisión debe tener entre 1 y 10 caracteres' })
-  comision_porciento?: string;
-
-  @ApiProperty({
-    description: 'Portal ID por defecto',
-    example: '1',
-    maxLength: 50,
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'El portal ID debe ser una cadena de texto' })
-  @Length(1, 50, { message: 'El portal ID debe tener entre 1 y 50 caracteres' })
-  default_portalid?: string;
-
-  @ApiProperty({
-    description: 'Nuevo campo',
-    example: 'valor',
-    maxLength: 255,
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'El nuevo campo debe ser una cadena de texto' })
-  @Length(1, 255, { message: 'El nuevo campo debe tener entre 1 y 255 caracteres' })
-  nuevocampo?: string;
-
-  @ApiProperty({
-    description: 'ID del encargado',
-    example: '1',
-    maxLength: 50,
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'El ID del encargado debe ser una cadena de texto' })
-  @Length(1, 50, { message: 'El ID del encargado debe tener entre 1 y 50 caracteres' })
-  encargadoId?: string;
-
-  @ApiProperty({
-    description: 'Indica si el usuario está activo',
-    example: '1',
-    maxLength: 1,
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'El campo valido debe ser una cadena de texto' })
-  @Length(1, 1, { message: 'El campo valido debe tener exactamente 1 carácter' })
-  valido?: string;
-} 
-   */
   @IsString({ message: 'La dirección debe ser una cadena de texto' })
-  @MaxLength(255, { message: 'La dirección no puede exceder 255 caracteres' })
+  @Length(5, 255, { message: 'La dirección debe tener entre 5 y 255 caracteres' })
   direccion?: string;
+
+  @ApiProperty({
+    description: 'Estado de validez del usuario',
+    example: true,
+    required: false,
+  })
+  @IsOptional()
+  @IsBoolean({ message: 'valida debe ser un valor booleano (true/false)' })
+  valida?: boolean;
 }

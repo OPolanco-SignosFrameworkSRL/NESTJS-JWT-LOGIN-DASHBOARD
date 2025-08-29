@@ -34,9 +34,11 @@ import { ApplicationModule } from '../../core/application/application.module';
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
+        secret: configService.get<string>('jwt.secret') || 'mi_clave_secreta_super_segura_para_jwt',
         signOptions: {
-          expiresIn: configService.get<string>('JWT_EXPIRES_IN', '24h'),
+          expiresIn: configService.get<string>('jwt.expiresIn') || '24h',
+          issuer: configService.get<string>('jwt.issuer') || 'solicitud-efectivo-api',
+          audience: configService.get<string>('jwt.audience') || 'solicitud-efectivo-users',
         },
       }),
       inject: [ConfigService],
