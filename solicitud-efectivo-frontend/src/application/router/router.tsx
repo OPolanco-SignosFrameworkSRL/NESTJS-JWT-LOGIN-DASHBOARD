@@ -15,7 +15,7 @@ import EmployeeTable from "@/application/pages/Admin/employees/EmployeeTable"
 import RolesTable from '../pages/Admin/roles/RolesTable';
 import RolePermissionsTable from '../pages/Admin/rolePermissions/RolePermissionsTable';
 import Dashboard from '../pages/Admin/dashboard/Dashboard';
-
+import { Facilities } from '../pages/configuration/Facilities';
 
 const RouterComponent = () => {
 
@@ -65,6 +65,10 @@ const RouterComponent = () => {
           element: <PaymentSettle/>
         },
         {
+          path: '/admin/facilities',
+          element: <Facilities/>
+        },
+        {
           path: '/admin',
           element: <Admin/>,
           children: [
@@ -83,7 +87,7 @@ const RouterComponent = () => {
             {
               path: '/admin/permissions',
               element: <RolePermissionsTable/>
-            }
+            },
           ]
         }
       ],

@@ -10,6 +10,10 @@ import { IoIosArrowUp } from "react-icons/io";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { FaDollarSign } from "react-icons/fa";
 import { CiMoneyBill } from "react-icons/ci";
+import { CiClock2 } from "react-icons/ci";
+import { PiBuildingApartmentFill } from "react-icons/pi";
+import { IoMdNotificationsOutline } from "react-icons/io";
+
 
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
@@ -26,19 +30,25 @@ const Nav = () => {
             {label: "Crear Solicitud", path: "/new-request", icon: <IoMdAddCircleOutline size={24} />},
             {label: "Flujo de Actividades", path: "/actividades", icon: <FaDollarSign size={24} />},
             {label: "Desembolso", path: "/Disbursement", icon: <CiMoneyBill size={24} />},
+            {label: "Pagos No Liquidados", path: "/payment-settle", icon: <CiClock2 size={24} />},
         ]},
         {label: "Estadísticas", path: "/estadisticas", icon: <PiChartLineUpBold size={26} />},
         {label: "Caja Chica", path: "/caja-chica", icon: <FaRegMoneyBillAlt size={26} />},
+        {label: "Configuración", path:{}, icon: <CiClock2 size={26} />, children:[
+            {label: "Recintos", path: "/admin/facilities", icon: <PiBuildingApartmentFill size={24} />},
+            {label: "Notificaciones", path: "/notificaciones", icon: <IoMdNotificationsOutline size={24} />},
+        ]},
         {label: "Administración", path: "/admin", icon: <IoIosSettings size={26} />},
     ]
 
     const isActive = location.pathname
 
-    const [isOpenChild, setIsOpenChild] = useState(false)
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null)
 
-    const handleOpenChild = () => {
-        setIsOpenChild(!isOpenChild)
+    const handleOpenChild = (label: string) => {
+    setOpenDropdown(openDropdown === label ? null : label)
     }
+
     
   return (
 
@@ -63,7 +73,7 @@ const Nav = () => {
                         <React.Fragment key={index}>
 
                             <Link to={item.path} className={`w-full p-2 rounded-lg ${isActive === item.path ? 'bg-gray-100' : ''} hover:bg-gray-100 transition-colors duration-200`}
-                                onClick={item.children ? handleOpenChild : undefined}
+                                onClick={item.children ? () => handleOpenChild(item.label) : undefined}
                             >
 
                                 <li className="flex w-full items-center gap-5">
@@ -81,7 +91,7 @@ const Nav = () => {
 
                                     {item.children && (
                                         <div className="flex items-center justify-center">
-                                            {isOpenChild ? <IoIosArrowUp size={24} className="text-gray-500 transition-all duration-700" /> : <IoIosArrowDown size={24} className="text-gray-500 transition-all duration-700" />}
+                                            {openDropdown === item.label ? <IoIosArrowUp size={24} className="text-gray-500 transition-all duration-700" /> : <IoIosArrowDown size={24} className="text-gray-500 transition-all duration-700" />}
                                         </div>
                                     )}
 
@@ -91,7 +101,7 @@ const Nav = () => {
 
                             <div className="ml-8">
                                 
-                                {isOpenChild && item.children && (
+                                {openDropdown === item.label && item.children && (
                                     <ul className="flex flex-col gap-2 mt-2">
                                         {item.children.map((child, childIndex) => (
                                             <Link 

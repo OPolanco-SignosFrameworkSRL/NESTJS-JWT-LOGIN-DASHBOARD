@@ -12,13 +12,6 @@ import { CiChat1 } from "react-icons/ci";
 import Title from "../ui/Text/Title";
 
 
-
-
-
-
-
-
-
 const Disbursement = () => {
 
 
