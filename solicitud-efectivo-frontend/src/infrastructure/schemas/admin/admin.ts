@@ -5,7 +5,7 @@ export const createEmployeeSchema = z.object({
     nombre: z.string(),
     apellido: z.string(),
     fullname: z.string(),
-    password: z.string().optional(),
+    password: z.string(),
     clave: z.string(),/* */
     roles: z.array(z.object({ id: z.number()})),
     user_email: z.string().email(),
@@ -19,18 +19,9 @@ export const createEmployeeSchema = z.object({
     max_descuento: z.string(),/* */
     close_caja: z.string(),/* */
     user_account_email: z.string().email(),/* */
-    user_account_email_passw: z.string(),/* */
     comision_porciento: z.string(),/* */
     default_portalid: z.string(),/* */
-    nuevocampo: z.string(),/* */
     encargadoId: z.string()/* */
-})
-
-export const updateEmployeeSchema = createEmployeeSchema.extend({
-    roles: z.array(z.object({ 
-        id: z.number(),
-        roleName: z.string()
-    })),
 })
 
 export const getAllEmployeesSchema = z.object({
@@ -38,10 +29,10 @@ export const getAllEmployeesSchema = z.object({
         id: z.number(),
         cedula: z.string(),
         fullname: z.string(),
-        rolesUsuario: z.array(z.object({ 
+        roles: z.array(z.object({ 
             id: z.number(),
             roleName: z.string()
-        })),
+        })).optional(),
         user_email: z.string(),
         valido: z.boolean(),
     })),
@@ -62,7 +53,7 @@ export const getEmployeeByIdSchema = z.object({
         cedula: z.string(),
         nombre: z.string(),
         apellido: z.string(),
-        rolesUsuario: z.array(z.object({ 
+        roles: z.array(z.object({ 
             id: z.number(),
             roleName: z.string()
         })),
@@ -81,6 +72,19 @@ export const getAllRolesSchema = z.object({
         valido: z.boolean()
     }))
 })
+
+export const updateEmployeeSchema = z.object({
+    nombre: z.string(),
+    apellido: z.string(),
+    cedula: z.string(),
+    password: z.string().optional(),
+    roles: z.array(z.object({ id: z.number(), roleName: z.string()})),
+    user_email: z.string().email(),
+    telefono: z.string(),
+    direccion: z.string(),
+    celular: z.string(),
+})
+
 
 export type GetAllEmployees = z.infer<typeof getAllEmployeesSchema>
 export type EmployeeById = z.infer<typeof getEmployeeByIdSchema>

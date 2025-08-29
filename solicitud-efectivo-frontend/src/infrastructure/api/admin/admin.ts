@@ -1,5 +1,5 @@
 import { isAxiosError } from "axios"
-import { getAllEmployeesSchema, getAllRolesSchema, getEmployeeByIdSchema, type CreateEmployee } from "@/infrastructure/schemas/admin/admin"
+import { getAllEmployeesSchema, getAllRolesSchema, getEmployeeByIdSchema, type CreateEmployee, type UpdateEmployee } from "@/infrastructure/schemas/admin/admin"
 
 import api from "@/infrastructure/api"
 
@@ -71,7 +71,7 @@ export const getEmployeeById = async (id: number) => {
 }
 
 
-export const updateEmployee = async (id: number, formData: CreateEmployee) => {
+export const updateEmployee = async (id: number, formData: UpdateEmployee) => {
     try {
         const url = `/users/${id}`
 
@@ -108,6 +108,26 @@ export const getAllRoles = async () => {
     try {
 
         const url = '/roles'
+
+        const { data } = await api(url)
+
+        const result = getAllRolesSchema.safeParse(data)
+
+        if (result.success) {
+            return result.data
+        }
+        
+    } catch (error) {
+        if(isAxiosError(error) && error.response) {
+            throw new Error(error.response.data.error);
+        }
+    }
+}
+
+export const getAllRolesView = async (limit: number) => {
+    try {
+
+        const url = `/roles?limit=${limit}`
 
         const { data } = await api(url)
 

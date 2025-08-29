@@ -11,6 +11,10 @@ import { ProtectedRoute } from '@/application/layout/ProtectedRoute';
 import EditEmployee from '../pages/Admin/employees/EditEmployee';
 import Admin from '../pages/Admin/Admin';
 import PaymentSettle from '../pages/PaymentSettle';
+import EmployeeTable from "@/application/pages/Admin/employees/EmployeeTable"
+import RolesTable from '../pages/Admin/roles/RolesTable';
+import RolePermissionsTable from '../pages/Admin/rolePermissions/RolePermissionsTable';
+import Dashboard from '../pages/Admin/dashboard/Dashboard';
 
 
 const RouterComponent = () => {
@@ -62,7 +66,25 @@ const RouterComponent = () => {
         },
         {
           path: '/admin',
-          element: <Admin/>
+          element: <Admin/>,
+          children: [
+            {
+              path: '/admin',
+              element: <Dashboard/>
+            },
+            {
+              path: '/admin/employees',
+              element: <EmployeeTable/>
+            },
+            {
+              path: '/admin/roles',
+              element: <RolesTable/>
+            },
+            {
+              path: '/admin/permissions',
+              element: <RolePermissionsTable/>
+            }
+          ]
         }
       ],
     },

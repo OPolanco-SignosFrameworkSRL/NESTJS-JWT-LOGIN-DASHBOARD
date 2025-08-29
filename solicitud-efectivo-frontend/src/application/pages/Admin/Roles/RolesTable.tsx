@@ -134,7 +134,13 @@ export default function RolesTable() {
                 {data.data.map((data, index) => (
                   <tr key={index} className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                       <td className={tableCss}> {data.role_name}</td>
-                      <td className={tableCss}> {data.valido}</td>
+                      <td className={`${tableCss}`}> 
+                        {data.valido.toString() === "true" ? (
+                          <div className="bg-green-100 text-green-800 hover:bg-green-100 rounded-full w-24 flex items-center justify-center">Activo</div>
+                        ) : (
+                          <div className="bg-gray-100 text-gray-800 hover:bg-gray-100 rounded-full w-24 flex items-center justify-center">Inactivo</div>
+                        ) }
+                      </td>
                       <td className={`${tableCss} flex items-center space-x-2`}>
                         <button
                           onClick={() => onClick(data.id)}
@@ -162,7 +168,7 @@ export default function RolesTable() {
 
       {/*<Pagination totalRecords={data.total} pageSize={data.limit}/>*/}
 
-      <ConfirmEliminationModal onClickCloseModalArgs="adminTable" handleDelete={() => handleDeleteEmployee(employeeId)}/>
+      {/*<ConfirmEliminationModal onClickCloseModalArgs="adminTable" handleDelete={() => handleDeleteEmployee(employeeId)}/>*/}
 
     </Container>
 

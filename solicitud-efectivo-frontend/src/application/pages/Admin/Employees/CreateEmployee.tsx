@@ -3,10 +3,13 @@ import { createEmployee, getAllRoles } from "@/infrastructure/api/admin/admin";
 import type { CreateEmployee } from "@/infrastructure/schemas/admin/admin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { toast } from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
 import SelectLibrary from 'react-select'
 
 export default function Register() {
+
+  const navigate = useNavigate()
 
   const { control, register, handleSubmit, formState: { errors } } = useForm<CreateEmployee>(
     {
@@ -29,10 +32,8 @@ export default function Register() {
         max_descuento: "0.5",
         close_caja: "0",
         user_account_email: "prueba@gmail.com",
-        user_account_email_passw: "MiClaveSecreta2024",
         comision_porciento: "5.5",
         default_portalid: "1",
-        nuevocampo: "valor",
         encargadoId: "1",
       }
     }
@@ -51,7 +52,9 @@ export default function Register() {
 
     mutationFn: createEmployee,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['employees'] })
+      queryClient.invalidateQueries({ queryKey: ['employees', 1, 10] })
+      toast.success("Empleado creado correctamente")
+      navigate("/admin/employees")
     },
     onError: (error) => {
       console.log(error)
@@ -61,9 +64,6 @@ export default function Register() {
   const onSubmit = (data: CreateEmployee) => {
 
     data.fullname = `${data.nombre} ${data.apellido}`
-
-
-    console.log(data)
 
     mutate(data)
 

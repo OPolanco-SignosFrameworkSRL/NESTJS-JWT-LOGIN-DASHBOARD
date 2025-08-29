@@ -9,7 +9,7 @@ import { Link } from "react-router-dom"
 import { twMerge } from "tailwind-merge"
 
 
-const rolePermissionsTable = () => {
+const RolePermissionsTable = () => {
 
   const tableCssHeader = 'text-sm sm:text-base h-12 px-4 text-left align-middle [&:has([role=checkbox])]:pr-0 w-[120px] font-semibold text-black'
   const tableCss = 'text-sm sm:text-base p-4 align-middle [&:has([role=checkbox])]:pr-0 truncate'
@@ -133,7 +133,7 @@ const rolePermissionsTable = () => {
   
 }
 
-export default rolePermissionsTable
+export default RolePermissionsTable
 
 {/*
     

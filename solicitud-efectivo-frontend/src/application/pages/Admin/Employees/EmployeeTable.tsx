@@ -85,25 +85,26 @@ export default function EmployeeTable() {
 
       <Container className="flex flex-col md:flex-row gap-3 md:gap-5 py-5 w-full">
 
-        <Container className="flex items-center gap-2 w-full md:flex-grow">
+        <Container className="flex flex-col gap-2 w-full">
 
             <span className="text-sm sm:text-base text-gray-800 font-semibold">Buscar:</span>
+
             <Input
-              type="text"
-              placeholder="Buscar"
-              twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300 h-11")}
+                type="text"
+                placeholder="Buscar"
+                twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300 h-11")}
             />
 
         </Container>
 
-        <Container className="flex items-center gap-2 w-full md:w-1/2 lg:w-3/6 xl:w-2/6  ">
+        <Container className="flex flex-col gap-2 w-full md:w-1/2 lg:w-3/6 xl:w-2/6  ">
 
             <span className="text-sm sm:text-base text-gray-800 font-semibold whitespace-nowrap">Estado:</span>
 
             <Select
-              options={[]}
-              placeholder="Buscar"
-              twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300")}
+                options={[]}
+                placeholder="Buscar"
+                twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300")}
             />
 
         </Container>
@@ -138,7 +139,7 @@ export default function EmployeeTable() {
                   <tr key={index} className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
                     <td className={tableCss}> {data.cedula}</td>
                     <td className={tableCss}> {data.fullname}</td>
-                    <td className={tableCss}> {data.rolesUsuario.map(item => item.roleName).join(", ")}</td>
+                    <td className={tableCss}> {data.roles?.map(item => item.roleName).join(", ")}</td>
                     <td className={tableCss}> {data.user_email}</td>
                     <td className={`${tableCss}`}> 
                       {data.valido.toString() === "true" ? (
@@ -147,7 +148,7 @@ export default function EmployeeTable() {
                         <div className="bg-gray-100 text-gray-800 hover:bg-gray-100 rounded-full w-24 flex items-center justify-center">Inactivo</div>
                       ) }
                     </td>
-                    <td className={`${tableCss} flex items-center space-x-2`}>
+                    <td className={`${tableCss} flex items-center space-x-6`}>
                       <button
                         onClick={() => onClick(data.id)}
                       >
