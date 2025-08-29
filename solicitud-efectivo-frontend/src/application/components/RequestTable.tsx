@@ -3,8 +3,6 @@ import Select from "../ui/Select/Select";
 import { twMerge } from 'tailwind-merge'
 import Container from "../ui/Container/Container";
 import Pagination from "./Pagination";
-import Text from "../ui/Text/Text";
-
 
 const RequestTable = () => {
 
