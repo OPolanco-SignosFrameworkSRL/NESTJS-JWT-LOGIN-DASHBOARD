@@ -1,3 +1,4 @@
+import Container from "@/application/ui/Container/Container";
 import Input from "@/application/ui/Input/Input";
 import { updateEmployee, getEmployeeById, getAllRoles } from "@/infrastructure/api/admin/admin";
 import type { UpdateEmployee } from "@/infrastructure/schemas/admin/admin";
@@ -39,8 +40,6 @@ export default function EditEmployee() {
   type Roles = { id: number, roleName: string };
   
   const options: Roles[] = rolesData?.data.map(item => ({ id: item.id, roleName: item.role_name })) || []
-
-  const rolesEmpleadoApi = data?.data.roles ?? []; 
   
   useEffect(() => {
 
@@ -50,7 +49,7 @@ export default function EditEmployee() {
         apellido: data.data.apellido,
         password: "",
         cedula: data.data.cedula,
-        roles: rolesEmpleadoApi,
+        roles: data?.data.roles ?? [],
         user_email: data.data.user_email,
         telefono: data.data.telefono,
         direccion: data.data.direccion,
@@ -88,9 +87,9 @@ export default function EditEmployee() {
 
   if(data) return (
     <>
-      <div className="mt-10 p-6 sm:p-10 bg-white shadow-lg">
+      <Container className="mt-10 p-6 sm:p-10 bg-white shadow-lg">
 
-        <div className="flex items-center justify-between">
+        <Container className="flex items-center justify-between">
 
           <h2 className="text-xs sm:text-base md:text-xl text-emerald-500 font-bold">
             Editar Empleado
@@ -104,16 +103,16 @@ export default function EditEmployee() {
             Volver a Dashboard
           </Link>
 
-        </div>
+        </Container>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
           noValidate
         >
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
+          <Container className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-10">
 
-            <div>
+            <Container>
               <label className="text-gray-800" htmlFor="name">Nombre:</label>
               <Input
                 id="name"
@@ -123,9 +122,9 @@ export default function EditEmployee() {
                 {...register("nombre", { required: "El nombre es requerido" })}
               />
               {errors.nombre && <p className="text-red-500">{errors.nombre.message}</p>}
-            </div>
+            </Container>
 
-            <div>
+            <Container>
               <label className="text-gray-800" htmlFor="lastName">Apellido:</label>
               <Input
                 id="lastName"
@@ -135,9 +134,9 @@ export default function EditEmployee() {
                 {...register("apellido", { required: "El apellido es requerido" })}
               />
               {errors.apellido && <p className="text-red-500">{errors.apellido.message}</p>}
-            </div>
+            </Container>
 
-            <div>
+            <Container>
               <label className="text-gray-800" htmlFor="cedula">Cedula:</label>
               <Input
                 id="cedula"
@@ -147,9 +146,9 @@ export default function EditEmployee() {
                 {...register("cedula", { required: "La cedula es requerida" })}
               />
               {errors.cedula && <p className="text-red-500">{errors.cedula.message}</p>}
-            </div>
+            </Container>
 
-            <div>
+            <Container>
               <label className="text-gray-800" htmlFor="password">Contraseña:</label>
               <Input
                 id="password"
@@ -161,14 +160,14 @@ export default function EditEmployee() {
                 })}
               />
               {errors.password && <p className="text-red-500">{errors.password.message}</p>}
-            </div>
+            </Container>
 
-            <div>
+            <Container>
 
-              <div className="flex items-center gap-2 ">
+              <Container className="flex items-center gap-2 ">
                 <label className="text-gray-800" htmlFor="rol">Role:</label>
                 <span className="text-red-500">*</span>
-              </div>
+              </Container>
 
               <Controller
                 name="roles"
@@ -282,10 +281,10 @@ export default function EditEmployee() {
 
               {errors.roles && <p className="text-red-500">{errors.roles.message}</p>}
 
-            </div>
+            </Container>
 
 
-            <div>
+            <Container>
               <label className="text-gray-800" htmlFor="email">Email:</label>
               <Input
                 id="email"
@@ -295,9 +294,9 @@ export default function EditEmployee() {
                 {...register("user_email", { required: "El email es requerido" })}
               />
               {errors.user_email && <p className="text-red-500">{errors.user_email.message}</p>}
-            </div>
+            </Container>
 
-            <div>
+            <Container>
               <label className="text-gray-800" htmlFor="telefono">Telefono:</label>
               <Input
                 id="telefono"
@@ -307,9 +306,9 @@ export default function EditEmployee() {
                 {...register("telefono", { required: "El telefono es requerido" })}
               />
               {errors.telefono && <p className="text-red-500">{errors.telefono.message}</p>}
-            </div>
+            </Container>
 
-            <div>
+            <Container>
               <label className="text-gray-800" htmlFor="celular">Celular:</label>
               <Input
                 id="celular"
@@ -319,10 +318,10 @@ export default function EditEmployee() {
                 {...register("celular", { required: "El celular es requerido" })}
               />
               {errors.celular && <p className="text-red-500">{errors.celular.message}</p>}
-            </div>
-          </div>
+            </Container>
+          </Container>
 
-          <div className="mt-2 mb-4">
+          <Container className="mt-2 mb-4">
             <label className="text-gray-800" htmlFor="direccion">Direccion:</label>
             <Input
               id="direccion"
@@ -332,18 +331,18 @@ export default function EditEmployee() {
               {...register("direccion", { required: "La direccion es requerida" })}
             />
             {errors.direccion && <p className="text-red-500">{errors.direccion.message}</p>}
-          </div>
+          </Container>
 
-          <div className="md:col-span-2">
+          <Container className="md:col-span-2">
             <Input
               type="submit"
               className="h-14 flex justify-center bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-lg cursor-pointer rounded"
               value="Editar Empleado"
             />
-          </div>
+          </Container>
 
         </form>
-      </div>
+      </Container>
     </>
   );
 }
