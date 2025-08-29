@@ -17,8 +17,7 @@ const Home = () => {
 
         <Container className="flex justify-between">
 
-          <Container>
-
+         
             <Title text="Listado de Solicitudes --- estt"/>
 
             <Title text="Gestiona y visualiza todas las solicitudes de efectivo" isTitle={false}/>
