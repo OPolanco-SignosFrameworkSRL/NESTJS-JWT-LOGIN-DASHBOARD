@@ -1,8 +1,8 @@
 import { IoIosClose } from "react-icons/io"
 import { useAppStore } from "../store/useAppStore"
-import Modal from "../ui/Modal/Modal"
+import Modal from "../ui/modal/Modal"
 import { CgDanger } from "react-icons/cg"
-import Container from "../ui/Container/Container"
+import Container from "../ui/container/Container"
 
 type ConfirmEliminationModalProps = {
     onClickCloseModalArgs: string

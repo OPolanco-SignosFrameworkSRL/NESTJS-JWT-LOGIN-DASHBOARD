@@ -5,8 +5,8 @@ import { FaCheckSquare } from "react-icons/fa";
 import { BsFillQuestionSquareFill } from "react-icons/bs";
 import { FaMoneyBill } from "react-icons/fa";
 import { FaCircleXmark } from "react-icons/fa6";
-import Container from "@/application/ui/Container/Container";
-import Text from "@/application/ui/Text/Text";
+import Container from "@/application/ui/container/Container";
+import Text from "@/application/ui/text/Text";
 
 const CardSection2 = () => {
 

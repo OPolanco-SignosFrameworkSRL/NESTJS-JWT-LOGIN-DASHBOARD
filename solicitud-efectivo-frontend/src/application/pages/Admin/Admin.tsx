@@ -1,11 +1,11 @@
 import { useState } from "react"
-import Title from "@/application/ui/Text/Title";
+import Title from "@/application/ui/text/Title";
 import EmployeeTable from "@/application/pages/Admin/employees/EmployeeTable"
 import RolesTable from "@/application/pages/Admin/roles/RolesTable";
 import Dashboard from "@/application/pages/Admin/dashboard/Dashboard";
 import RolePermissionsTable from "@/application/pages/Admin/rolePermissions/RolePermissionsTable";
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
-import Container from "@/application/ui/Container/Container";
+import Container from "@/application/ui/container/Container";
 
 
 

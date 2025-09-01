@@ -1,4 +1,4 @@
-import Input from "@/application/ui/Input/Input"
+import Input from "@/application/ui/input/Input"
 import { useFieldArray, type Control, type FieldValues } from "react-hook-form"
 import type { UseFormRegister } from "react-hook-form"
 import type { FieldErrors } from "react-hook-form"

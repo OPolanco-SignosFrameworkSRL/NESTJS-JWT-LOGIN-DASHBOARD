@@ -1,12 +1,12 @@
 import { FaPlus } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
-import Title from "@/application/ui/Text/Title";
+import Title from "@/application/ui/text/Title";
 
 import CardSection1 from "@/application/components/home/CardSection1";
 import CardSection2 from "@/application/components/home/CardSection2";
 import RequestTable from "@/application/components/RequestTable";
-import Container from "../ui/Container/Container";
+import Container from "../ui/container/Container";
 
 
 const Home = () => {

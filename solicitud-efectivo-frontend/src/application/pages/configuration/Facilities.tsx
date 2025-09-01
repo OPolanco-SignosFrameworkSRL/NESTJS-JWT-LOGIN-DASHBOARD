@@ -1,20 +1,19 @@
 
-import React from "react"
 import { TbEdit } from "react-icons/tb"
 import { FaRegTrashAlt } from "react-icons/fa"
-import Container from "@/application/ui/Container/Container"
-import Select from "@/application/ui/Select/Select"
+import Container from "@/application/ui/container/Container"
+import Select from "@/application/ui/select/Select"
 import { twMerge } from "tailwind-merge"
-import Input from "@/application/ui/Input/Input"
+import Input from "@/application/ui/input/Input"
 import { Link } from "react-router-dom"
-import Title from "@/application/ui/Text/Title"
+import Title from "@/application/ui/text/Title"
 
 
 
 const tableCssHeader = "px-4 py-2 text-left text-gray-700 font-semibold"
 const tableCss = "px-4 py-2 text-gray-800"
 
-export const Facilities: React.FC = () => {
+export const Facilities = () => {
 
   return (
     <>
@@ -82,7 +81,6 @@ export const Facilities: React.FC = () => {
 
             <tr className=" border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
             
-              <th className={`${tableCssHeader}`}>Id</th>
               <th className={`${tableCssHeader}`}>División</th>
               <th className={`${tableCssHeader}`}>Descripción</th>
               <th className={`${tableCssHeader}`}>Estado</th>
@@ -96,7 +94,6 @@ export const Facilities: React.FC = () => {
 
         
             <tr  className="border-b border-green-300 transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-              <td className={tableCss}> 1</td>
               <td className={tableCss}> 2</td>
               <td className={tableCss}> 3</td>
               <td className={tableCss}> 5</td>

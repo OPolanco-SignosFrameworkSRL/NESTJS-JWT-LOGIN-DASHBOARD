@@ -1,7 +1,7 @@
 import { type FieldErrors, type UseFormRegister, type FieldValues, type Control, useFieldArray } from "react-hook-form";
 
-import Input from "@/application/ui/Input/Input"
-import Select from "@/application/ui/Select/Select";
+import Input from "@/application/ui/input/Input"
+import Select from "@/application/ui/select/Select";
 
 type BasicInformationFormProps = {
   register: UseFormRegister<FieldValues>

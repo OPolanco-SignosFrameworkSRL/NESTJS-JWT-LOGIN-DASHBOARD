@@ -1,4 +1,4 @@
-import Container from '@/application/ui/Container/Container'
+import Container from '@/application/ui/container/Container'
 
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import type { LoginFormSchema } from '@/infrastructure/schemas/auth/auth';
 
 import { GoPersonFill } from "react-icons/go";
-import Input from '../ui/Input/Input';
+import Input from '../ui/input/Input';
 import { useLogin } from '../hooks/auth';
 import { useEffect } from 'react';
 

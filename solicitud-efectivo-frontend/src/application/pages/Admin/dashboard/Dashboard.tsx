@@ -1,8 +1,8 @@
-import Container from "@/application/ui/Container/Container"
+import Container from "@/application/ui/container/Container"
 import { IoShieldOutline } from "react-icons/io5";
 import { FiUsers } from "react-icons/fi";
-import Text from "@/application/ui/Text/Text";
-import ButtonForms from "@/application/ui/ButtonForm/ButtonForms";
+import Text from "@/application/ui/text/Text";
+import ButtonForms from "@/application/ui/buttonForm/ButtonForms";
 
 const Dashboard = () => {
     

@@ -1,4 +1,4 @@
-import Input from "@/application/ui/Input/Input";
+import Input from "@/application/ui/input/Input";
 import { createEmployee, getAllRoles } from "@/infrastructure/api/admin/admin";
 import type { CreateEmployee } from "@/infrastructure/schemas/admin/admin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

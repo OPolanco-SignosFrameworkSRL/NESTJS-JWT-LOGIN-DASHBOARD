@@ -1,9 +1,9 @@
 import { FaRegCheckCircle } from "react-icons/fa";
 import { IoAlertCircleOutline } from "react-icons/io5";
 import { GiCash } from "react-icons/gi";
-import ButtonForms from "@/application/ui/ButtonForm/ButtonForms";
-import Select from "@/application/ui/Select/Select";
-import Input from "@/application/ui/Input/Input";
+import ButtonForms from "@/application/ui/buttonForm/ButtonForms";
+import Select from "@/application/ui/select/Select";
+import Input from "@/application/ui/input/Input";
 import { useFieldArray, type Control, type FieldErrors, type FieldValues, type UseFormRegister, type UseFormWatch } from "react-hook-form";
 
 type MembersFormProps = {

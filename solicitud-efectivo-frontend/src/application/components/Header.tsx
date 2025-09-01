@@ -1,7 +1,7 @@
-import Container from "../ui/Container/Container"
+import Container from "../ui/container/Container"
 import { RxHamburgerMenu } from "react-icons/rx";
 import { useAppStore } from "../store/useAppStore";
-import Title from "../ui/Text/Title";
+import Title from "../ui/text/Title";
 
 type HeaderProps = {
   handleOpen: () => void

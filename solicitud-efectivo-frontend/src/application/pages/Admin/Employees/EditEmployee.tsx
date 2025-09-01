@@ -1,9 +1,9 @@
-import Container from "@/application/ui/Container/Container";
-import Input from "@/application/ui/Input/Input";
+import Container from "@/application/ui/container/Container";
+import Input from "@/application/ui/input/Input";
 import { updateEmployee, getEmployeeById, getAllRoles } from "@/infrastructure/api/admin/admin";
 import type { UpdateEmployee } from "@/infrastructure/schemas/admin/admin";
 import { hashPassword } from "@/shared/utilts/convertToSha256";
-import { getUrlParams } from "@/shared/utilts/GetUrlParams";
+import { getUrlParams } from "@/shared/utilts/getUrlParams";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";

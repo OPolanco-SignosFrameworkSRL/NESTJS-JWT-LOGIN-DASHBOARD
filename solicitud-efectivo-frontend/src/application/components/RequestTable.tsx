@@ -1,7 +1,7 @@
-import Input from "../ui/Input/Input";
-import Select from "../ui/Select/Select";
+import Input from "../ui/input/Input";
+import Select from "../ui/select/Select";
 import { twMerge } from 'tailwind-merge'
-import Container from "../ui/Container/Container";
+import Container from "../ui/container/Container";
 import Pagination from "./Pagination";
 
 const RequestTable = () => {

@@ -1,13 +1,13 @@
-import ButtonForms from "@/application/ui/ButtonForm/ButtonForms";
+import ButtonForms from "@/application/ui/buttonForm/ButtonForms";
 
 import { useForm } from "react-hook-form"
-import Select from "../ui/Select/Select";
-import Input from "../ui/Input/Input";
+import Select from "../ui/select/Select";
+import Input from "../ui/input/Input";
 import { IoDocumentTextOutline } from "react-icons/io5";
 import { CiChat1 } from "react-icons/ci";
-import Title from "../ui/Text/Title";
+import Title from "../ui/text/Title";
 import { MdFileUpload } from "react-icons/md";
-import Text from "../ui/Text/Text";
+import Text from "../ui/text/Text";
 import { MdOutlineFileUpload } from "react-icons/md";
 
 import {useCallback} from 'react'

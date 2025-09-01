@@ -1,11 +1,11 @@
-import ButtonForms from "@/application/ui/ButtonForm/ButtonForms";
+import ButtonForms from "@/application/ui/buttonForm/ButtonForms";
 import { useState } from "react"
 import { CiUser } from "react-icons/ci";
 import { useForm } from "react-hook-form"
 import BasicInformationForm from "@/application/components/newRequest/BasicInformationForm";
 import ProductionDataForm from "@/application/components/newRequest/ProductionDataForm";
 import MembersForm from "@/application/components/newRequest/MembersForm";
-import Title from "@/application/ui/Text/Title";
+import Title from "@/application/ui/text/Title";
 
 
 

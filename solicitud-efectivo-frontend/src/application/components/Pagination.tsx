@@ -1,8 +1,8 @@
 import { RiArrowLeftSLine, RiArrowRightSLine } from 'react-icons/ri'
-import Container from '../ui/Container/Container'
+import Container from '../ui/container/Container'
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import Select from '../ui/Select/Select'
+import Select from '../ui/select/Select'
 import { MdLabel } from 'react-icons/md'
 
 type PaginationProps = {

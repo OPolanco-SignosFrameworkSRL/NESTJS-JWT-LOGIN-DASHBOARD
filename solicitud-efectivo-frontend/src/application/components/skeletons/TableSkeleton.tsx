@@ -1,4 +1,4 @@
-import Container from "@/application/ui/Container/Container"
+import Container from "@/application/ui/container/Container"
 
 const tableSkeleton = () => {
 

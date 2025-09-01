@@ -1,5 +1,5 @@
-import Container from "@/application/ui/Container/Container";
-import Text from "@/application/ui/Text/Text";
+import Container from "@/application/ui/container/Container";
+import Text from "@/application/ui/text/Text";
 import { IoIosTrendingUp } from "react-icons/io";
 
 

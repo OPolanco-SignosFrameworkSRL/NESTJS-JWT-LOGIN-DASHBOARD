@@ -3,17 +3,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { TbEdit } from "react-icons/tb";
 import { FaRegTrashAlt } from "react-icons/fa";
-import Container from "@/application/ui/Container/Container";
+import Container from "@/application/ui/container/Container";
 import Pagination from "@/application/components/Pagination";
-import Select from "@/application/ui/Select/Select";
-import Input from "@/application/ui/Input/Input";
+import Select from "@/application/ui/select/Select";
+import Input from "@/application/ui/input/Input";
 import { twMerge } from "tailwind-merge";
-import { getUrlParams } from "@/shared/utilts/GetUrlParams";
+import { getUrlParams } from "@/shared/utilts/getUrlParams";
 import { useAppStore } from "@/application/store/useAppStore";
 import ConfirmEliminationModal from "@/application/components/ConfirmEliminationModal";
 import toast from "react-hot-toast";
-import ErrorTable from "@/application/components/admin/ErrorTable";
 import TableSkeleton from "@/application/components/skeletons/TableSkeleton";
+import ErrorTable from "@/application/components/admin/ErrorTable";
 
 export default function EmployeeTable() {
 
