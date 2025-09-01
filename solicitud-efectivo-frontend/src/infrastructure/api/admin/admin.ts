@@ -124,10 +124,10 @@ export const getAllRoles = async () => {
     }
 }
 
-export const getAllRolesView = async (limit: number) => {
+export const getAllRolesView = async ({page, limit}: adminProps) => {
     try {
 
-        const url = `/roles?limit=${limit}`
+        const url = `/roles?page=${page}&limit=${limit}`
 
         const { data } = await api(url)
 

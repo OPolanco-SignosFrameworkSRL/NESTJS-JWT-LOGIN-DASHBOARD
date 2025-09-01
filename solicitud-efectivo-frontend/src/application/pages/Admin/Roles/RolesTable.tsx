@@ -1,4 +1,4 @@
-import { deleteEmployee, getAllRoles } from "@/infrastructure/api/admin/admin";
+import { deleteEmployee, getAllRoles, getAllRolesView } from "@/infrastructure/api/admin/admin";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { TbEdit } from "react-icons/tb";
@@ -10,25 +10,28 @@ import Input from "@/application/ui/Input/Input";
 import { twMerge } from "tailwind-merge";
 //import { getUrlParams } from "@/shared/utilts/GetUrlParams";
 import { useAppStore } from "@/application/store/useAppStore";
-import ConfirmEliminationModal from "@/application/components/ConfirmEliminationModal";
 import toast from "react-hot-toast";
 import SkeletonTable from "@/application/components/skeletons/TableSkeleton";
 import ErrorTable from "@/application/components/admin/ErrorTable";
+import Pagination from "@/application/components/Pagination";
+import { getUrlParams } from "@/shared/utilts/GetUrlParams";
+import { useState } from "react";
+import ConfirmEliminationModal from "@/application/components/ConfirmEliminationModal";
 
 
 export default function RolesTable() {
 
-  //const pageNumber = getUrlParams("pageNumber") || 1
+  const pageNumber = getUrlParams("pageNumber") || 1
 
   const navigate = useNavigate()
 
   const queryClient = useQueryClient()
 
-  //const limit = 10 /* Cambiar a un select para ver cantidad de registros */
+  const limit = 10 /* Cambiar a un select para ver cantidad de registros */
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['roles'],
-    queryFn: getAllRoles,
+    queryKey: ['rolesView', Number(pageNumber), limit],
+    queryFn: () => getAllRolesView({page: Number(pageNumber), limit}),
     staleTime: 5 * 60 * 1000,
     initialData: () => queryClient.getQueryData(['roles']),
   });
@@ -42,7 +45,11 @@ export default function RolesTable() {
     navigate(`/edit-employee?employeeId=${employeeId}`)
   }
 
-  const handleShowModal = useAppStore(state => state.handleShowModal)
+  const [showModal, setShowModal] = useState<string | false>(false)
+
+  const handleShowModal = (label: string) => {
+    setShowModal(showModal ===  label ? false : label as string)
+  }
 
   const { mutate } = useMutation({
 
@@ -55,7 +62,6 @@ export default function RolesTable() {
       toast.error("No se pudo eliminar el empleado")
     }
   })
-
 
   const handleDeleteEmployee = (employeeId: number) => {
     console.log(employeeId)
@@ -79,29 +85,30 @@ export default function RolesTable() {
           Roles
         </h2>
 
-        <Link to="/create-employee"
-          className="rounded-md bg-gradient-to-r from-green-600 to-emerald-600 p-2 sm:p-3 text-sm font-bold text-white shadow-sm hover:from-green-700 hover:to-emerald-700"
+        <button
+          className="cursor-pointer rounded-md bg-gradient-to-r from-green-600 to-emerald-600 p-2 sm:p-3 text-sm font-bold text-white shadow-sm hover:from-green-700 hover:to-emerald-700"
         >
           Agregar Rol
-        </Link>
+        </button>
 
       </Container>
 
 
-      <div className="flex flex-col md:flex-row gap-3 md:gap-5 py-5 w-full">
+      <Container className="flex flex-col md:flex-row gap-3 md:gap-5 py-5 w-full">
 
-        <div className="flex items-center gap-2 w-full md:flex-grow">
+        <Container className="flex flex-col gap-2 w-full">
 
             <span className="text-sm sm:text-base text-gray-800 font-semibold">Buscar:</span>
+
             <Input
                 type="text"
                 placeholder="Buscar"
                 twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300 h-11")}
             />
 
-        </div>
+        </Container>
 
-        <div className="flex items-center gap-2 w-full md:w-1/2 lg:w-3/6 xl:w-2/6  ">
+        <Container className="flex flex-col gap-2 w-full md:w-1/2 lg:w-3/6 xl:w-2/6  ">
 
             <span className="text-sm sm:text-base text-gray-800 font-semibold whitespace-nowrap">Estado:</span>
 
@@ -111,9 +118,9 @@ export default function RolesTable() {
                 twMerge={(...classes) => twMerge(classes, "border-gray-300 focus:ring-gray-300")}
             />
 
-        </div>
+        </Container>
 
-      </div>
+      </Container>
 
       <Container className="border border-green-300 overflow-hidden my-5">
 
@@ -136,9 +143,9 @@ export default function RolesTable() {
                       <td className={tableCss}> {data.role_name}</td>
                       <td className={`${tableCss}`}> 
                         {data.valido.toString() === "true" ? (
-                          <div className="bg-green-100 text-green-800 hover:bg-green-100 rounded-full w-24 flex items-center justify-center">Activo</div>
+                          <Container className="bg-green-100 text-green-800 hover:bg-green-100 rounded-full w-24 flex items-center justify-center">Activo</Container>
                         ) : (
-                          <div className="bg-gray-100 text-gray-800 hover:bg-gray-100 rounded-full w-24 flex items-center justify-center">Inactivo</div>
+                          <Container className="bg-gray-100 text-gray-800 hover:bg-gray-100 rounded-full w-24 flex items-center justify-center">Inactivo</Container>
                         ) }
                       </td>
                       <td className={`${tableCss} flex items-center space-x-2`}>
@@ -166,9 +173,9 @@ export default function RolesTable() {
       </Container>
 
 
-      {/*<Pagination totalRecords={data.total} pageSize={data.limit}/>*/}
+      <Pagination totalRecords={data.total} pageSize={data.limit}/>
 
-      {/*<ConfirmEliminationModal onClickCloseModalArgs="adminTable" handleDelete={() => handleDeleteEmployee(employeeId)}/>*/}
+      <ConfirmEliminationModal onClickCloseModalArgs="adminTable" handleDelete={() => handleDeleteEmployee(employeeId)}/>
 
     </Container>
 

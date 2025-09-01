@@ -79,7 +79,6 @@ const Pagination = ({totalRecords, pageSize, onPageChange}: PaginationProps) => 
     const visiblePageNumbers = getVisiblePageNumbers();
 
     const numbers = [
-        {number: 10},
         {number: 20},
         {number: 30}
     ]
@@ -87,18 +86,17 @@ const Pagination = ({totalRecords, pageSize, onPageChange}: PaginationProps) => 
     return (
 
 
-        <div className="flex flex-col sm:flex-row items-center w-full">
+        <Container className="flex flex-col sm:flex-row items-center w-full">
 
-            <div className="flex justify-start  w-1/6">
+            <Container className="flex justify-start w-full">
+                <Container className="mb-5 sm:mb-0">{`Mostrando ${pageSize < totalRecords ? pageSize : totalRecords} de ${totalRecords} registros`}</Container>
+            </Container>
 
-                <div className="mb-5 sm:mb-0">Mostrando 1 de 10 registros</div>
-            </div>
 
+            <Container className="flex justify-end w-full gap-2  ">
 
-            <div className="flex justify-end w-full gap-2  ">
-
-                <div className="flex items-center gap-5 w-60 ">
-                    <div className="">Mostrar</div>
+                <Container className="flex items-center gap-5 w-60 ">
+                    <Container className="">Mostrar</Container>
                     <Select
                         options={numbers.map((items, index) => ({
                             value: index,
@@ -106,20 +104,20 @@ const Pagination = ({totalRecords, pageSize, onPageChange}: PaginationProps) => 
                         }))}
                         placeholder='10'
                     />
-                    <div className="">Registros</div>
-                </div>
+                    <Container className="">Registros</Container>
+                </Container>
 
-                <div className="flex items-center gap-2">
+                <Container className="flex items-center gap-2">
 
-                    <div 
+                    <Container 
                         className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground border h-10 w-10 bg-white border-emerald-200 hover:bg-emerald-50 cursor-pointer"
                         onClick={() => handlePageChange(currentPage - 1)}
                         style={{ opacity: currentPage === 1 ? 0.5 : 1 }}
                     >
                         <RiArrowLeftSLine/>
-                    </div>
+                    </Container>
 
-                    <div className="flex gap-2">
+                    <Container className="flex gap-2">
                         {visiblePageNumbers.map((number) => (
                             <button
                                 key={number}
@@ -137,22 +135,22 @@ const Pagination = ({totalRecords, pageSize, onPageChange}: PaginationProps) => 
                                 </Container>
                             </button>
                         ))}
-                    </div>
+                    </Container>
 
-                    <div 
+                    <Container 
                         className="ring-offset-background focus-visible:outline-hidden focus-visible:ring-ring inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none bg-white disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 hover:text-accent-foreground border h-10 w-10 border-emerald-200 hover:bg-emerald-50 cursor-pointer"
                         onClick={() => handlePageChange(currentPage + 1)}
                         style={{ opacity: currentPage === totalPages ? 0.5 : 1 }}
                     >
                         <RiArrowRightSLine/>
-                    </div>
+                    </Container>
 
-                </div>
+                </Container>
 
 
-            </div>
+            </Container>
 
-        </div>    
+        </Container>    
 
     )
 }

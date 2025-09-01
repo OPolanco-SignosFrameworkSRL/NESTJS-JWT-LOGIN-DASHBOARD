@@ -70,7 +70,14 @@ export const getAllRolesSchema = z.object({
         id: z.number(),
         role_name: z.string(),
         valido: z.boolean()
-    }))
+    })),
+    total: z.number(),
+    page: z.number(),
+    limit: z.number(),
+    totalPages: z.number(),
+    statusCode: z.number(),
+    message: z.string(),
+    timestamp: z.string(),
 })
 
 export const updateEmployeeSchema = z.object({
@@ -91,22 +98,3 @@ export type EmployeeById = z.infer<typeof getEmployeeByIdSchema>
 export type CreateEmployee = z.infer<typeof createEmployeeSchema>
 export type UpdateEmployee = z.infer<typeof updateEmployeeSchema>
 export type GetAllRoles = z.infer<typeof getAllRolesSchema>
-
-/*
-
- data.user_status = 1
-    data.caja_id = "1"
-    data.tienda_id = "1"
-    data.allow_multi_tienda = "0"
-    data.max_descuento = "10.5"
-    data.close_caja = "0"
-    data.user_account_email = "pedro@gmail.com"
-    data.user_account_email_passw = "MiClaveSecreta2024"
-    data.comision_porciento = "5.5"
-    data.default_portalid = "1"
-    data.nuevocampo = "valor"
-    data.encargadoId = "1"
-
-
-
-*/
