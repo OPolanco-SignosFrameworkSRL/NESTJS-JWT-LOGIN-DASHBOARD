@@ -9,6 +9,4 @@ export const getUrlParams = (param: string) => {
 
     return searchParams.get(param);
 
-
-
 }

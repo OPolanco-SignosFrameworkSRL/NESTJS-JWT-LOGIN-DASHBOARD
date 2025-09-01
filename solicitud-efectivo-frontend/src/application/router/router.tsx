@@ -4,17 +4,17 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import Home from '../pages/HomePage';
 import LoginPage from '../pages/LoginPage';
 import SolicitudGastos from '../pages/SolicitudGastos';
-import CreateEmployee from '../pages/Admin/employees/CreateEmployee';
+import CreateEmployee from '../pages/admin/employees/CreateEmployee';
 import NewRequest from '../pages/request/NewRequest';
 import Disbursement from '../pages/Disbursement';
 import { ProtectedRoute } from '@/application/layout/ProtectedRoute';
-import EditEmployee from '../pages/Admin/employees/EditEmployee';
-import Admin from '../pages/Admin/Admin';
+import EditEmployee from '../pages/admin/employees/EditEmployee';
+import Admin from '../pages/admin/Admin';
 import PaymentSettle from '../pages/PaymentSettle';
-import EmployeeTable from "@/application/pages/Admin/employees/EmployeeTable"
-import RolesTable from '../pages/Admin/roles/RolesTable';
-import RolePermissionsTable from '../pages/Admin/rolePermissions/RolePermissionsTable';
-import Dashboard from '../pages/Admin/dashboard/Dashboard';
+import EmployeeTable from "@/application/pages/admin/employees/EmployeeTable"
+import RolesTable from '../pages/admin/roles/RolesTable';
+import RolePermissionsTable from '../pages/admin/rolePermissions/RolePermissionsTable';
+import Dashboard from '../pages/admin/dashboard/Dashboard';
 import { Facilities } from '../pages/configuration/Facilities';
 
 const RouterComponent = () => {
