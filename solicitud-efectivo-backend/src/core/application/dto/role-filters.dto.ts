@@ -54,10 +54,10 @@ export class RoleFiltersDto {
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  page?: number = 1;
+  page?: number;
 
   @ApiProperty({
-    description: 'Número de elementos por página',
+    description: 'Número de elementos por página (si no se especifica, trae todos los registros)',
     example: 10,
     minimum: 1,
     required: false,
@@ -66,5 +66,5 @@ export class RoleFiltersDto {
   @Type(() => Number)
   @IsNumber()
   @Min(1)
-  limit?: number = 10;
+  limit?: number;
 }

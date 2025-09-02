@@ -22,6 +22,7 @@ import {
   ApiBearerAuth,
   ApiQuery,
   ApiParam,
+  ApiBody,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
@@ -61,6 +62,14 @@ export class RolesController {
 
   @Post()
   @Roles(1) // Admin
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        role_name: { type: 'string', example: 'Testing' }
+      }
+    }
+  })
   @ApiOperation({ 
     summary: 'Crear un nuevo rol',
     description: 'Crea un nuevo rol en el sistema. Solo usuarios administradores pueden acceder.'
@@ -98,18 +107,54 @@ export class RolesController {
   @Roles(1, 4) // Admin, Supervisor
   @ApiOperation({ 
     summary: 'Obtener todos los roles',
-    description: 'Obtiene la lista de roles con filtros opcionales y paginación'
+    description: 'Retorna una lista paginada de roles en el sistema. Admin y Supervisor pueden acceder.' 
   })
-  @ApiQuery({ name: 'role_name', required: false, description: 'Filtrar por nombre de rol' })
-  @ApiQuery({ name: 'role_desc', required: false, description: 'Filtrar por descripción' })
-  @ApiQuery({ name: 'valido', required: false, description: 'Filtrar por estado (true/false)' })
-  @ApiQuery({ name: 'search', required: false, description: 'Búsqueda general' })
-  @ApiQuery({ name: 'page', required: false, description: 'Número de página' })
-  @ApiQuery({ name: 'limit', required: false, description: 'Elementos por página' })
+  @ApiQuery({ 
+    name: 'page', 
+    required: false, 
+    type: Number,
+    description: 'Número de página para paginación',
+    example: 1
+  })
+  @ApiQuery({ 
+    name: 'limit', 
+    required: false, 
+    type: Number,
+    description: 'Número de elementos por página',
+    example: 10
+  })
+  @ApiQuery({ 
+    name: 'role_name', 
+    required: false, 
+    type: String,
+    description: 'Filtrar por nombre de rol',
+    example: 'Administrador'
+  })
+  @ApiQuery({ 
+    name: 'role_desc', 
+    required: false, 
+    type: String,
+    description: 'Filtrar por descripción de rol',
+    example: 'administración'
+  })
+  @ApiQuery({ 
+    name: 'valido', 
+    required: false, 
+    type: Boolean,
+    description: 'Filtrar por estado (activo/inactivo)',
+    example: true
+  })
+  @ApiQuery({ 
+    name: 'search', 
+    required: false, 
+    type: String,
+    description: 'Búsqueda general por nombre o descripción',
+    example: 'admin'
+  })
   @ApiResponse({ 
     status: 200, 
     description: 'Lista de roles obtenida exitosamente',
-    type: RolePaginatedResponseDto
+    type: RolePaginatedResponseDto 
   })
   @ApiResponse({ 
     status: 401, 
@@ -117,78 +162,69 @@ export class RolesController {
   })
   @ApiResponse({ 
     status: 403, 
-    description: 'Acceso denegado' 
+    description: 'Acceso denegado - se requieren permisos de administrador o supervisor' 
   })
-  async findAll(@Query() filters: RoleFiltersDto): Promise<RolePaginatedResponseDto> {
+  async findAll(@Query() filters: RoleFiltersDto): Promise<any> {
     try {
-      const result = await this.getRolesUseCase.executePaginated(
-        filters,
-        filters.page,
-        filters.limit
-      );
-
-      return {
-        data: result.data.map(role => this.mapToResponseDto(role)),
-        total: result.total,
-        page: result.page,
-        limit: result.limit,
-        totalPages: result.totalPages,
-      };
+      return await this.getRolesUseCase.executePaginated(filters, filters.page || 1, filters.limit || 10);
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener los roles');
     }
   }
 
   @Get('active')
-  @Roles(1, 4, 2) // Admin, Supervisor, Usuario
+  @Roles(1, 4) // Admin, Supervisor
   @ApiOperation({ 
-    summary: 'Obtener roles activos',
-    description: 'Obtiene solo los roles que están activos en el sistema'
+    summary: 'Obtener solo roles activos',
+    description: 'Retorna una lista de roles activos en el sistema. Admin y Supervisor pueden acceder.' 
   })
   @ApiResponse({ 
     status: 200, 
     description: 'Lista de roles activos obtenida exitosamente',
-    type: [RoleResponseDto]
+    type: [RoleResponseDto] 
   })
-  async findActive(): Promise<RoleResponseDto[]> {
+  @ApiResponse({ 
+    status: 401, 
+    description: 'No autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acceso denegado - se requieren permisos de administrador o supervisor' 
+  })
+  async findActive(): Promise<any> {
     try {
-      const roles = await this.getRolesUseCase.executeActiveRoles();
-      return roles.map(role => this.mapToResponseDto(role));
+      const filters: RoleFiltersDto = { valido: true };
+      const result = await this.getRolesUseCase.execute(filters);
+      return result;
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener los roles activos');
     }
   }
 
- /*  @Get('stats')
-  @Roles('Admin')
-  @ApiOperation({ 
-    summary: 'Obtener estadísticas de roles',
-    description: 'Obtiene estadísticas generales del sistema de roles'
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Estadísticas obtenidas exitosamente',
-    type: RoleStatsDto
-  })
-  async getStats(): Promise<RoleStatsDto> {
-    try {
-      return await this.getRoleStatsUseCase.execute();
-    } catch (error) {
-      throw new InternalServerErrorException('Error al obtener las estadísticas');
-    }
-  } */
-
   @Get(':id')
   @Roles(1, 4) // Admin, Supervisor
   @ApiOperation({ 
     summary: 'Obtener un rol por ID',
-    description: 'Obtiene los detalles de un rol específico por su ID'
+    description: 'Retorna la información de un rol específico. Admin y Supervisor pueden acceder.' 
   })
-  @ApiParam({ name: 'id', description: 'ID del rol', type: 'number' })
+  @ApiParam({ 
+    name: 'id', 
+    type: Number, 
+    description: 'ID del rol a buscar',
+    example: 1 
+  })
   @ApiResponse({ 
     status: 200, 
     description: 'Rol encontrado exitosamente',
-    type: RoleResponseDto
+    type: RoleResponseDto 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'No autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acceso denegado - se requieren permisos de administrador o supervisor' 
   })
   @ApiResponse({ 
     status: 404, 
@@ -197,56 +233,58 @@ export class RolesController {
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<RoleResponseDto> {
     try {
       const role = await this.getRoleByIdUseCase.execute(id);
-      
-      if (!role) {
-        throw new NotFoundException(`Rol con ID ${id} no encontrado`);
-      }
-
       return this.mapToResponseDto(role);
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
+      if (error.message.includes('no encontrado')) {
+        throw new NotFoundException(error.message);
       }
       throw new InternalServerErrorException('Error al obtener el rol');
     }
   }
 
-  //@Patch(':id')
   @Put(':id')
   @Roles(1) // Admin
   @ApiOperation({ 
     summary: 'Actualizar un rol',
-    description: 'Actualiza los datos de un rol existente. Solo usuarios administradores pueden acceder.'
+    description: 'Actualiza la información de un rol existente. Solo usuarios administradores pueden acceder.' 
   })
-  @ApiParam({ name: 'id', description: 'ID del rol', type: 'number' })
+  @ApiParam({ 
+    name: 'id', 
+    type: Number, 
+    description: 'ID del rol a actualizar',
+    example: 1 
+  })
   @ApiResponse({ 
     status: 200, 
     description: 'Rol actualizado exitosamente',
-    type: RoleResponseDto
+    type: RoleResponseDto 
   })
   @ApiResponse({ 
     status: 400, 
     description: 'Datos inválidos' 
   })
   @ApiResponse({ 
+    status: 401, 
+    description: 'No autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acceso denegado - se requieren permisos de administrador' 
+  })
+  @ApiResponse({ 
     status: 404, 
     description: 'Rol no encontrado' 
   })
   async update(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() updateRoleDto: UpdateRoleDto,
+    @Param('id', ParseIntPipe) id: number, 
+    @Body() updateRoleDto: UpdateRoleDto
   ): Promise<RoleResponseDto> {
     try {
       const role = await this.updateRoleUseCase.execute(id, updateRoleDto);
-      
-      if (!role) {
-        throw new NotFoundException(`Rol con ID ${id} no encontrado`);
-      }
-
       return this.mapToResponseDto(role);
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
+      if (error.message.includes('no encontrado')) {
+        throw new NotFoundException(error.message);
       }
       if (error.message.includes('Ya existe')) {
         throw new BadRequestException(error.message);
@@ -258,78 +296,84 @@ export class RolesController {
   @Delete(':id')
   @Roles(1) // Admin
   @ApiOperation({ 
-    summary: 'Desactivar un rol',
-    description: 'Desactiva un rol (soft delete). Solo usuarios administradores pueden acceder.'
+    summary: 'Eliminar un rol',
+    description: 'Elimina un rol del sistema (soft delete). Solo usuarios administradores pueden acceder.' 
   })
-  @ApiParam({ name: 'id', description: 'ID del rol', type: 'number' })
+  @ApiParam({ 
+    name: 'id', 
+    type: Number, 
+    description: 'ID del rol a eliminar',
+    example: 1 
+  })
   @ApiResponse({ 
     status: 200, 
-    description: 'Rol desactivado exitosamente'
+    description: 'Rol eliminado exitosamente' 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'No autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acceso denegado - se requieren permisos de administrador' 
   })
   @ApiResponse({ 
     status: 404, 
     description: 'Rol no encontrado' 
   })
-  @ApiResponse({ 
-    status: 400, 
-    description: 'No se puede desactivar un rol crítico' 
-  })
-  async remove(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+  async remove(@Param('id', ParseIntPipe) id: number) {
     try {
-      const success = await this.deleteRoleUseCase.execute(id);
-      
-      if (!success) {
-        throw new NotFoundException(`Rol con ID ${id} no encontrado`);
-      }
-
-      return { message: 'Rol desactivado exitosamente' };
+      await this.deleteRoleUseCase.execute(id);
+      return { message: 'Rol eliminado exitosamente' };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
+      if (error.message.includes('no encontrado')) {
+        throw new NotFoundException(error.message);
       }
-      if (error.message.includes('crítico')) {
-        throw new BadRequestException(error.message);
-      }
-      throw new InternalServerErrorException('Error al desactivar el rol');
+      throw new InternalServerErrorException('Error al eliminar el rol');
     }
   }
 
-  //@Patch(':id/restore')
   @Put(':id/restore')
   @Roles(1) // Admin
   @ApiOperation({ 
-    summary: 'Restaurar un rol',
-    description: 'Reactiva un rol desactivado. Solo usuarios administradores pueden acceder.'
+    summary: 'Restaurar un rol eliminado',
+    description: 'Restaura un rol que fue marcado como eliminado. Solo usuarios administradores pueden acceder.' 
   })
-  @ApiParam({ name: 'id', description: 'ID del rol', type: 'number' })
+  @ApiParam({ 
+    name: 'id', 
+    type: Number, 
+    description: 'ID del rol a restaurar',
+    example: 1 
+  })
   @ApiResponse({ 
     status: 200, 
-    description: 'Rol restaurado exitosamente'
+    description: 'Rol restaurado exitosamente' 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'No autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acceso denegado - se requieren permisos de administrador' 
   })
   @ApiResponse({ 
     status: 404, 
     description: 'Rol no encontrado' 
   })
-  async restore(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
+  async restore(@Param('id', ParseIntPipe) id: number) {
     try {
-      const success = await this.deleteRoleUseCase.executeRestore(id);
-      
-      if (!success) {
-        throw new NotFoundException(`Rol con ID ${id} no encontrado`);
-      }
-
+      await this.updateRoleUseCase.execute(id, { valido: true });
       return { message: 'Rol restaurado exitosamente' };
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
+      if (error.message.includes('no encontrado')) {
+        throw new NotFoundException(error.message);
       }
       throw new InternalServerErrorException('Error al restaurar el rol');
     }
   }
 
-  /**
-   * Mapea una entidad de dominio a DTO de respuesta
-   */
+  // Mapear entity a response DTO
   private mapToResponseDto(role: any): RoleResponseDto {
     return {
       id: role.id,

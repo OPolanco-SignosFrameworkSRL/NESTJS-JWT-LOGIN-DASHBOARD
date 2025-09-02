@@ -18,6 +18,9 @@ import { map } from 'rxjs/operators';
   @Injectable()
   export class ResponseInterceptor implements NestInterceptor {
     intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+      const request = context.switchToHttp().getRequest();
+      const url = request.url;
+      
       return next.handle().pipe(
         map((data) => {
           // Si ya es una respuesta paginada, no envolver en el wrapper "Token"
@@ -33,12 +36,32 @@ import { map } from 'rxjs/operators';
           if (data && typeof data === 'object' && 'statusCode' in data && 'message' in data && 'timestamp' in data) {
             return data;
           }
+
+          // Manejo especial para el endpoint by-rol de modulos-permisos
+          if (url && url.includes('/modulos-permisos/by-rol/')) {
+            return {
+              data: data.data || data,
+              statusCode: 200,
+              timestamp: new Date().toISOString(),
+              message: 'Operación exitosa',
+            };
+          }
+
+          // No aplicar wrapper "Token" a otros endpoints de modulos-permisos
+          if (url && url.includes('/modulos-permisos')) {
+            return {
+              ...data,
+              statusCode: 200,
+              timestamp: new Date().toISOString(),
+              message: 'Operación exitosa',
+            };
+          }
           
           return {
             Token: data,
             statusCode: 200,
-            message: 'Operación exitosa',
             timestamp: new Date().toISOString(),
+            message: 'Operación exitosa',
           };
         }),
       );

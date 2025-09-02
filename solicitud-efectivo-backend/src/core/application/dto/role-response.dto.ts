@@ -55,7 +55,7 @@ export class RolePaginatedResponseDto {
     description: 'Total de p√°ginas',
     example: 5,
   })
-  totalPages: number;
+  totalPages: number; @ApiProperty({ description: 'Indica si hay p·gina siguiente', example: true, }) hasNext: boolean; @ApiProperty({ description: 'Indica si hay p·gina anterior', example: false, }) hasPrev: boolean;
 }
 
 export class RoleStatsDto {

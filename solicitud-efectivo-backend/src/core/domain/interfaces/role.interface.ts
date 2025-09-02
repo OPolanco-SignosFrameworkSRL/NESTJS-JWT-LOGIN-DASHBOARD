@@ -8,6 +8,8 @@ export interface IRoleFilters {
   role_desc?: string;
   valido?: boolean;
   search?: string; // Búsqueda general por nombre o descripción
+  page?: number;
+  limit?: number;
 }
 
 /**
@@ -15,7 +17,7 @@ export interface IRoleFilters {
  */
 export interface ICreateRoleData {
   role_name: string;
-  role_desc: string;
+  role_desc?: string;
   valido?: boolean;
 }
 
@@ -36,7 +38,7 @@ export interface IRolePaginatedResponse {
   total: number;
   page: number;
   limit: number;
-  totalPages: number;
+  totalPages: number; hasNext: boolean; hasPrev: boolean;
 }
 
 /**

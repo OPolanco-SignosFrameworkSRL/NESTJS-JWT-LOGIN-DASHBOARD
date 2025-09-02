@@ -11,6 +11,7 @@ import {
   IUserStats,
   IUserFilters,
   IUserUpdateData,
+  IUserPayload,
   //} from '../user.interface';
 } from '../user.interface';
 import { PaginationDto, PaginatedResponseDto } from '../../application/dto/pagination.dto';
@@ -126,7 +127,7 @@ export class UsersService {
     id: number,
     //updateData: IUserUpdateData,
     updateData: any,
-    currentUser?: { id: number; role: number },
+    currentUser?: IUserPayload,
   ): Promise<IUserResponse> {
     try {
       // Buscar usuario en la tabla real
@@ -197,8 +198,8 @@ export class UsersService {
       if (updateData.valido !== undefined) {
         userWrite.valido = Boolean(updateData.valido);
 
-        // Si se está restaurando (valida: true), limpiar campos de soft delete
-        if (updateData.Valido === true) {
+        // Si se está restaurando (valido: true), limpiar campos de soft delete
+        if (updateData.valido === true) {
           userWrite.deleted_at = null;
           userWrite.deleted_by = null;
           this.logger.log(`Usuario ${userWrite.id} restaurado automáticamente via actualización`);

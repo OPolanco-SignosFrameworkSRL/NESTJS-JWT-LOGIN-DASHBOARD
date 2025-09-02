@@ -4,7 +4,7 @@ import { IsString, IsNotEmpty, MaxLength, IsOptional, IsBoolean } from 'class-va
 export class CreateRoleDto {
   @ApiProperty({
     description: 'Nombre del rol',
-    example: 'Administrador',
+    example: 'Testing',
     maxLength: 50,
   })
   @IsString()
@@ -16,11 +16,12 @@ export class CreateRoleDto {
     description: 'Descripción del rol',
     example: 'Usuario con permisos de administración completa',
     maxLength: 255,
+    required: false,
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @MaxLength(255)
-  role_desc: string;
+  role_desc?: string;
 
   @ApiProperty({
     description: 'Indica si el rol está activo',

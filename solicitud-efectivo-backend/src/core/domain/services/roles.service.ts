@@ -216,9 +216,10 @@ export class RolesService {
       throw new Error('El nombre del rol es requerido');
     }
 
-    if (!isUpdate && !roleData.role_desc?.trim()) {
-      throw new Error('La descripción del rol es requerida');
-    }
+    // role_desc es opcional, solo validar si se proporciona
+    // if (!isUpdate && !roleData.role_desc?.trim()) {
+    //   throw new Error('La descripción del rol es requerida');
+    // }
 
     if (roleData.role_name) {
       if (roleData.role_name.trim().length < 2) {
@@ -230,7 +231,7 @@ export class RolesService {
       }
     }
 
-    if (roleData.role_desc) {
+    if (roleData.role_desc && roleData.role_desc.trim()) {
       if (roleData.role_desc.trim().length < 5) {
         throw new Error('La descripción del rol debe tener al menos 5 caracteres');
       }

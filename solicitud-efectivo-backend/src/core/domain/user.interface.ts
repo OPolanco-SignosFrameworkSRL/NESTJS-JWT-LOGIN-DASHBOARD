@@ -26,6 +26,8 @@ export interface IUser {
 export interface IUserPayload {
   id: number;        // ID del usuario (alias de sub)
   cedula: string;
+  apellido?: string;
+  nombre?: string;
   sub: number;       // ID del usuario (JWT standard)
   fullname: string;
   rolesUsuario: Array<{ id: number; roleName: string }>; // Array de roles del usuario

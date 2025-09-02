@@ -70,10 +70,25 @@ export class RoleRepository implements IRoleRepository {
 
     queryBuilder.orderBy('role.id', 'DESC');
 
-    const offset = (page - 1) * limit;
-    queryBuilder.skip(offset).take(limit);
+    // Si no se especifican límites, traer todos los datos
+    if (page !== undefined && limit !== undefined) {
+      const offset = (page - 1) * limit;
+      queryBuilder.skip(offset).take(limit);
+    }
 
     const [entities, total] = await queryBuilder.getManyAndCount();
+    
+    // Si no hay paginación, retornar todos los datos
+    if (page === undefined || limit === undefined) {
+      return {
+        data: entities.map(this.mapToDomain),
+        total,
+        page: 1,
+        limit: total,
+        totalPages: 1, hasNext: false, hasPrev: false,
+      };
+    }
+
     const totalPages = Math.ceil(total / limit);
 
     return {
@@ -81,7 +96,7 @@ export class RoleRepository implements IRoleRepository {
       total,
       page,
       limit,
-      totalPages,
+      totalPages, hasNext: page < totalPages, hasPrev: page > 1,
     };
   }
 
