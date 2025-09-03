@@ -10,6 +10,7 @@ import { CommentModule } from './presentation/modules/comment.module';
 import { DesembolsoModule } from './presentation/modules/desembolso.module';
 import { AdminRequestModule } from './presentation/modules/admin-request.module';
 import { ModulosPermisosModule } from './presentation/modules/modulos-permisos.module';
+import { SolicitudEfectivoModule } from './presentation/modules/solicitud-efectivo.module';
 import { AppController } from './app.controller';
 import { getDatabaseConfig } from './config/database.config';
 import { appConfig, jwtConfig } from './config/app.config';
@@ -36,6 +37,7 @@ import { appConfig, jwtConfig } from './config/app.config';
     DesembolsoModule,
     AdminRequestModule,
     ModulosPermisosModule,
+    SolicitudEfectivoModule,
   ],
   controllers: [AppController],
   providers: [],
