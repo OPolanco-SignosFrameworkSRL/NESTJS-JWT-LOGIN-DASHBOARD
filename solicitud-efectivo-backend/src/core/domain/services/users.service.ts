@@ -1,20 +1,29 @@
-import { Injectable, NotFoundException, Logger, UnauthorizedException, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository, SelectQueryBuilder, In } from 'typeorm';
-import { UserEntity } from '../../../infrastructure/database/entities/user.entity';
-import { UserWriteEntity } from '../../../infrastructure/database/entities/user-write.entity';
-import { UsuarioRolEntity } from '../../../infrastructure/database/entities/usuario-rol.entity';
-import { RoleEntity } from '../../../infrastructure/database/entities/role.entity';
-import { CryptoService } from '../../../infrastructure/services/crypto.service';
+import {
+  Injectable,
+  NotFoundException,
+  Logger,
+  UnauthorizedException,
+  BadRequestException,
+} from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { DataSource, Repository, SelectQueryBuilder, In } from "typeorm";
+import { UserEntity } from "../../../infrastructure/database/entities/user.entity";
+import { UserWriteEntity } from "../../../infrastructure/database/entities/user-write.entity";
+import { UsuarioRolEntity } from "../../../infrastructure/database/entities/usuario-rol.entity";
+import { RoleEntity } from "../../../infrastructure/database/entities/role.entity";
+import { CryptoService } from "../../../infrastructure/services/crypto.service";
 import {
   IUserResponse,
   IUserStats,
   IUserFilters,
-  IUserUpdateData,
   IUserPayload,
+  IUserBasicResponse,
   //} from '../user.interface';
-} from '../user.interface';
-import { PaginationDto, PaginatedResponseDto } from '../../application/dto/pagination.dto';
+} from "../user.interface";
+import {
+  PaginationDto,
+  PaginatedResponseDto,
+} from "../../application/dto/pagination.dto";
 
 @Injectable()
 export class UsersService {
@@ -30,13 +39,15 @@ export class UsersService {
     @InjectRepository(RoleEntity)
     private readonly roleRepository: Repository<RoleEntity>,
     private readonly dataSource: DataSource,
-    private readonly cryptoService: CryptoService,
-  ) { }
+    private readonly cryptoService: CryptoService
+  ) {}
 
   /**
    * Obtiene todos los usuarios con paginación y filtros
    */
-  async findAll(filters?: IUserFilters): Promise<PaginatedResponseDto<IUserResponse>> {
+  async findAll(
+    filters?: IUserFilters
+  ): Promise<PaginatedResponseDto<IUserResponse>> {
     try {
       const { page = 1, limit = 10 } = filters || {};
       const skip = (page - 1) * limit;
@@ -47,15 +58,12 @@ export class UsersService {
       const total = await queryBuilder.getCount();
 
       // Aplicar paginación
-      const users = await queryBuilder
-        .skip(skip)
-        .take(limit)
-        .getMany();
+      const users = await queryBuilder.skip(skip).take(limit).getMany();
 
       const totalPages = Math.ceil(total / limit);
 
       const mappedUsers = await Promise.all(
-        users.map(user => this.mapToUserResponse(user, false)) // Sin contraseña para findAll
+        users.map((user) => this.mapToUserResponse(user, false)) // Sin contraseña para findAll
       );
 
       return {
@@ -65,10 +73,69 @@ export class UsersService {
         limit,
         totalPages,
         hasNext: page < totalPages,
-        hasPrev: page > 1
+        hasPrev: page > 1,
       };
     } catch (error) {
-      this.logger.error('Error obteniendo usuarios:', error);
+      this.logger.error("Error obteniendo usuarios:", error);
+      throw error;
+    }
+  }
+
+  // Nuevo método específico
+  async findAllOnly(
+    filters?: IUserFilters
+  ): Promise<PaginatedResponseDto<IUserBasicResponse>> {
+    try {
+      const { page = 1, limit = 10 } = filters || {};
+      const skip = (page - 1) * limit;
+
+      // Query builder específico con campos limitados
+      const queryBuilder = this.userRepository
+        .createQueryBuilder("user")
+        .select(["user.id", "user.nombre", "user.apellido", "user.cedula"]);
+
+      // Aplicar filtros básicos
+      if (filters?.active !== undefined) {
+        queryBuilder.where("user.valido = :valido", {
+          valido: filters.active ? true : false,
+        });
+      }
+
+      if (filters?.search) {
+        queryBuilder.andWhere(
+          "(user.nombre LIKE :search OR user.apellido LIKE :search OR user.cedula LIKE :search)",
+          { search: `%${filters.search}%` }
+        );
+      }
+
+      const total = await queryBuilder.getCount();
+      const users = await queryBuilder
+        .skip(skip)
+        .take(limit)
+        .orderBy("user.nombre", "DESC")
+        .getMany();
+
+      const totalPages = Math.ceil(total / limit);
+
+      // Mapeo específico sin roles ni datos sensibles
+      const mappedUsers = users.map((user) => ({
+        id: user.id,
+        nombre: user.nombre,
+        apellido: user.apellido,
+        cedula: user.cedula,
+      }));
+
+      return {
+        data: mappedUsers,
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      };
+    } catch (error) {
+      this.logger.error("Error obteniendo usuarios básicos:", error);
       throw error;
     }
   }
@@ -80,7 +147,7 @@ export class UsersService {
     try {
       // Buscar usuario sin filtrar por valido para poder ver usuarios inactivos también
       const user = await this.userRepository.findOne({
-        where: { id }
+        where: { id },
       });
 
       if (!user) {
@@ -101,12 +168,12 @@ export class UsersService {
     try {
       // Buscar usuario sin filtrar por valido para poder ver usuarios inactivos también
       const user = await this.userRepository.findOne({
-        where: { cedula }
+        where: { cedula },
       });
 
       if (!user) {
         throw new NotFoundException(
-          `Usuario con cédula ${cedula} no encontrado`,
+          `Usuario con cédula ${cedula} no encontrado`
         );
       }
 
@@ -114,7 +181,7 @@ export class UsersService {
     } catch (error) {
       this.logger.error(
         `Error obteniendo usuario por cédula ${cedula}:`,
-        error,
+        error
       );
       throw error;
     }
@@ -127,12 +194,12 @@ export class UsersService {
     id: number,
     //updateData: IUserUpdateData,
     updateData: any,
-    currentUser?: IUserPayload,
+    currentUser?: IUserPayload
   ): Promise<IUserResponse> {
     try {
       // Buscar usuario en la tabla real
       const userWrite = await this.userWriteRepository.findOne({
-        where: { id }
+        where: { id },
       });
 
       if (!userWrite) {
@@ -140,10 +207,13 @@ export class UsersService {
       }
 
       // Verificar permisos: Admin puede actualizar cualquier usuario, Usuario solo puede actualizar sus propios datos
-      const isAdmin = currentUser?.rolesUsuario?.some(role => role.id === 1) || false;
-      
+      const isAdmin =
+        currentUser?.rolesUsuario?.some((role) => role.id === 1) || false;
+
       if (currentUser && !isAdmin && currentUser.id !== id) {
-        throw new UnauthorizedException('No tienes permisos para actualizar este usuario');
+        throw new UnauthorizedException(
+          "No tienes permisos para actualizar este usuario"
+        );
       }
 
       // Actualizar campos permitidos
@@ -168,12 +238,16 @@ export class UsersService {
             await this.usuarioRolRepository.save(newRole);
           }
         }
-        this.logger.log(`Roles actualizados para usuario ${userWrite.id}: ${updateData.roles.map(r => r.id).join(', ')}`);
+        this.logger.log(
+          `Roles actualizados para usuario ${userWrite.id}: ${updateData.roles.map((r) => r.id).join(", ")}`
+        );
       }
 
       // Manejar rol individual (para compatibilidad)
       if (updateData.role) {
-        const existing = await this.usuarioRolRepository.findOne({ where: { idUsuario: userWrite.id } });
+        const existing = await this.usuarioRolRepository.findOne({
+          where: { idUsuario: userWrite.id },
+        });
         if (existing) {
           existing.idRol = updateData.role;
           existing.userMod = currentUser?.id || null;
@@ -202,7 +276,9 @@ export class UsersService {
         if (updateData.valido === true) {
           userWrite.deleted_at = null;
           userWrite.deleted_by = null;
-          this.logger.log(`Usuario ${userWrite.id} restaurado automáticamente via actualización`);
+          this.logger.log(
+            `Usuario ${userWrite.id} restaurado automáticamente via actualización`
+          );
         }
       }
       /*
@@ -264,7 +340,7 @@ export class UsersService {
               // Generar hash de la contraseña (cedula + clave)
               const passwordHash = this.cryptoService.calculateSHA256(userWrite.cedula + updateData.password); */
       // VERSIÓN FUNCIONAL - Actualizar contraseña solo si se proporciona y no está vacía
-      if (updateData.password && updateData.password.trim() !== '') {
+      if (updateData.password && updateData.password.trim() !== "") {
         let passwordHash;
 
         // Si ya es un hash (64 caracteres hexadecimales), usarlo directamente
@@ -272,7 +348,9 @@ export class UsersService {
           passwordHash = updateData.password;
         } else {
           // Si es texto plano, generar el hash
-          passwordHash = this.cryptoService.calculateSHA256(userWrite.cedula + updateData.password);
+          passwordHash = this.cryptoService.calculateSHA256(
+            userWrite.cedula + updateData.password
+          );
         }
 
         userWrite.password = passwordHash;
@@ -287,7 +365,7 @@ export class UsersService {
       });
 
       if (!updatedUser) {
-        throw new NotFoundException('Error al obtener datos actualizados');
+        throw new NotFoundException("Error al obtener datos actualizados");
       }
 
       this.logger.log(`Usuario ${id} actualizado exitosamente`);
@@ -312,7 +390,7 @@ export class UsersService {
     try {
       // Buscar usuario en la tabla real
       const userWrite = await this.userWriteRepository.findOne({
-        where: { id }
+        where: { id },
       });
 
       if (!userWrite) {
@@ -329,16 +407,18 @@ export class UsersService {
 
       await this.userWriteRepository.save(userWrite);
 
-      this.logger.log(`Usuario ${id} marcado como eliminado (soft delete) por ${currentUser?.id || 'sistema'}`);
+      this.logger.log(
+        `Usuario ${id} marcado como eliminado (soft delete) por ${currentUser?.id || "sistema"}`
+      );
 
       return {
-        message: 'Usuario marcado como eliminado exitosamente',
+        message: "Usuario marcado como eliminado exitosamente",
         user: {
           id: userWrite.id,
           cedula: userWrite.cedula,
           nombre: userWrite.nombre,
-          apellido: userWrite.apellido
-        }
+          apellido: userWrite.apellido,
+        },
       };
     } catch (error) {
       this.logger.error(`Error eliminando usuario ${id}:`, error);
@@ -349,25 +429,30 @@ export class UsersService {
   /**
    * Valida si un usuario puede ser eliminado
    */
-  private async validateUserDeletion(user: UserWriteEntity, currentUser?: { id: number; role: number }): Promise<void> {
+  private async validateUserDeletion(
+    user: UserWriteEntity,
+    currentUser?: { id: number; role: number }
+  ): Promise<void> {
     // Verificar si es el último administrador - obtener rol desde UsuariosRoles
     const usuarioRol = await this.usuarioRolRepository.findOne({
-      where: { idUsuario: user.id, rowActive: true }
+      where: { idUsuario: user.id, rowActive: true },
     });
 
     if (usuarioRol?.idRol === 1) {
       const adminCount = await this.usuarioRolRepository.count({
-        where: { idRol: 1, rowActive: true }
+        where: { idRol: 1, rowActive: true },
       });
 
       if (adminCount <= 1) {
-        throw new Error('No se puede eliminar el último administrador del sistema');
+        throw new Error(
+          "No se puede eliminar el último administrador del sistema"
+        );
       }
     }
 
     // Verificar si el usuario actual está intentando eliminarse a sí mismo
     if (currentUser && currentUser.id === user.id) {
-      throw new Error('No puedes eliminarte a ti mismo');
+      throw new Error("No puedes eliminarte a ti mismo");
     }
 
     // Aquí podrías agregar más validaciones como:
@@ -376,8 +461,6 @@ export class UsersService {
     // - etc.
   }
 
-
-
   /**
    * Obtiene usuarios eliminados (soft delete)
    */
@@ -385,23 +468,19 @@ export class UsersService {
     try {
       const deletedUsers = await this.userWriteRepository.find({
         where: { valido: false },
-        order: { deleted_at: 'DESC' }
+        order: { deleted_at: "DESC" },
       });
 
       // Mapear usuarios eliminados usando el método estándar
       const mappedUsers = await Promise.all(
-        deletedUsers.map(user => this.mapToUserResponse(user, false)) // Sin contraseña para deleted
+        deletedUsers.map((user) => this.mapToUserResponse(user, false)) // Sin contraseña para deleted
       );
       return mappedUsers;
     } catch (error) {
-      this.logger.error('Error obteniendo usuarios eliminados:', error);
+      this.logger.error("Error obteniendo usuarios eliminados:", error);
       throw error;
     }
   }
-
-
-
-
 
   /**
    * Busca usuarios por término
@@ -409,20 +488,22 @@ export class UsersService {
   async searchByTerm(term: string): Promise<IUserResponse[]> {
     try {
       const users = await this.userRepository
-        .createQueryBuilder('user')
-        .where('user.valido = :valido', { valido: true })
+        .createQueryBuilder("user")
+        .where("user.valido = :valido", { valido: true })
         .andWhere(
-          '(user.nombre LIKE :term OR user.apellido LIKE :term OR user.cedula LIKE :term)',
-          { term: `%${term}%` },
+          "(user.nombre LIKE :term OR user.apellido LIKE :term OR user.cedula LIKE :term)",
+          { term: `%${term}%` }
         )
-        .orderBy('user.nombre', 'DESC')
+        .orderBy("user.nombre", "DESC")
         .getMany();
 
-      return await Promise.all(users.map(user => this.mapToUserResponse(user, false)));
+      return await Promise.all(
+        users.map((user) => this.mapToUserResponse(user, false))
+      );
     } catch (error) {
       this.logger.error(
         `Error buscando usuarios con término "${term}":`,
-        error,
+        error
       );
       throw error;
     }
@@ -435,10 +516,10 @@ export class UsersService {
     try {
       // Buscar usuarios por rol desde UsuariosRoles
       const usuariosRoles = await this.usuarioRolRepository.find({
-        where: { idRol: role, rowActive: true }
+        where: { idRol: role, rowActive: true },
       });
 
-      const userIds = usuariosRoles.map(ur => ur.idUsuario);
+      const userIds = usuariosRoles.map((ur) => ur.idUsuario);
 
       if (userIds.length === 0) {
         return [];
@@ -446,10 +527,12 @@ export class UsersService {
 
       const users = await this.userRepository.find({
         where: { id: In(userIds), valido: true },
-        order: { nombre: 'DESC' }
+        order: { nombre: "DESC" },
       });
 
-      return await Promise.all(users.map(user => this.mapToUserResponse(user, false)));
+      return await Promise.all(
+        users.map((user) => this.mapToUserResponse(user, false))
+      );
     } catch (error) {
       this.logger.error(`Error obteniendo usuarios por rol ${role}:`, error);
       throw error;
@@ -511,11 +594,14 @@ export class UsersService {
 
       return {
         totalUsers,
-        usersByRole: usersByRole.map(item => ({ role: item.role, count: parseInt(item.count) })),
+        usersByRole: usersByRole.map((item) => ({
+          role: item.role,
+          count: parseInt(item.count),
+        })),
         usersByDivision: [], // Temporalmente vacío
       };
     } catch (error) {
-      this.logger.error('Error obteniendo estadísticas de usuarios:', error);
+      this.logger.error("Error obteniendo estadísticas de usuarios:", error);
       throw error;
     }
   }
@@ -532,7 +618,7 @@ export class UsersService {
     } catch (error) {
       this.logger.error(
         `Error verificando existencia de usuario ${cedula}:`,
-        error,
+        error
       );
       return false;
     }
@@ -549,7 +635,9 @@ export class UsersService {
   ): Promise<{ success: boolean; message: string; user?: any }> {
     try {
       if (!cedula || !clave || !telefono) {
-        throw new UnauthorizedException('Cédula, clave y teléfono son requeridos');
+        throw new UnauthorizedException(
+          "Cédula, clave y teléfono son requeridos"
+        );
       }
 
       // Generar el hash de la contraseña (cedula + clave)
@@ -560,13 +648,13 @@ export class UsersService {
         where: {
           cedula,
           password: passwordHash,
-          valido: true
+          valido: true,
         },
       });
 
       if (!user) {
         this.logger.warn(`Credenciales inválidas para cédula: ${cedula}`);
-        throw new UnauthorizedException('Credenciales inválidas');
+        throw new UnauthorizedException("Credenciales inválidas");
       }
 
       // Actualizar el número de teléfono
@@ -578,45 +666,50 @@ export class UsersService {
 
       return {
         success: true,
-        message: 'Teléfono actualizado exitosamente',
+        message: "Teléfono actualizado exitosamente",
         user: {
           id: user.id,
           cedula: user.cedula,
           nombre: user.nombre,
           apellido: user.apellido,
           telefono: telefono,
-        }
+        },
       };
-
     } catch (error) {
-      this.logger.error(`Error actualizando teléfono para usuario ${cedula}:`, error);
+      this.logger.error(
+        `Error actualizando teléfono para usuario ${cedula}:`,
+        error
+      );
 
       if (error instanceof UnauthorizedException) {
         throw error;
       }
 
-      throw new UnauthorizedException('Error interno del servidor');
+      throw new UnauthorizedException("Error interno del servidor");
     }
   }
 
   /**
    * Crea el query builder base con filtros
    */
-  private createQueryBuilder(filters?: IUserFilters): SelectQueryBuilder<UserEntity> {
-    const queryBuilder = this.userRepository
-      .createQueryBuilder('user');
+  private createQueryBuilder(
+    filters?: IUserFilters
+  ): SelectQueryBuilder<UserEntity> {
+    const queryBuilder = this.userRepository.createQueryBuilder("user");
 
     // Filtro por validez del usuario
     // COMPORTAMIENTO POR DEFECTO: traer TODOS los usuarios (activos e inactivos)
     // Solo filtrar si se especifica explícitamente el parámetro active
     if (filters?.active !== undefined) {
-      queryBuilder.where('user.valido = :valido', {
-        valido: filters.active ? true : false  // Convertir explícitamente a booleano
+      queryBuilder.where("user.valido = :valido", {
+        valido: filters.active ? true : false, // Convertir explícitamente a booleano
       });
       this.logger.log(`Aplicando filtro de usuario activo: ${filters.active}`);
     } else {
       // SIN FILTROS - Mostrar TODOS los usuarios por defecto
-      this.logger.log('Sin filtro de valido - mostrando todos los usuarios (activos e inactivos)');
+      this.logger.log(
+        "Sin filtro de valido - mostrando todos los usuarios (activos e inactivos)"
+      );
     }
 
     // Temporalmente deshabilitado - el rol se obtiene desde UsuariosRoles
@@ -635,34 +728,35 @@ export class UsersService {
 
     if (filters?.search) {
       queryBuilder.andWhere(
-        '(user.nombre LIKE :search OR user.apellido LIKE :search OR user.cedula LIKE :search)',
-        { search: `%${filters.search}%` },
+        "(user.nombre LIKE :search OR user.apellido LIKE :search OR user.cedula LIKE :search)",
+        { search: `%${filters.search}%` }
       );
     }
 
-    return queryBuilder.orderBy('user.nombre', 'DESC');
+    return queryBuilder.orderBy("user.nombre", "DESC");
   }
-
-
 
   /**
    * Mapea la entidad User a IUserResponse con estructura completa
    */
-  private async mapToUserResponse(user: UserEntity, includePassword: boolean = false): Promise<IUserResponse> {
+  private async mapToUserResponse(
+    user: UserEntity,
+    includePassword: boolean = false
+  ): Promise<IUserResponse> {
     // Obtener todos los roles del usuario desde UsuariosRoles
     const usuariosRoles = await this.usuarioRolRepository.find({
       where: { idUsuario: user.id, rowActive: true },
-      relations: ['roleEntity']
+      relations: ["roleEntity"],
     });
 
     // Construir array de roles
-    const roles = usuariosRoles.map(ur => ({
+    const roles = usuariosRoles.map((ur) => ({
       id: ur.roleEntity.id,
-      roleName: ur.roleEntity.roleName
+      roleName: ur.roleEntity.roleName,
     }));
 
     // Obtener rol principal (primer rol o por defecto)
-    const rolePrincipal = roles.length > 0 ? roles[0].roleName : 'Usuario';
+    const rolePrincipal = roles.length > 0 ? roles[0].roleName : "Usuario";
 
     // Obtener datos adicionales de la tabla de escritura si se necesita la contraseña
     let password: string | undefined;
@@ -670,9 +764,10 @@ export class UsersService {
     let celular: string | undefined;
     let direccion: string | undefined;
 
-    if (includePassword || true) { // Siempre obtener datos completos
+    if (includePassword || true) {
+      // Siempre obtener datos completos
       const userWrite = await this.userWriteRepository.findOne({
-        where: { id: user.id }
+        where: { id: user.id },
       });
 
       if (userWrite) {
@@ -698,9 +793,7 @@ export class UsersService {
       telefono: telefono,
       celular: celular,
       direccion: direccion,
-      valido: Boolean(user.valido)
+      valido: Boolean(user.valido),
     };
   }
-
-
 }

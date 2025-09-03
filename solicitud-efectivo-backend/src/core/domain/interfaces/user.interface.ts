@@ -4,6 +4,16 @@
 export type UserRole = 'Admin' | 'Usuario' | 'Supervisor' | 'Manager' | 'Administrator';
 
 /**
+ * Interfaz para respuesta básica de usuario (sin roles ni datos sensibles)
+ */
+export interface IUserBasicResponse {
+  id: number;
+  nombre: string;
+  apellido: string;
+  cedula: string;
+}
+
+/**
  * Interfaz para la respuesta de usuario
  */
 export interface IUserResponse {

@@ -5,6 +5,7 @@ export enum UserRole {
   Manager = 'Manager',
 }
 
+
 export interface IUser {
   id: number;
   cedula: string;
@@ -101,6 +102,13 @@ export interface IUserUpdateData {
   nuevocampo?: string;
   encargadoId?: string;
   valido?: string;
+}
+
+export interface IUserBasicResponse {
+  id: number;
+  nombre: string;
+  apellido: string;
+  cedula: string;
 }
 
 export interface IUserResponse {
