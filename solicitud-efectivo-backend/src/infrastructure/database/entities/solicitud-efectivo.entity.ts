@@ -1,0 +1,41 @@
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { IntegranteDesembolsoEntity } from './integrante-desembolso.entity';
+
+@Entity('solicitud_efectivo')
+export class SolicitudEfectivoEntity {
+  @PrimaryGeneratedColumn()
+  id: number;
+
+  @Column({ name: 'usuario_id' })
+  usuarioId: number;
+
+  @Column({ type: 'float' })
+  monto: number;
+
+  @Column({ name: 'tipo_solicitud_id' })
+  tipoSolicitudId: number;
+
+  @Column({ name: 'division_id' })
+  divisionId: number;
+
+  @Column({ name: 'fecha_orden', type: 'date' })
+  fechaOrden: Date;
+
+  @Column({ name: 'numero_orden', type: 'int' })
+  numeroOrden: number;
+
+  @Column({ name: 'nombre_cliente', type: 'varchar', length: 100 })
+  nombreCliente: string;
+
+  @Column({ name: 'numero_ticket', type: 'int' })
+  numeroTicket: number;
+
+  @Column({ type: 'varchar', length: 255 })
+  concepto: string;
+
+  @Column({ name: 'status_id' })
+  statusId: number;
+
+  @OneToMany(() => IntegranteDesembolsoEntity, integrante => integrante.solicitud)
+  integrantes: IntegranteDesembolsoEntity[];
+}
