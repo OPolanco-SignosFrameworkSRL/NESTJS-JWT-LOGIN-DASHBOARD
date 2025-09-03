@@ -30,4 +30,35 @@ export class SolicitudEfectivoController {
         return this.solicitudService.create(createDto, req.user);
     }
 
+    @Get()
+    @ApiOperation({ summary: 'Obtener todas las solicitudes' })
+    @ApiResponse({ status: 200, description: 'Lista de solicitudes obtenida' })
+    findAll(@Req() req: any) {
+        return this.solicitudService.findAll(req.user);
+    }
+
+    @Get(':id')
+    @ApiOperation({ summary: 'Obtener solicitud por ID' })
+    @ApiResponse({ status: 200, description: 'Solicitud obtenida' })
+    findOne(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+        return this.solicitudService.findOne(id, req.user);
+    }
+
+    @Put(':id')
+    @ApiOperation({ summary: 'Actualizar solicitud' })
+    @ApiResponse({ status: 200, description: 'Solicitud actualizada' })
+    update(
+        @Param('id', ParseIntPipe) id: number, 
+        @Body() updateDto: any, 
+        @Req() req: any
+    ) {
+        return this.solicitudService.update(id, updateDto, req.user);
+    }
+
+    @Delete(':id')
+    @ApiOperation({ summary: 'Eliminar solicitud' })
+    @ApiResponse({ status: 200, description: 'Solicitud eliminada' })
+    remove(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+        return this.solicitudService.remove(id, req.user);
+    }
 }
