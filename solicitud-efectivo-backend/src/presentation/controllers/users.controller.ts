@@ -13,7 +13,7 @@ import {
   Request,
   //BadRequestException,
   NotFoundException,
-} from '@nestjs/common';
+} from "@nestjs/common";
 import {
   ApiTags,
   ApiOperation,
@@ -21,88 +21,134 @@ import {
   ApiBearerAuth,
   ApiQuery,
   ApiParam,
-} from '@nestjs/swagger';
-import { UsersService } from '../../core/domain/services/users.service';
-import { AuthService } from '../../core/domain/services/auth.service';
-import { UpdateUserDto } from '../../core/application/dto/update-user.dto';
-import { RegisterDto } from '../../core/application/dto/register.dto';
-import { CreateUserDto } from '../../core/application/dto/create-user.dto';
-import { UserFiltersDto } from '../../core/application/dto/user-filters.dto';
-import { UpdatePhoneDto } from '../../core/application/dto/update-phone.dto';
+} from "@nestjs/swagger";
+import { UsersService } from "../../core/domain/services/users.service";
+import { AuthService } from "../../core/domain/services/auth.service";
+import { UpdateUserDto } from "../../core/application/dto/update-user.dto";
+import { RegisterDto } from "../../core/application/dto/register.dto";
+import { CreateUserDto } from "../../core/application/dto/create-user.dto";
+import { UserFiltersDto } from "../../core/application/dto/user-filters.dto";
+import { UpdatePhoneDto } from "../../core/application/dto/update-phone.dto";
 //import { DeleteUserDto } from '../../core/application/dto/delete-user.dto';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { RolesGuard } from '../guards/roles.guard';
-import { Roles } from '../decorators/roles.decorator';
-import { UserRole } from '../../core/domain/user.interface';
-import { PaginationDto, PaginatedResponseDto } from '../../core/application/dto/pagination.dto';
+import { JwtAuthGuard } from "../guards/jwt-auth.guard";
+import { RolesGuard } from "../guards/roles.guard";
+import { Roles } from "../decorators/roles.decorator";
+import { UserRole } from "../../core/domain/user.interface";
+import {
+  PaginationDto,
+  PaginatedResponseDto,
+} from "../../core/application/dto/pagination.dto";
 //import { ApiPaginatedResponse } from '../../common/decorators/api-paginated-response.decorator';
 
-@ApiTags('Usuarios')
-@Controller('users')
+@ApiTags("Usuarios")
+@Controller("users")
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly authService: AuthService,
-  ) { }
+    private readonly authService: AuthService
+  ) {}
 
   @Post()
   @Roles(1) // ID 1 = ADMINISTRADOR
-  @ApiOperation({ summary: 'Crear un nuevo usuario' })
+  @ApiOperation({ summary: "Crear un nuevo usuario" })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: 'Usuario creado exitosamente',
+    description: "Usuario creado exitosamente",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        success: { type: 'boolean', example: true },
-        message: { type: 'string', example: 'Usuario creado correctamente' },
+        success: { type: "boolean", example: true },
+        message: { type: "string", example: "Usuario creado correctamente" },
       },
     },
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Datos de entrada inválidos',
+    description: "Datos de entrada inválidos",
   })
   @ApiResponse({
     status: HttpStatus.CONFLICT,
-    description: 'El usuario ya existe',
+    description: "El usuario ya existe",
   })
   async create(@Body() createUserDto: CreateUserDto) {
     return await this.authService.createUser(createUserDto);
   }
 
   // ❌ ENDPOINT DESHABILITADO - Obtener todos los usuarios
-  
+
   @Get()
-  @ApiOperation({ summary: 'Obtener todos los usuarios' })
-  @ApiQuery({ name: 'role', required: false, enum: [1, 2, 3, 4], description: '1=Admin, 2=Usuario, 3=Manager, 4=Supervisor' })
-  @ApiQuery({ name: 'division', required: false, type: String })
-  @ApiQuery({ name: 'search', required: false, type: String })
-  @ApiQuery({ name: 'active', required: false, type: Boolean })
-  @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
-  @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
+  @ApiOperation({ summary: "Obtener todos los usuarios" })
+  @ApiQuery({
+    name: "role",
+    required: false,
+    enum: [1, 2, 3, 4],
+    description: "1=Admin, 2=Usuario, 3=Manager, 4=Supervisor",
+  })
+  @ApiQuery({ name: "division", required: false, type: String })
+  @ApiQuery({ name: "search", required: false, type: String })
+  @ApiQuery({ name: "active", required: false, type: Boolean })
+  @ApiQuery({ name: "page", required: false, type: Number, example: 1 })
+  @ApiQuery({ name: "limit", required: false, type: Number, example: 10 })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Lista de usuarios obtenida exitosamente',
+    description: "Lista de usuarios obtenida exitosamente",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
-        data: { type: 'array', items: { type: 'object' } },
-        total: { type: 'number', example: 150 },
-        page: { type: 'number', example: 1 },
-        limit: { type: 'number', example: 10 },
-        totalPages: { type: 'number', example: 15 },
-        hasNext: { type: 'boolean', example: true },
-        hasPrev: { type: 'boolean', example: false }
-      }
-    }
+        data: { type: "array", items: { type: "object" } },
+        total: { type: "number", example: 150 },
+        page: { type: "number", example: 1 },
+        limit: { type: "number", example: 10 },
+        totalPages: { type: "number", example: 15 },
+        hasNext: { type: "boolean", example: true },
+        hasPrev: { type: "boolean", example: false },
+      },
+    },
   })
   async findAll(@Query() filters: UserFiltersDto) {
     return await this.usersService.findAll(filters);
   }
-  
+
+  // Nuevo endpoint específico
+  @Get("only")
+  @ApiOperation({ summary: "Obtener usuarios con datos básicos" })
+  @ApiQuery({ name: "search", required: false, type: String })
+  @ApiQuery({ name: "active", required: false, type: Boolean })
+  @ApiQuery({ name: "page", required: false, type: Number, example: 1 })
+  @ApiQuery({ name: "limit", required: false, type: Number, example: 10 })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: "Lista de usuarios con datos básicos obtenida exitosamente",
+    schema: {
+      type: "object",
+      properties: {
+        data: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "number" },
+              nombre: { type: "string" },
+              apellido: { type: "string" },
+              cedula: { type: "string" },
+            },
+          },
+        },
+        total: { type: "number" },
+        page: { type: "number" },
+        limit: { type: "number" },
+        totalPages: { type: "number" },
+        hasNext: { type: "boolean" },
+        hasPrev: { type: "boolean" },
+      },
+    },
+  })
+  async findAllOnly(@Query() filters: UserFiltersDto) {
+    return await this.usersService.findAllOnly(filters);
+  }
+
   // ❌ ENDPOINT DESHABILITADO - Estadísticas de usuarios
   /* 
     @Get('stats')
@@ -182,66 +228,68 @@ export class UsersController {
       return await this.usersService.findByDivision(division);
     }
   */
-  @Get(':id')
+  @Get(":id")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @ApiOperation({ summary: 'Obtener un usuario por ID' })
-  @ApiParam({ name: 'id', type: Number })
+  @ApiOperation({ summary: "Obtener un usuario por ID" })
+  @ApiParam({ name: "id", type: Number })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Usuario obtenido exitosamente',
+    description: "Usuario obtenido exitosamente",
     type: Object,
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Usuario no encontrado',
+    description: "Usuario no encontrado",
   })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@Param("id", ParseIntPipe) id: number) {
     const user = await this.usersService.findOne(id);
 
     return {
       data: user,
       statusCode: 200,
-      message: 'Usuario obtenido exitosamente',
+      message: "Usuario obtenido exitosamente",
       timestamp: new Date().toISOString(),
-    }
+    };
   }
-  @Get('cedula/:cedula')
-  @ApiOperation({ summary: 'Obtener un usuario por cédula' })
-  @ApiParam({ name: 'cedula', type: String })
+  @Get("cedula/:cedula")
+  @ApiOperation({ summary: "Obtener un usuario por cédula" })
+  @ApiParam({ name: "cedula", type: String })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Usuario obtenido exitosamente',
+    description: "Usuario obtenido exitosamente",
     type: Object,
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Usuario no encontrado',
+    description: "Usuario no encontrado",
   })
-  async findByCedula(@Param('cedula') cedula: string) {
+  async findByCedula(@Param("cedula") cedula: string) {
     return await this.usersService.findByCedula(cedula);
   }
 
-  @Get(':id/preview-update')
+  @Get(":id/preview-update")
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @ApiOperation({ 
-    summary: 'Vista previa de datos antes de actualizar',
-    description: 'Obtiene los datos actuales del usuario para mostrar antes de la actualización'
+  @ApiOperation({
+    summary: "Vista previa de datos antes de actualizar",
+    description:
+      "Obtiene los datos actuales del usuario para mostrar antes de la actualización",
   })
-  async previewUpdate(@Param('id', ParseIntPipe) id: number) {
+  async previewUpdate(@Param("id", ParseIntPipe) id: number) {
     const user = await this.usersService.findOne(id);
-    
+
     if (!user) {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     }
-    
+
     return {
-      message: 'Datos actuales del usuario',
+      message: "Datos actuales del usuario",
       datos: user,
-      instrucciones: 'Envía los campos que quieres cambiar al endpoint PUT /users/:id'
+      instrucciones:
+        "Envía los campos que quieres cambiar al endpoint PUT /users/:id",
     };
   }
 
-  @Put(':id')
+  @Put(":id")
   @UseGuards(JwtAuthGuard, RolesGuard)
   /* 
   @ApiOperation({ summary: 'Actualizar un usuario (Admin puede actualizar cualquier usuario, Usuario solo puede actualizar sus propios datos)' })
@@ -259,61 +307,69 @@ export class UsersController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Datos de entrada inválidos',
      */
-  @ApiOperation({ 
-    summary: 'Actualizar un usuario',
-    description: 'Muestra los datos actuales y luego actualiza el usuario' 
+  @ApiOperation({
+    summary: "Actualizar un usuario",
+    description: "Muestra los datos actuales y luego actualiza el usuario",
   })
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @Param("id", ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
-    @Request() req,
+    @Request() req
   ) {
     const currentUser = req.user;
     //return await this.usersService.update(id, updateUserDto, currentUser);
     // 🔍 Obtener datos actuales ANTES de actualizar
     const currentUserData = await this.usersService.findOne(id);
-    
+
     if (!currentUserData) {
       throw new NotFoundException(`Usuario con ID ${id} no encontrado`);
     }
-    
+
     // ✅ Actualizar usuario
-    const updatedUser = await this.usersService.update(id, updateUserDto, currentUser);
-    
+    const updatedUser = await this.usersService.update(
+      id,
+      updateUserDto,
+      currentUser
+    );
+
     return {
-      message: 'Usuario actualizado exitosamente',
+      message: "Usuario actualizado exitosamente",
       datosAnteriores: currentUserData, // Datos antes de la actualización
-      datosActualizados: updatedUser,   // Datos después de la actualización
-      cambiosRealizados: updateUserDto       // Qué campos se enviaron para cambiar
+      datosActualizados: updatedUser, // Datos después de la actualización
+      cambiosRealizados: updateUserDto, // Qué campos se enviaron para cambiar
     };
   }
 
-  @Delete(':id')
+  @Delete(":id")
   @Roles(1) // ID 1 = ADMINISTRADOR
   @ApiOperation({
     /* summary: 'Eliminar un usuario (soft delete por defecto, eliminación física con confirmación)',
     description: 'Por defecto realiza soft delete. Para eliminación física permanente, enviar confirmPermanentDelete: true y confirmText: "SI, ELIMINAR PERMANENTEMENTE"'
  */
-    summary: 'Eliminar un usuario (soft delete)',
-    description: 'Realiza soft delete del usuario. Solo requiere el ID en la URL.'
+    summary: "Eliminar un usuario (soft delete)",
+    description:
+      "Realiza soft delete del usuario. Solo requiere el ID en la URL.",
   })
-  @ApiParam({ name: 'id', type: Number })
+  @ApiParam({ name: "id", type: Number })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: 'Usuario eliminado exitosamente',
+    description: "Usuario eliminado exitosamente",
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
         /* message: { type: 'string', example: 'Usuario marcado como eliminado (soft delete)' },
         type: { type: 'string', enum: ['soft', 'permanent'], example: 'soft' }, */
-        message: { type: 'string', example: 'Usuario marcado como eliminado exitosamente' },
+        message: {
+          type: "string",
+          example: "Usuario marcado como eliminado exitosamente",
+        },
         user: {
-          type: 'object',
+          type: "object",
           properties: {
-            id: { type: 'number', example: 1 },
-            cedula: { type: 'string', example: '40245980129' },
-            nombre: { type: 'string', example: 'Raul' },
-            apellido: { type: 'string', example: 'Vargas' },
+            id: { type: "number", example: 1 },
+            cedula: { type: "string", example: "40245980129" },
+            nombre: { type: "string", example: "Raul" },
+            apellido: { type: "string", example: "Vargas" },
           },
         },
       },
@@ -321,14 +377,14 @@ export class UsersController {
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Usuario no encontrado',
+    description: "Usuario no encontrado",
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Validaciones fallidas (último admin, auto-eliminación, etc.)',
+    description: "Validaciones fallidas (último admin, auto-eliminación, etc.)",
   })
   async remove(
-    @Param('id', ParseIntPipe) id: number,
+    @Param("id", ParseIntPipe) id: number,
     //@Body() deleteUserDto: DeleteUserDto,
     @Request() req
   ) {
@@ -348,7 +404,6 @@ export class UsersController {
     ); */
     return await this.usersService.remove(id, currentUser);
   }
-
 
   // ❌ ENDPOINT DESHABILITADO - Obtener lista de usuarios eliminados (soft delete)
   /*
