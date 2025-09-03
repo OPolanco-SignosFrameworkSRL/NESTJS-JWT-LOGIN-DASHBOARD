@@ -166,7 +166,7 @@ export class RolesController {
   })
   async findAll(@Query() filters: RoleFiltersDto): Promise<any> {
     try {
-      return await this.getRolesUseCase.executePaginated(filters, filters.page || 1, filters.limit || 10);
+      return await this.getRolesUseCase.executePaginated(filters, filters.page, filters.limit);
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener los roles');
     }

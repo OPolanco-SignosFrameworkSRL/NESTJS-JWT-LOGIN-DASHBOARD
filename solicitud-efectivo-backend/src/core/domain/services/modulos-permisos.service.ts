@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException, Logger, BadRequestException } from '@nestjs/common';
 import { ModuloPermisoRepository } from '../../../infrastructure/repositories/modulo-permiso.repository';
+import { ModuloRepository } from '../../../infrastructure/repositories/modulo.repository';
+import { RolesPermisosRepository } from '../../../infrastructure/repositories/roles-permisos.repository';
 import { 
   IModuloPermiso, 
   IModuloPermisoCreateData, 
@@ -15,6 +17,8 @@ export class ModulosPermisosService {
 
   constructor(
     private readonly moduloPermisoRepository: ModuloPermisoRepository,
+    private readonly moduloRepository: ModuloRepository,
+    private readonly rolesPermisosRepository: RolesPermisosRepository,
   ) {}
 
   /**
@@ -112,6 +116,8 @@ export class ModulosPermisosService {
     }
   }
 
+
+
   /**
    * Actualiza un permiso de módulo
    */
@@ -122,23 +128,18 @@ export class ModulosPermisosService {
         throw new NotFoundException(`Permiso de módulo con ID ${id} no encontrado`);
       }
 
-      // Preparar datos para actualización (actualizar TODA la fila)
-      const finalIdModulo = updateData.idModulo ?? existingPermiso.IdModulo;
-      const finalVer = updateData.ver ?? Boolean(existingPermiso.Ver);
-      const finalAgregar = updateData.agregar ?? Boolean(existingPermiso.Agregar);
-      const finalEditar = updateData.editar ?? Boolean(existingPermiso.Editar);
-      const finalEliminar = updateData.eliminar ?? Boolean(existingPermiso.Eliminar);
-      const finalRowActive = updateData.rowActive ?? Boolean(existingPermiso.RowActive);
+      // Preparar datos para actualización
+      const updateFields: any = {};
+      
+      if (updateData.idModulo !== undefined) updateFields.IdModulo = updateData.idModulo;
+      if (updateData.ver !== undefined) updateFields.Ver = updateData.ver;
+      if (updateData.agregar !== undefined) updateFields.Agregar = updateData.agregar;
+      if (updateData.editar !== undefined) updateFields.Editar = updateData.editar;
+      if (updateData.eliminar !== undefined) updateFields.Eliminar = updateData.eliminar;
+      if (updateData.rowActive !== undefined) updateFields.RowActive = updateData.rowActive;
 
-      const updateFields: any = {
-        IdModulo: finalIdModulo,
-        Ver: finalVer,
-        Agregar: finalAgregar,
-        Editar: finalEditar,
-        Eliminar: finalEliminar,
-        RowActive: finalRowActive,
-        UserMod: userId,
-      };
+      // Agregar usuario que modificó
+      updateFields.UserMod = userId;
 
       const updatedPermiso = await this.moduloPermisoRepository.update(id, updateFields);
 
@@ -242,18 +243,15 @@ export class ModulosPermisosService {
 
       const result = await this.moduloPermisoRepository['dataSource'].query(query, [idRol]);
       
-      // Filtrar los resultados que tienen idModulo null
-      return result
-        .filter(row => row.IdModulo !== null)
-        .map(row => ({
-          modulo: row.Modulo,
-          idRol: row.IdRol,
-          idModulo: row.IdModulo,
-          ver: Boolean(row.Ver),
-          agregar: Boolean(row.Agregar),
-          editar: Boolean(row.Editar),
-          eliminar: Boolean(row.Eliminar)
-        }));
+      return result.map(row => ({
+        modulo: row.Modulo,
+        idRol: row.IdRol,
+        idModulo: row.IdModulo,
+        ver: Boolean(row.Ver),
+        agregar: Boolean(row.Agregar),
+        editar: Boolean(row.Editar),
+        eliminar: Boolean(row.Eliminar)
+      }));
     } catch (error) {
       this.logger.error(`Error obteniendo permisos por rol ${idRol}:`, error);
       throw error;
@@ -261,76 +259,51 @@ export class ModulosPermisosService {
   }
 
   /**
-   * Actualiza múltiples permisos por rol
+   * Crea un nuevo permiso de módulo por rol y módulo
    */
-  async bulkUpdateByRol(permisosData: any[], userId: number): Promise<any[]> {
+  async createByRolAndModule(createData: { idRol: number, Module_name: string, ver: boolean, agregar: boolean, editar: boolean, eliminar: boolean }, userId: number): Promise<IModuloPermisoResponse> {
     try {
-      const processedPermisos = [];
-
-      for (const permisoData of permisosData) {
-        try {
-          // Buscar si ya existe un permiso para este módulo y rol
-          const existingPermiso = await this.findByModuloAndRol(
-            permisoData.idModulo,
-            permisoData.idRol
-          );
-
-          if (existingPermiso) {
-            // Si existe, actualizar
-            const updated = await this.update(
-              existingPermiso.id,
-              {
-                idModulo: permisoData.idModulo,
-                ver: permisoData.ver,
-                agregar: permisoData.agregar,
-                editar: permisoData.editar,
-                eliminar: permisoData.eliminar,
-              },
-              userId,
-            );
-            processedPermisos.push(updated);
-          } else {
-            // Si no existe, crear nuevo
-            const created = await this.create(
-              {
-                idModulo: permisoData.idModulo,
-                ver: permisoData.ver,
-                agregar: permisoData.agregar,
-                editar: permisoData.editar,
-                eliminar: permisoData.eliminar,
-              },
-              userId,
-            );
-            processedPermisos.push(created);
-          }
-        } catch (error) {
-          this.logger.error(
-            `Error procesando permiso para módulo ${permisoData.idModulo} y rol ${permisoData.idRol}:`,
-            error,
-          );
-          // Continuar con los siguientes permisos
-        }
+      // 1. Encontrar o crear el módulo
+      const modulo = await this.moduloRepository.findOrCreate(createData.Module_name, userId);
+      
+      // 2. Verificar si ya existe un permiso para este módulo
+      let permiso = await this.moduloPermisoRepository.findByModulo(modulo.Id);
+      
+      // 3. Verificar si ya existe la relación rol-módulo
+      const existingRolPermiso = await this.rolesPermisosRepository.findByRolAndPermiso(createData.idRol, modulo.Id);
+      if (existingRolPermiso) {
+        throw new BadRequestException(`Ya existe un permiso para el rol ${createData.idRol} y módulo "${createData.Module_name}"`);
+      }
+      
+      if (!permiso) {
+        // 4. Crear el permiso si no existe
+        permiso = await this.moduloPermisoRepository.create({
+          IdModulo: modulo.Id,
+          Ver: createData.ver,
+          Agregar: createData.agregar,
+          Editar: createData.editar,
+          Eliminar: createData.eliminar,
+          UserAdd: userId
+        });
+      } else {
+        // 4b. Actualizar el permiso existente con los nuevos valores
+        permiso = await this.moduloPermisoRepository.update(permiso.Id, {
+          Ver: createData.ver,
+          Agregar: createData.agregar,
+          Editar: createData.editar,
+          Eliminar: createData.eliminar,
+          UserMod: userId
+        });
       }
 
-      return processedPermisos;
-    } catch (error) {
-      this.logger.error('Error en bulk update por rol:', error);
-      throw error;
-    }
-  }
+      // 5. Crear la relación en RolesPermisos
+      await this.rolesPermisosRepository.create(createData.idRol, modulo.Id, userId);
 
-  /**
-   * Busca un permiso por módulo y rol
-   */
-  async findByModuloAndRol(idModulo: number, idRol: number): Promise<any | null> {
-    try {
-      // Buscar en el repositorio por módulo y rol (si el repositorio soporta IdRol)
-      const permiso = await (this.moduloPermisoRepository as any).findByModuloAndRol(idModulo, idRol);
-      if (!permiso) return null;
+      this.logger.log(`Permiso de módulo creado exitosamente: ${permiso.Id} para módulo "${createData.Module_name}" y rol ${createData.idRol}`);
       return this.mapToModuloPermisoResponse(permiso);
     } catch (error) {
-      this.logger.error(`Error buscando permiso por módulo ${idModulo} y rol ${idRol}:`, error);
-      return null;
+      this.logger.error('Error creando permiso de módulo por rol:', error);
+      throw error;
     }
   }
 
@@ -351,5 +324,24 @@ export class ModulosPermisosService {
       userMod: permiso.UserMod,
       userDel: permiso.UserDel
     };
+  }
+
+  /**
+   * Actualiza múltiples permisos por rol
+   */
+  async bulkUpdateByRol(permisos: any[]): Promise<IModuloPermisoResponse[]> {
+    const resultados = [];
+    
+    for (const permiso of permisos) {
+      try {
+        const updated = await this.update(permiso.id || permiso.Id, permiso, 1); // userId por defecto
+        resultados.push(updated);
+      } catch (error) {
+        this.logger.error(`Error actualizando permiso ${permiso.id || permiso.Id}:`, error);
+        throw error;
+      }
+    }
+    
+    return resultados;
   }
 }

@@ -47,8 +47,8 @@ export class RoleRepository implements IRoleRepository {
 
   async findAllPaginated(
     filters?: IRoleFilters, 
-    page: number = 1, 
-    limit: number = 10
+    page?: number, 
+    limit?: number
   ): Promise<IRolePaginatedResponse> {
     const queryBuilder = this.roleRepository.createQueryBuilder('role');
 
