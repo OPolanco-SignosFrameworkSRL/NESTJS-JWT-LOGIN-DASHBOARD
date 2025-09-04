@@ -19,6 +19,13 @@ import { SolicitudTipoEntity } from '../infrastructure/database/entities/solicit
 import { StatusEntity } from '../infrastructure/database/entities/status.entity';
 import { DivisionEntity } from '../infrastructure/database/entities/division.entity';
 
+import { TipoPagoEntity } from '../infrastructure/database/entities/tipo-pago.entity';
+import { SolicitudDesembolsoWebTiposEntity } from '../infrastructure/database/entities/solicitud-desembolso-web-tipos.entity';
+import { GaDependenciasEntity } from '../infrastructure/database/entities/ga-dependencias.entity';
+import { PagoNoLiquidadoEntity } from '../infrastructure/database/entities/pago-no-liquidado.entity';
+import { PagoNoLiquidadoAdjuntoEntity } from '../infrastructure/database/entities/pago-no-liquidado-adjunto.entity';
+
+
 
 export const getDatabaseConfig = (
   configService: ConfigService,
@@ -48,6 +55,11 @@ export const getDatabaseConfig = (
     SolicitudTipoEntity,
     StatusEntity,
     DivisionEntity,
+    TipoPagoEntity,
+    SolicitudDesembolsoWebTiposEntity,
+    GaDependenciasEntity,
+    PagoNoLiquidadoEntity,
+    PagoNoLiquidadoAdjuntoEntity,
   ],
   synchronize: false, // Deshabilitado porque vappusuarios es una vista, no una tabla
   logging: configService.get<boolean>('DB_LOGGING', false),
