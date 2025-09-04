@@ -11,7 +11,11 @@ import { DesembolsoModule } from './presentation/modules/desembolso.module';
 import { AdminRequestModule } from './presentation/modules/admin-request.module';
 import { ModulosPermisosModule } from './presentation/modules/modulos-permisos.module';
 import { SolicitudEfectivoModule } from './presentation/modules/solicitud-efectivo.module';
+<<<<<<< HEAD
 import { StatusModule } from './presentation/modules/status.module';
+=======
+import { ResponsableModule } from './presentation/modules/responsable.module';
+>>>>>>> af3b239dded57f1212d8b450a49476bd73ea3822
 import { AppController } from './app.controller';
 import { getDatabaseConfig } from './config/database.config';
 import { appConfig, jwtConfig } from './config/app.config';
@@ -39,7 +43,11 @@ import { appConfig, jwtConfig } from './config/app.config';
     AdminRequestModule,
     ModulosPermisosModule,
     SolicitudEfectivoModule,
+<<<<<<< HEAD
     StatusModule,
+=======
+    ResponsableModule,
+>>>>>>> af3b239dded57f1212d8b450a49476bd73ea3822
   ],
   controllers: [AppController],
   providers: [],
