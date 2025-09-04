@@ -20,6 +20,7 @@ import { PagosNoLiquidadosModule } from './presentation/modules/pagos-no-liquida
 import { TipoPagoModule } from './presentation/modules/tipo-pago.module';
 import { SolicitudDesembolsoWebTiposModule } from './presentation/modules/solicitud-desembolso-web-tipos.module';
 import { GaDependenciasModule } from './presentation/modules/ga-dependencias.module';
+import { RecintosModule } from './presentation/modules/recintos.module';
 
 import { AppController } from './app.controller';
 import { getDatabaseConfig } from './config/database.config';
@@ -59,6 +60,7 @@ import { appConfig, jwtConfig } from './config/app.config';
     SolicitudDesembolsoWebTiposModule,
     GaDependenciasModule,
 
+    RecintosModule,
   ],
   controllers: [AppController],
   providers: [],
