@@ -1,37 +1,11 @@
-import { IsNumber, IsBoolean, IsOptional, IsArray, ValidateNested, IsString } from 'class-validator';
+import { IsNumber, IsBoolean, IsOptional, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateModuloPermisoSimpleDto {
-  @ApiProperty({ description: 'ID del rol', example: 1 })
+export class CreateModuloPermisoSimpleDto { @ApiProperty({ description: 'ID del rol', example: 1 }) @IsNumber() idRol: number; @ApiProperty({ description: 'Permiso de visualizaci髇', example: true }) @IsBoolean() ver: boolean; @ApiProperty({ description: 'Permiso de agregar', example: true }) @IsBoolean() agregar: boolean; @ApiProperty({ description: 'Permiso de editar', example: true }) @IsBoolean() editar: boolean; @ApiProperty({ description: 'Permiso de eliminar', example: true }) @IsBoolean() eliminar: boolean; } export class CreateModuloPermisoDto {
+  @ApiProperty({ description: 'ID del m贸dulo', example: 1 })
   @IsNumber()
-  idRol: number;
-
-  @ApiProperty({ description: 'Permiso de visualizaci贸n', example: true })
-  @IsBoolean()
-  ver: boolean;
-
-  @ApiProperty({ description: 'Permiso de agregar', example: true })
-  @IsBoolean()
-  agregar: boolean;
-
-  @ApiProperty({ description: 'Permiso de editar', example: true })
-  @IsBoolean()
-  editar: boolean;
-
-  @ApiProperty({ description: 'Permiso de eliminar', example: true })
-  @IsBoolean()
-  eliminar: boolean;
-}
-
-export class CreateModuloPermisoByRolDto {
-  @ApiProperty({ description: 'ID del rol', example: 1 })
-  @IsNumber()
-  idRol: number;
-
-  @ApiProperty({ description: 'Nombre del m贸dulo', example: 'wiristiki' })
-  @IsString()
-  Module_name: string;
+  idModulo: number;
 
   @ApiProperty({ description: 'Permiso de visualizaci贸n', example: true })
   @IsBoolean()
@@ -80,28 +54,6 @@ export class UpdateModuloPermisoDto {
   @IsOptional()
   @IsBoolean()
   rowActive?: boolean;
-}
-
-export class CreateModuloPermisoDto {
-  @ApiProperty({ description: 'ID del m贸dulo', example: 1 })
-  @IsNumber()
-  idModulo: number;
-
-  @ApiProperty({ description: 'Permiso de visualizaci贸n', example: true })
-  @IsBoolean()
-  ver: boolean;
-
-  @ApiProperty({ description: 'Permiso de agregar', example: true })
-  @IsBoolean()
-  agregar: boolean;
-
-  @ApiProperty({ description: 'Permiso de editar', example: true })
-  @IsBoolean()
-  editar: boolean;
-
-  @ApiProperty({ description: 'Permiso de eliminar', example: true })
-  @IsBoolean()
-  eliminar: boolean;
 }
 
 export class BulkCreateModuloPermisoDto {

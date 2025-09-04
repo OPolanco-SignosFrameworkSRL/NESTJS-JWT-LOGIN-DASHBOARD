@@ -14,6 +14,7 @@ import {
   UseGuards,
   UsePipes,
   ValidationPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -27,7 +28,7 @@ import {
 } from '@nestjs/swagger';
 import { ModulosPermisosService } from '../../core/domain/services/modulos-permisos.service';
 import {
-  CreateModuloPermisoDto,
+  CreateModuloPermisoDto, CreateModuloPermisoSimpleDto,
   UpdateModuloPermisoDto,
   BulkCreateModuloPermisoDto,
   BulkUpdateModuloPermisoDto,
@@ -55,6 +56,19 @@ export class ModulosPermisosController {
     summary: 'Crear un nuevo permiso de módulo',
     description: 'Crea un nuevo permiso para un módulo específico',
   })
+  @ApiBody({
+    description: 'Datos del permiso a crear',
+    schema: {
+      example: {
+        "idRol": 1,
+        "Module_name": "wiristiki",
+        "ver": true,
+        "agregar": true,
+        "editar": true,
+        "eliminar": true
+      }
+    }
+  })
   @ApiResponse({
     status: HttpStatus.CREATED,
     description: 'Permiso de módulo creado exitosamente',
@@ -79,10 +93,17 @@ export class ModulosPermisosController {
       const resultados = [];
       for (const item of data) {
         try {
-          const creado = await this.modulosPermisosService.create(item, currentUser.id);
+          let creado;
+          if (item.Module_name) {
+            // Nuevo formato con Module_name
+            creado = await this.modulosPermisosService.createByRolAndModule(item, currentUser.id);
+          } else {
+            // Formato original con idModulo
+            creado = await this.modulosPermisosService.create(item, currentUser.id);
+          }
           resultados.push(creado);
         } catch (error) {
-          this.logger.error(`Error creando permiso para módulo ${item?.idModulo}:`, error);
+          this.logger.error(`Error creando permiso:`, error);
         }
       }
       this.logger.log(`${resultados.length} permisos de módulo creados por usuario ${currentUser.id}`);
@@ -93,22 +114,25 @@ export class ModulosPermisosController {
     }
 
     // Si recibe un objeto, crear uno solo
-    const permiso = await this.modulosPermisosService.create(
-      data,
-      currentUser.id,
-    );
-
-    this.logger.log(
-      `Permiso de módulo creado por usuario ${currentUser.id}: ${permiso.id}`,
-    );
-
-    return {
-      message: 'Permiso de módulo creado exitosamente',
-      data: permiso,
-    };
+    try {
+      let created;
+      if (data.Module_name) {
+        // Nuevo formato con Module_name
+        created = await this.modulosPermisosService.createByRolAndModule(data, currentUser.id);
+      } else {
+        // Formato original con idModulo
+        created = await this.modulosPermisosService.create(data, currentUser.id);
+      }
+      
+      this.logger.log(`Permiso de módulo creado por usuario ${currentUser.id}`);
+      return created;
+    } catch (error) {
+      this.logger.error('Error en POST /api/modulos-permisos:', error);
+      throw new BadRequestException(error.message);
+    }
   }
 
-  @Post('bulk')
+ /*  @Post('bulk')
   @Roles(1) // Solo ADMINISTRADOR
   @ApiOperation({
     summary: 'Crear múltiples permisos de módulos',
@@ -146,7 +170,7 @@ export class ModulosPermisosController {
       message: `${permisos.length} permisos de módulos creados exitosamente`,
       data: permisos,
     };
-  }
+  } */
 
   @Get('by-rol/:idRol')
   @ApiOperation({
@@ -399,7 +423,6 @@ export class ModulosPermisosController {
 
     const processedPermisos = await this.modulosPermisosService.bulkUpdateByRol(
       permisosArray,
-      currentUser.id,
     );
 
     this.logger.log(

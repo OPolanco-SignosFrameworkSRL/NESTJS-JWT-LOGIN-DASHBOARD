@@ -88,7 +88,6 @@ export class UsersController {
   })
   @ApiQuery({ name: "division", required: false, type: String })
   @ApiQuery({ name: "search", required: false, type: String })
-  @ApiQuery({ name: "active", required: false, type: Boolean })
   @ApiQuery({ name: "page", required: false, type: Number, example: 1 })
   @ApiQuery({ name: "limit", required: false, type: Number, example: 10 })
   @ApiResponse({
@@ -109,6 +108,36 @@ export class UsersController {
   })
   async findAll(@Query() filters: UserFiltersDto) {
     return await this.usersService.findAll(filters);
+  }
+
+  @Get("active")
+  @Roles(1, 4) // Admin, Supervisor
+  @ApiOperation({ 
+    summary: 'Obtener solo usuarios activos',
+    description: 'Retorna una lista de usuarios activos en el sistema.' 
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de usuarios activos obtenida exitosamente'
+  })
+  async findActive(@Query() pagination: PaginationDto) {
+    // Filtrar directamente por usuarios activos sin el campo valido
+    return await this.usersService.findActiveUsers(pagination);
+  }
+
+  @Get("inactive")
+  @Roles(1, 4) // Admin, Supervisor
+  @ApiOperation({ 
+    summary: 'Obtener solo usuarios inactivos',
+    description: 'Retorna una lista de usuarios inactivos en el sistema.' 
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de usuarios inactivos obtenida exitosamente'
+  })
+  async findInactive(@Query() pagination: PaginationDto) {
+    // Filtrar directamente por usuarios inactivos sin el campo valido
+    return await this.usersService.findInactiveUsers(pagination);
   }
 
   // Nuevo endpoint específico
@@ -152,7 +181,7 @@ export class UsersController {
   // ❌ ENDPOINT DESHABILITADO - Estadísticas de usuarios
   /* 
     @Get('stats')
-    @Roles(UserRole.Admin, UserRole.Supervisor)
+    @Roles(1, 4) // Admin, Supervisor
     @ApiOperation({ summary: 'Obtener estadísticas de usuarios' })
     @ApiResponse({
       status: HttpStatus.OK,
@@ -408,7 +437,7 @@ export class UsersController {
   // ❌ ENDPOINT DESHABILITADO - Obtener lista de usuarios eliminados (soft delete)
   /*
     @Get('deleted/list')
-    @Roles(UserRole.Admin)
+    @Roles(1) // Admin
     @ApiOperation({ summary: 'Obtener lista de usuarios eliminados (soft delete)' })
     @ApiResponse({
       status: HttpStatus.OK,

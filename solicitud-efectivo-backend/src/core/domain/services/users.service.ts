@@ -81,6 +81,74 @@ export class UsersService {
     }
   }
 
+  async findActiveUsers(pagination?: PaginationDto): Promise<PaginatedResponseDto<IUserResponse>> {
+    try {
+      const { page = 1, limit = 10 } = pagination || {};
+      const skip = (page - 1) * limit;
+
+      const queryBuilder = this.userRepository
+        .createQueryBuilder("user")
+        .leftJoinAndSelect("user.roleEntity", "role")
+        .where("user.valido = :valido", { valido: true })
+        .skip(skip)
+        .take(limit);
+
+      const [users, total] = await queryBuilder.getManyAndCount();
+      const totalPages = Math.ceil(total / limit);
+
+      const mappedUsers = await Promise.all(
+        users.map((user) => this.mapToUserResponse(user, false))
+      );
+
+      return {
+        data: mappedUsers,
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      };
+    } catch (error) {
+      this.logger.error("Error obteniendo usuarios activos:", error);
+      throw error;
+    }
+  }
+
+  async findInactiveUsers(pagination?: PaginationDto): Promise<PaginatedResponseDto<IUserResponse>> {
+    try {
+      const { page = 1, limit = 10 } = pagination || {};
+      const skip = (page - 1) * limit;
+
+      const queryBuilder = this.userRepository
+        .createQueryBuilder("user")
+        .leftJoinAndSelect("user.roleEntity", "role")
+        .where("user.valido = :valido", { valido: false })
+        .skip(skip)
+        .take(limit);
+
+      const [users, total] = await queryBuilder.getManyAndCount();
+      const totalPages = Math.ceil(total / limit);
+
+      const mappedUsers = await Promise.all(
+        users.map((user) => this.mapToUserResponse(user, false))
+      );
+
+      return {
+        data: mappedUsers,
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNext: page < totalPages,
+        hasPrev: page > 1,
+      };
+    } catch (error) {
+      this.logger.error("Error obteniendo usuarios inactivos:", error);
+      throw error;
+    }
+  }
+
   // Nuevo método específico
   async findAllOnly(
     filters?: IUserFilters

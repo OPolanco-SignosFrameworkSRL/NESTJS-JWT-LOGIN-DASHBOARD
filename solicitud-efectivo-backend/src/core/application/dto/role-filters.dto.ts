@@ -21,19 +21,6 @@ export class RoleFiltersDto {
   @IsString()
   role_desc?: string;
 
-  @ApiProperty({
-    description: 'Filtrar por estado (activo/inactivo)',
-    example: true,
-    required: false,
-  })
-  @IsOptional()
-  @Transform(({ value }) => {
-    if (value === 'true') return true;
-    if (value === 'false') return false;
-    return value;
-  })
-  @IsBoolean()
-  valido?: boolean;
 
   @ApiProperty({
     description: 'Búsqueda general por nombre o descripción',
@@ -67,4 +54,14 @@ export class RoleFiltersDto {
   @IsNumber()
   @Min(1)
   limit?: number;
+
+  @ApiProperty({
+    description: 'Filtrar por StatusId específico',
+    example: 1,
+    required: false,
+  })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  statusId?: number;
 }
