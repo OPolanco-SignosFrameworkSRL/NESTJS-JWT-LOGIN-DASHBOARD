@@ -5,6 +5,7 @@ export enum RequestStatusAction {
   APPROVE = 'approve',    // Aprobar (estado 2)
   AUTHORIZE = 'authorize', // Autorizar (estado 3)
   REJECT = 'reject',      // Rechazar (estado 4)
+  VERIFY = 'verify',      // Verificar (estado 6)
 }
 
 export class UpdateRequestStatusDto {

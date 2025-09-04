@@ -7,7 +7,7 @@ import { UpdateRequestStatusDto, RequestStatusAction } from '../../core/applicat
 import { UpdateRequestStatusUseCase } from '../../core/application/use-cases/update-request-status.use-case';
 import { ResponseInterceptor } from '../interceptors/response.interceptor';
 
-@ApiTags('Admin - Gestión de Solicitudes')
+@ApiTags('Admin - Gestión de Solicitudes - X')
 @Controller('admin/requests')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @ApiBearerAuth()
@@ -62,11 +62,6 @@ export class AdminRequestController {
     try {
       const user = req.user;
       
-      // Debug: ver qué está llegando en req.user
-      console.log('🔍 Debug - req.user completo:', JSON.stringify(req.user, null, 2));
-      console.log('🔍 Debug - user.id:', user?.id);
-      console.log('🔍 Debug - user.role:', user?.role);
-
       const result = await this.updateRequestStatusUseCase.execute({
         requestId: updateStatusDto.requestId,
         action: updateStatusDto.action,
