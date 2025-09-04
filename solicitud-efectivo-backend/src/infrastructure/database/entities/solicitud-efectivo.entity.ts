@@ -1,5 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { IntegranteDesembolsoEntity } from './integrante-desembolso.entity';
+import { DesembolsoEntity } from './desembolso.entity';
+import { UserEntity } from './user.entity';
+import { SolicitudTipoEntity } from './solicitud-tipo.entity';
 
 @Entity('solicitud_efectivo')
 export class SolicitudEfectivoEntity {
@@ -36,6 +39,17 @@ export class SolicitudEfectivoEntity {
   @Column({ name: 'status_id' })
   statusId: number;
 
+  @ManyToOne(() => UserEntity, user => user.solicitudes)
+  @JoinColumn({ name: 'usuario_id' })
+  usuario: UserEntity;
+
+  @ManyToOne(() => SolicitudTipoEntity)
+  @JoinColumn({ name: 'tipo_solicitud_id' })
+  tipoSolicitud: SolicitudTipoEntity;
+
   @OneToMany(() => IntegranteDesembolsoEntity, integrante => integrante.solicitud)
   integrantes: IntegranteDesembolsoEntity[];
+
+  @OneToMany(() => DesembolsoEntity, desembolso => desembolso.solicitud)
+  desembolsos: DesembolsoEntity[];
 }
