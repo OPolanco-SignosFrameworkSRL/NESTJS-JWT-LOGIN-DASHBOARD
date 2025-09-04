@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsOptional, MaxLength, IsBoolean } from 'class-validator';
+import { IsString, IsOptional, MaxLength, IsNumber } from 'class-validator';
 
 export class UpdateRoleDto {
   @ApiProperty({
@@ -25,11 +25,11 @@ export class UpdateRoleDto {
   role_desc?: string;
 
   @ApiProperty({
-    description: 'Indica si el rol está activo',
-    example: true,
+    description: 'ID del status del rol (1=Activo, 2=Inactivo, etc.)',
+    example: 1,
     required: false,
   })
   @IsOptional()
-  @IsBoolean()
-  valido?: boolean;
+  @IsNumber()
+  statusId?: number;
 }

@@ -9,6 +9,8 @@ export class Role {
     public readonly role_name: string,
     public readonly role_desc: string,
     public readonly valido: boolean = true,
+    public readonly statusId?: number,
+    public readonly statusInfo?: { status: number; description: string }
   ) {}
 
   /**
