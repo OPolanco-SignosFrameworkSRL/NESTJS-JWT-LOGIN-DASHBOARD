@@ -297,10 +297,8 @@ export class RolesController {
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<RoleResponseDto> {
     try {
       const role = await this.getRoleByIdUseCase.execute(id);
-      console.log('Role obtenido:', JSON.stringify(role, null, 2));
       return this.mapToResponseDto(role);
     } catch (error) {
-      console.error('Error en findOne:', error);
       if (error.message.includes('no encontrado')) {
         throw new NotFoundException(error.message);
       }
@@ -449,7 +447,7 @@ export class RolesController {
     return {
       id: role.id,
       role_name: role.role_name,
-      role_desc: role.role_desc,
+      role_desc: role.role_desc || '',
       status: status,
     };
   }

@@ -22,14 +22,6 @@ export class RoleEntity {
   roleName: string;
 
   @ApiProperty({
-    description: 'Descripción del rol',
-    example: 'Usuario con permisos de administración completa',
-    maxLength: 255,
-  })
-  @Column({ name: 'RoleDesc', length: 255, nullable: true })
-  roleDesc?: string;
-
-  @ApiProperty({
     description: 'Indica si el rol está activo',
     example: true,
     default: true,

@@ -11,7 +11,7 @@ import {
   IRolePaginatedResponse, 
   IRoleStats 
 } from '../../core/domain/interfaces/role.interface';
-import { UserRole } from '../../core/domain/user.interface';
+
 
 @Injectable()
 export class RoleRepository implements IRoleRepository {
@@ -19,58 +19,73 @@ export class RoleRepository implements IRoleRepository {
     @InjectRepository(RoleEntity)
     private readonly roleRepository: Repository<RoleEntity>,
   ) {}
+  restore(id: number): Promise<boolean> {
+    throw new Error('Method not implemented.');
+  }
+  hardDelete(id: number): Promise<boolean> {
+    throw new Error('Method not implemented.');
+  }
+  existsByName(roleName: string, excludeId?: number): Promise<boolean> {
+    throw new Error('Method not implemented.');
+  }
+  findActiveRoles(): Promise<Role[]> {
+    throw new Error('Method not implemented.');
+  }
+  findInactiveRoles(): Promise<Role[]> {
+    throw new Error('Method not implemented.');
+  }
+  searchByText(searchText: string): Promise<Role[]> {
+    throw new Error('Method not implemented.');
+  }
+  count(filters?: IRoleFilters): Promise<number> {
+    throw new Error('Method not implemented.');
+  }
 
   async findAll(filters?: IRoleFilters): Promise<Role[]> {
     const queryBuilder = this.roleRepository.createQueryBuilder('role');
 
     if (filters?.role_name) {
-      queryBuilder.andWhere('role.roleName LIKE :role_name', { 
-        role_name: `%${filters.role_name}%` 
+      queryBuilder.andWhere('role.roleName LIKE :roleName', { 
+        roleName: `%${filters.role_name}%` 
       });
     }
 
-    // Nota: role_desc no existe en la entidad/tabla actual
-
-
     if (filters?.search) {
-      queryBuilder.andWhere('role.roleName LIKE :search', { search: `%${filters.search}%` });
+      queryBuilder.andWhere('(role.roleName LIKE :search)', {
+        search: `%${filters.search}%`
+      });
     }
 
-    if (filters?.statusId !== undefined) {
-      queryBuilder.andWhere('role.statusId = :statusId', { statusId: filters.statusId });
+    if (filters?.statusId) {
+      queryBuilder.andWhere('role.statusId = :statusId', { 
+        statusId: filters.statusId 
+      });
     }
-
-    queryBuilder.orderBy('role.id', 'DESC');
 
     const entities = await queryBuilder.getMany();
     return entities.map(this.mapToDomain);
   }
 
-  async findAllPaginated(
-    filters?: IRoleFilters, 
-    page?: number, 
-    limit?: number
-  ): Promise<IRolePaginatedResponse> {
+  async findAllPaginated(filters?: IRoleFilters, page?: number, limit?: number): Promise<IRolePaginatedResponse> {
     const queryBuilder = this.roleRepository.createQueryBuilder('role');
 
     if (filters?.role_name) {
-      queryBuilder.andWhere('role.roleName LIKE :role_name', { 
-        role_name: `%${filters.role_name}%` 
+      queryBuilder.andWhere('role.roleName LIKE :roleName', { 
+        roleName: `%${filters.role_name}%` 
       });
     }
 
-    // Nota: role_desc no existe en la entidad/tabla actual
-
-
     if (filters?.search) {
-      queryBuilder.andWhere('role.roleName LIKE :search', { search: `%${filters.search}%` });
+      queryBuilder.andWhere('(role.roleName LIKE :search)', {
+        search: `%${filters.search}%`
+      });
     }
 
-    if (filters?.statusId !== undefined) {
-      queryBuilder.andWhere('role.statusId = :statusId', { statusId: filters.statusId });
+    if (filters?.statusId) {
+      queryBuilder.andWhere('role.statusId = :statusId', { 
+        statusId: filters.statusId 
+      });
     }
-
-    queryBuilder.orderBy('role.id', 'DESC');
 
     // Si no se especifican límites, traer todos los datos
     if (page !== undefined && limit !== undefined) {
@@ -87,7 +102,9 @@ export class RoleRepository implements IRoleRepository {
         total,
         page: 1,
         limit: total,
-        totalPages: 1, hasNext: false, hasPrev: false,
+        totalPages: 1,
+        hasNext: false,
+        hasPrev: false,
       };
     }
 
@@ -98,7 +115,9 @@ export class RoleRepository implements IRoleRepository {
       total,
       page,
       limit,
-      totalPages, hasNext: page < totalPages, hasPrev: page > 1,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
     };
   }
 
@@ -131,9 +150,6 @@ export class RoleRepository implements IRoleRepository {
     if (roleData.role_name !== undefined) {
       updatePayload.roleName = roleData.role_name;
     }
-    if (roleData.role_desc !== undefined) {
-      updatePayload.roleDesc = roleData.role_desc;
-    }
     if (roleData.statusId !== undefined) {
       updatePayload.statusId = roleData.statusId;
     }
@@ -152,120 +168,65 @@ export class RoleRepository implements IRoleRepository {
     return updateResult.affected > 0;
   }
 
-  async restore(id: number): Promise<boolean> {
-    const updateResult = await this.roleRepository.update(id, { rowActive: true });
-    return updateResult.affected > 0;
-  }
-
-  async hardDelete(id: number): Promise<boolean> {
-    const deleteResult = await this.roleRepository.delete(id);
-    return deleteResult.affected > 0;
-  }
-
-  async existsByName(roleName: string, excludeId?: number): Promise<boolean> {
-    const queryBuilder = this.roleRepository.createQueryBuilder('role')
-      .where('role.roleName = :roleName', { roleName });
-
-    if (excludeId) {
-      queryBuilder.andWhere('role.id != :excludeId', { excludeId });
-    }
-
-    const count = await queryBuilder.getCount();
-    return count > 0;
-  }
-
-  async getStats(): Promise<IRoleStats> {
-    const totalRoles = await this.roleRepository.count();
-    const activeRoles = await this.roleRepository.count({ where: { rowActive: true } });
-    const inactiveRoles = totalRoles - activeRoles;
-
-    // Contar roles administrativos
-    const administrativeRoles = await this.roleRepository.count({ 
-      where: { 
-        roleName: ILike('%administrador%'),
-        rowActive: true 
-      } 
-    });
-
-    const operationalRoles = activeRoles - administrativeRoles;
-
-    return {
-      totalRoles,
-      activeRoles,
-      inactiveRoles,
-      administrativeRoles,
-      operationalRoles,
-    };
-  }
-
-  async findActiveRoles(): Promise<Role[]> {
-    const entities = await this.roleRepository.find({ 
+  async findActive(): Promise<Role[]> {
+    const entities = await this.roleRepository.find({
       where: { rowActive: true },
       order: { id: 'ASC' }
     });
     return entities.map(this.mapToDomain);
   }
 
-  async findInactiveRoles(): Promise<Role[]> {
-    const entities = await this.roleRepository.find({ 
+  async findInactive(): Promise<Role[]> {
+    const entities = await this.roleRepository.find({
       where: { rowActive: false },
       order: { id: 'ASC' }
     });
     return entities.map(this.mapToDomain);
   }
 
-  async searchByText(searchText: string): Promise<Role[]> {
+  async findByStatus(statusId: number): Promise<Role[]> {
     const entities = await this.roleRepository.find({
-      where: [
-        { roleName: ILike(`%${searchText}%`) }
-      ],
+      where: { statusId },
       order: { id: 'ASC' }
     });
     return entities.map(this.mapToDomain);
   }
 
-  async count(filters?: IRoleFilters): Promise<number> {
-    const queryBuilder = this.roleRepository.createQueryBuilder('role');
+  async getStats(): Promise<IRoleStats> {
+    const totalRoles = await this.roleRepository.count();
+    const activeRoles = await this.roleRepository.count({ 
+      where: { rowActive: true } 
+    });
+    const inactiveRoles = totalRoles - activeRoles;
 
-    if (filters?.role_name) {
-      queryBuilder.andWhere('role.roleName LIKE :role_name', { 
-        role_name: `%${filters.role_name}%` 
-      });
-    }
-
-    // Nota: role_desc no existe en la entidad/tabla actual
-
-
-    if (filters?.search) {
-      queryBuilder.andWhere('role.roleName LIKE :search', { search: `%${filters.search}%` });
-    }
-
-    return queryBuilder.getCount();
+    // Stats básicos sin lógica compleja
+    return {
+      totalRoles,
+      activeRoles,
+      inactiveRoles,
+      administrativeRoles: 0,
+      operationalRoles: 0,
+    };
   }
 
   /**
    * Mapea una entidad de infraestructura a una entidad de dominio
    */
   private mapToDomain(entity: RoleEntity): Role {
-    console.log('Entidad recibida en mapToDomain:', JSON.stringify(entity, null, 2));
-    
     const statusInfo = entity.status ? {
       status: entity.status.id,
       description: entity.status.description
     } : undefined;
 
-    console.log('StatusInfo:', statusInfo);
-
     const role = new Role(
       entity.id,
       entity.roleName,
-      entity.roleDesc || '',
+      '', // role_desc temporal hasta agregar columna en BD
       entity.rowActive,
       entity.statusId,
       statusInfo
     );
 
-    console.log('Role creado:', JSON.stringify(role, null, 2));
     return role;
   }
 }
