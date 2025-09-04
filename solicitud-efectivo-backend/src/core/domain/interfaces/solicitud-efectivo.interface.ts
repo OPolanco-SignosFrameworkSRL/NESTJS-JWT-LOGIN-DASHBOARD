@@ -7,6 +7,7 @@ export enum SolicitudEfectivoStatus {
   AUTORIZADO = 3,
   RECHAZADA = 4,
   DESEMBOLSADO = 5,
+  VERIFICADA = 6,
 }
 
 /**

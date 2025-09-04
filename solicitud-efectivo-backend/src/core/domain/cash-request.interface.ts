@@ -60,6 +60,7 @@ export interface ICashRequestStats {
   pendingRequests: number;
   approvedRequests: number;
   rejectedRequests: number;
+  verifiedRequests: number;
   totalAmount: number;
   requestsByStatus: Array<{ status: number; count: number }>;
   requestsByDivision: Array<{ division: number; count: number }>;
@@ -72,6 +73,7 @@ export enum CashRequestStatus {
   AUTORIZADO = 3,
   RECHAZADA = 4,
   DESEMBOLSADO = 5,
+  VERIFICADA = 6,
 }
 
 export enum CashRequestType {

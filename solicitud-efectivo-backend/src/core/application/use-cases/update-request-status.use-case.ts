@@ -78,9 +78,15 @@ export class UpdateRequestStatusUseCase {
           throw new BadRequestException('Solo se pueden aprobar solicitudes pendientes');
         }
         break;
+      
+      case RequestStatusAction.VERIFY:
+        if (currentStatus !== 2) { // Solo se puede verificar si está aprobada
+          throw new BadRequestException('Solo se pueden verificar solicitudes aprobadas');
+        }
+        break;
 
       case RequestStatusAction.AUTHORIZE:
-        if (currentStatus !== 2) { // Solo se puede autorizar si está aprobada
+        if (currentStatus !== 6) { // Solo se puede autorizar si está verificada
           throw new BadRequestException('Solo se pueden autorizar solicitudes aprobadas');
         }
         break;
@@ -105,6 +111,8 @@ export class UpdateRequestStatusUseCase {
         return 3; // AUTORIZADO
       case RequestStatusAction.REJECT:
         return 4; // RECHAZADA
+      case RequestStatusAction.VERIFY:
+        return 6; // VERIFICADA
       default:
         throw new BadRequestException('Acción no válida');
     }
@@ -120,6 +128,8 @@ export class UpdateRequestStatusUseCase {
         return 'AUTORIZADO';
       case 4:
         return 'RECHAZADA';
+      case 6:
+        return 'VERIFICADA';
       default:
         return 'DESCONOCIDO';
     }
