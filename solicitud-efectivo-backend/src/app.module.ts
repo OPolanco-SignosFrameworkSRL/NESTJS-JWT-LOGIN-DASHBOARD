@@ -14,6 +14,7 @@ import { SolicitudEfectivoModule } from './presentation/modules/solicitud-efecti
 import { StatusModule } from './presentation/modules/status.module';
 import { ResponsableModule } from './presentation/modules/responsable.module';
 import { DivisionModule } from './presentation/modules/division.module';
+import { PagosNoLiquidadosModule } from './presentation/modules/pagos-no-liquidados.module';
 import { AppController } from './app.controller';
 import { getDatabaseConfig } from './config/database.config';
 import { appConfig, jwtConfig } from './config/app.config';
@@ -43,8 +44,8 @@ import { appConfig, jwtConfig } from './config/app.config';
     SolicitudEfectivoModule,
     StatusModule,
     ResponsableModule,
-
     DivisionModule,
+    PagosNoLiquidadosModule,
 
   ],
   controllers: [AppController],
