@@ -17,6 +17,7 @@ import { DivisionModule } from './presentation/modules/division.module';
 import { TipoPagoModule } from './presentation/modules/tipo-pago.module';
 import { SolicitudDesembolsoWebTiposModule } from './presentation/modules/solicitud-desembolso-web-tipos.module';
 import { GaDependenciasModule } from './presentation/modules/ga-dependencias.module';
+import { RecintosModule } from './presentation/modules/recintos.module';
 import { AppController } from './app.controller';
 import { getDatabaseConfig } from './config/database.config';
 import { appConfig, jwtConfig } from './config/app.config';
@@ -50,6 +51,7 @@ import { appConfig, jwtConfig } from './config/app.config';
     TipoPagoModule,
     SolicitudDesembolsoWebTiposModule,
     GaDependenciasModule,
+    RecintosModule,
   ],
   controllers: [AppController],
   providers: [],
