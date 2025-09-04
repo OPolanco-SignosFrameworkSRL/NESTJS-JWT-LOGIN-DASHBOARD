@@ -297,8 +297,10 @@ export class RolesController {
   async findOne(@Param('id', ParseIntPipe) id: number): Promise<RoleResponseDto> {
     try {
       const role = await this.getRoleByIdUseCase.execute(id);
+      console.log('Role obtenido:', JSON.stringify(role, null, 2));
       return this.mapToResponseDto(role);
     } catch (error) {
+      console.error('Error en findOne:', error);
       if (error.message.includes('no encontrado')) {
         throw new NotFoundException(error.message);
       }
@@ -427,7 +429,7 @@ export class RolesController {
   })
   async restore(@Param('id', ParseIntPipe) id: number) {
     try {
-      await this.updateRoleUseCase.execute(id, { valido: true });
+      await this.updateRoleUseCase.execute(id, { statusId: 1 });
       return { message: 'Rol restaurado exitosamente' };
     } catch (error) {
       if (error.message.includes('no encontrado')) {
@@ -439,11 +441,16 @@ export class RolesController {
 
   // Mapear entity a response DTO
   private mapToResponseDto(role: any): RoleResponseDto {
+    const status = role.statusInfo ? [{
+      status: role.statusInfo.status,
+      description: role.statusInfo.description
+    }] : [];
+
     return {
       id: role.id,
       role_name: role.role_name,
       role_desc: role.role_desc,
-      valido: role.valido,
+      status: status,
     };
   }
 }

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { StatusResponseDto } from './status-response.dto';
 
 export class RoleResponseDto {
   @ApiProperty({
@@ -20,10 +21,16 @@ export class RoleResponseDto {
   role_desc: string;
 
   @ApiProperty({
-    description: 'Indica si el rol estÃ¡ activo',
-    example: true,
+    description: 'InformaciÃ³n del status asociado al rol',
+    type: [StatusResponseDto],
+    example: [
+      {
+        status: 1,
+        description: 'Activo'
+      }
+    ]
   })
-  valido: boolean;
+  status: StatusResponseDto[];
 }
 
 export class RolePaginatedResponseDto {
@@ -55,7 +62,7 @@ export class RolePaginatedResponseDto {
     description: 'Total de pÃ¡ginas',
     example: 5,
   })
-  totalPages: number; @ApiProperty({ description: 'Indica si hay página siguiente', example: true, }) hasNext: boolean; @ApiProperty({ description: 'Indica si hay página anterior', example: false, }) hasPrev: boolean;
+  totalPages: number; @ApiProperty({ description: 'Indica si hay pï¿½gina siguiente', example: true, }) hasNext: boolean; @ApiProperty({ description: 'Indica si hay pï¿½gina anterior', example: false, }) hasPrev: boolean;
 }
 
 export class RoleStatsDto {

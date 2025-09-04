@@ -27,7 +27,7 @@ export interface ICreateRoleData {
 export interface IUpdateRoleData {
   role_name?: string;
   role_desc?: string;
-  valido?: boolean;
+  statusId?: number;
 }
 
 /**

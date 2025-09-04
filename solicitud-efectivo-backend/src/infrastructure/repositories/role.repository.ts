@@ -103,7 +103,10 @@ export class RoleRepository implements IRoleRepository {
   }
 
   async findById(id: number): Promise<Role | null> {
-    const entity = await this.roleRepository.findOne({ where: { id } });
+    const entity = await this.roleRepository.findOne({ 
+      where: { id },
+      relations: ['status']
+    });
     return entity ? this.mapToDomain(entity) : null;
   }
 
@@ -128,8 +131,11 @@ export class RoleRepository implements IRoleRepository {
     if (roleData.role_name !== undefined) {
       updatePayload.roleName = roleData.role_name;
     }
-    if (roleData.valido !== undefined) {
-      updatePayload.rowActive = roleData.valido;
+    if (roleData.role_desc !== undefined) {
+      updatePayload.roleDesc = roleData.role_desc;
+    }
+    if (roleData.statusId !== undefined) {
+      updatePayload.statusId = roleData.statusId;
     }
 
     const updateResult = await this.roleRepository.update(id, updatePayload);
@@ -241,11 +247,25 @@ export class RoleRepository implements IRoleRepository {
    * Mapea una entidad de infraestructura a una entidad de dominio
    */
   private mapToDomain(entity: RoleEntity): Role {
-    return new Role(
+    console.log('Entidad recibida en mapToDomain:', JSON.stringify(entity, null, 2));
+    
+    const statusInfo = entity.status ? {
+      status: entity.status.id,
+      description: entity.status.description
+    } : undefined;
+
+    console.log('StatusInfo:', statusInfo);
+
+    const role = new Role(
       entity.id,
       entity.roleName,
-      '', // role_desc ya no existe en la BD
+      entity.roleDesc || '',
       entity.rowActive,
+      entity.statusId,
+      statusInfo
     );
+
+    console.log('Role creado:', JSON.stringify(role, null, 2));
+    return role;
   }
 }
