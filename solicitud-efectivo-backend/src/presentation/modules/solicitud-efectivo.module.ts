@@ -6,11 +6,13 @@ import { AdminSolicitudEfectivoController } from '../controllers/admin-solicitud
 import { SolicitudEfectivoService } from '../../core/domain/services/solicitud-efectivo.service';
 import { SolicitudEfectivoEntity } from '../../infrastructure/database/entities/solicitud-efectivo.entity';
 import { IntegranteDesembolsoEntity } from '../../infrastructure/database/entities/integrante-desembolso.entity';
+import { UserEntity } from '../../infrastructure/database/entities/user.entity';
+import { SolicitudTipoEntity } from '../../infrastructure/database/entities/solicitud-tipo.entity';
 import { UsersModule } from './users.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([SolicitudEfectivoEntity, IntegranteDesembolsoEntity]),
+    TypeOrmModule.forFeature([SolicitudEfectivoEntity, IntegranteDesembolsoEntity, UserEntity, SolicitudTipoEntity]),
     UsersModule, // Para usar UsersService
   ],
   controllers: [SolicitudEfectivoController, AdminSolicitudEfectivoController],

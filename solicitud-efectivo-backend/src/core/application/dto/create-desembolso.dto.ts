@@ -1,9 +1,15 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsString, IsOptional, IsPositive, Max, Min, IsNotEmpty } from 'class-validator';
+import { ApiProperty } from "@nestjs/swagger";
+import {
+  IsNumber,
+  IsString,
+  IsOptional,
+  IsPositive,
+  IsNotEmpty
+} from "class-validator";
 
 export class CreateDesembolsoDto {
   @ApiProperty({
-    description: 'ID de la solicitud autorizada',
+    description: "ID de la solicitud de efectivo",
     example: 5,
   })
   @IsNumber()
@@ -11,7 +17,7 @@ export class CreateDesembolsoDto {
   solicitud_id: number;
 
   @ApiProperty({
-    description: 'ID del responsable del desembolso',
+    description: "ID del responsable del desembolso",
     example: 30,
   })
   @IsNumber()
@@ -19,31 +25,7 @@ export class CreateDesembolsoDto {
   responsable_id: number;
 
   @ApiProperty({
-    description: 'Cédula de identidad del responsable',
-    example: '12345678',
-  })
-  @IsString()
-  @IsNotEmpty()
-  cedula_identidad: string;
-
-  @ApiProperty({
-    description: 'ID de la división',
-    example: 1,
-  })
-  @IsNumber()
-  @IsNotEmpty()
-  division_id: number;
-
-  @ApiProperty({
-    description: 'ID del método de pago',
-    example: 1,
-  })
-  @IsNumber()
-  @IsNotEmpty()
-  metodo_pago_id: number;
-
-  @ApiProperty({
-    description: 'Monto del desembolso (no puede exceder el monto solicitado)',
+    description: "Monto del desembolso",
     example: 3500,
   })
   @IsNumber()
@@ -52,17 +34,16 @@ export class CreateDesembolsoDto {
   monto_desembolso: number;
 
   @ApiProperty({
-    description: 'Número de cheque (si aplica)',
-    example: 'CHK-001',
-    required: false,
+    description: "Número de cheque",
+    example: "CHK-001",
   })
-  @IsOptional()
   @IsString()
-  numero_cheque?: string;
+  @IsNotEmpty()
+  cheque_num: string;
 
   @ApiProperty({
-    description: 'Referencia del desembolso',
-    example: 'REF-001',
+    description: "Referencia del desembolso",
+    example: "REF-001",
     required: false,
   })
   @IsOptional()
@@ -70,11 +51,11 @@ export class CreateDesembolsoDto {
   referencia?: string;
 
   @ApiProperty({
-    description: 'Observaciones del desembolso',
-    example: 'Desembolso por materiales de oficina',
+    description: "Observaciones del desembolso",
+    example: "Desembolso por materiales de oficina",
     required: false,
   })
   @IsOptional()
   @IsString()
-  observaciones?: string;
+  observacion?: string;
 }

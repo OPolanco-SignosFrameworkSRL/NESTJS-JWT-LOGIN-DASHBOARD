@@ -1,6 +1,7 @@
-import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Index, OneToMany } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
+import { SolicitudEfectivoEntity } from './solicitud-efectivo.entity';
 
 @Entity('Appusuarios')
 @Index(['cedula'], { unique: true })
@@ -95,7 +96,8 @@ export class UserEntity {
   @Column({ name: 'Valido', type: 'bit', default: () => '(1)' })
   valido: boolean;
 
-
+  @OneToMany(() => SolicitudEfectivoEntity, solicitud => solicitud.usuario)
+  solicitudes?: SolicitudEfectivoEntity[];
 
   getFullName(): string {
     return `${this.nombre} ${this.apellido}`.trim();

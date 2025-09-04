@@ -8,20 +8,30 @@ import {
     Param, 
     Req, 
     UseGuards,
-    ParseIntPipe 
+    ParseIntPipe,
+    Inject
   } from "@nestjs/common";
   import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from "@nestjs/swagger";
   import { SolicitudEfectivoService } from "@/core/domain/services/solicitud-efectivo.service";
   import { CreateSolicitudDto } from "@/core/application/dto/create-solicitud.dto";
+  import { SolicitudOnlyResponseDto } from "@/core/application/dto/solicitud-only-response.dto";
   import { JwtAuthGuard } from "../guards/jwt-auth.guard";
   import { RolesGuard } from "../guards/roles.guard";
+  import { Roles } from "../decorators/roles.decorator";
+  import { InjectRepository } from '@nestjs/typeorm';
+  import { Repository } from 'typeorm';
+  import { SolicitudEfectivoEntity } from '../../infrastructure/database/entities/solicitud-efectivo.entity';
 
 @ApiTags('Solicitudes')
 @ApiBearerAuth()
 @Controller('solicitud-efectivo')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class SolicitudEfectivoController {
-    constructor(private solicitudService: SolicitudEfectivoService) {}
+    constructor(
+      private solicitudService: SolicitudEfectivoService,
+      @InjectRepository(SolicitudEfectivoEntity)
+      private readonly solicitudRepository: Repository<SolicitudEfectivoEntity>,
+    ) {}
 
     @Post()
     @ApiOperation({ summary: 'Crear nueva solicitud de efectivo' })
@@ -35,6 +45,31 @@ export class SolicitudEfectivoController {
     @ApiResponse({ status: 200, description: 'Lista de solicitudes obtenida' })
     findAll(@Req() req: any) {
         return this.solicitudService.findAll(req.user);
+    }
+
+    @Get('only')
+    @Roles(1) // Admin
+    @ApiOperation({ summary: 'Obtener lista simple de solicitudes de efectivo' })
+    @ApiResponse({ 
+      status: 200, 
+      description: 'Lista de solicitudes obtenida exitosamente',
+      type: [SolicitudOnlyResponseDto]
+    })
+    async getOnly() {
+      // Usar las relaciones de TypeORM para obtener datos reales de la base de datos
+      const solicitudes = await this.solicitudRepository.find({
+        relations: ['usuario', 'tipoSolicitud'],
+        order: { id: 'DESC' }
+      });
+
+      return solicitudes.map(solicitud => ({
+        id: solicitud.id,
+        tipoSolicitud: solicitud.tipoSolicitud?.tipoDesc || 'Desconocido',
+        nombreUsuario: `${solicitud.usuario?.nombre} ${solicitud.usuario?.apellido}`.trim(),
+        cedula: solicitud.usuario?.cedula,
+        monto: solicitud.monto,
+        tipoPago: 'Efectivo'
+      }));
     }
 
     @Get(':id')

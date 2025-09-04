@@ -13,6 +13,8 @@ import { ModuloEntity } from '../infrastructure/database/entities/modulo.entity'
 import { ModuloPermisoEntity } from '../infrastructure/database/entities/modulo-permiso.entity';
 import { SolicitudEfectivoEntity } from '../infrastructure/database/entities/solicitud-efectivo.entity';
 import { IntegranteDesembolsoEntity } from '../infrastructure/database/entities/integrante-desembolso.entity';
+import { GaColaboradoresEntity } from '../infrastructure/database/entities/ga-colaboradores.entity';
+import { SolicitudTipoEntity } from '../infrastructure/database/entities/solicitud-tipo.entity';
 
 export const getDatabaseConfig = (
   configService: ConfigService,
@@ -37,6 +39,8 @@ export const getDatabaseConfig = (
     ModuloPermisoEntity,
     SolicitudEfectivoEntity,
     IntegranteDesembolsoEntity,
+    GaColaboradoresEntity,
+    SolicitudTipoEntity,
   ],
   synchronize: false, // Deshabilitado porque vappusuarios es una vista, no una tabla
   logging: configService.get<boolean>('DB_LOGGING', false),

@@ -19,7 +19,7 @@ export class DesembolsoController {
   ) {}
 
   @Post()
-  @Roles(1) // Admin
+/*   @Roles(1) // Admin */
   @ApiOperation({ summary: 'Crear un nuevo desembolso' })
   @ApiResponse({ 
     status: 201, 
@@ -70,7 +70,7 @@ export class DesembolsoController {
     return await this.desembolsoService.findById(id);
   }
 
-  @Get('solicitud/:solicitudId')
+/*   @Get('solicitud/:solicitudId')
   @Roles(1) // Admin
   @ApiOperation({ summary: 'Obtener desembolsos por solicitud' })
   @ApiParam({ name: 'solicitudId', description: 'ID de la solicitud', example: 5 })
@@ -86,5 +86,5 @@ export class DesembolsoController {
   @ApiResponse({ status: 200, description: 'Desembolsos del responsable obtenidos exitosamente' })
   async findByResponsable(@Param('responsableId') responsableId: number) {
     return await this.desembolsoService.findByResponsable(responsableId);
-  }
+  } */
 }

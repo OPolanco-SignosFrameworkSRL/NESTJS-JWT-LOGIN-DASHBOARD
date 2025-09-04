@@ -4,7 +4,7 @@ export interface IDesembolsoRepository {
   /**
    * Crea un nuevo desembolso
    */
-  create(createDesembolsoDto: CreateDesembolsoDto & { numero_desembolso: string; registrado_por_id: number; estado: string }): Promise<any>;
+  create(createDesembolsoDto: CreateDesembolsoDto & { numDesembolso: string }): Promise<any>;
 
   /**
    * Obtiene todos los desembolsos
@@ -42,4 +42,19 @@ export interface IDesembolsoRepository {
   delete(id: number): Promise<void>;
 
   findAllWithPagination(filters?: any & { skip?: number; take?: number }): Promise<[any[], number]>;
+
+  /**
+   * Obtiene una solicitud de efectivo por ID usando relaciones
+   */
+  findSolicitudById(solicitudId: number): Promise<any>;
+
+  /**
+   * Actualiza el estado de una solicitud de efectivo
+   */
+  updateSolicitudStatus(solicitudId: number, newStatus: number): Promise<void>;
+
+  /**
+   * Ejecuta una consulta SQL directa
+   */
+  query(sql: string, parameters?: any[]): Promise<any>;
 }
