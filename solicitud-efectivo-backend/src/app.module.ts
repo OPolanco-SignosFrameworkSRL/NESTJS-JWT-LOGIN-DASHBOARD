@@ -12,6 +12,7 @@ import { AdminRequestModule } from './presentation/modules/admin-request.module'
 import { ModulosPermisosModule } from './presentation/modules/modulos-permisos.module';
 import { SolicitudEfectivoModule } from './presentation/modules/solicitud-efectivo.module';
 import { ResponsableModule } from './presentation/modules/responsable.module';
+import { DivisionModule } from './presentation/modules/division.module';
 import { AppController } from './app.controller';
 import { getDatabaseConfig } from './config/database.config';
 import { appConfig, jwtConfig } from './config/app.config';
@@ -40,6 +41,7 @@ import { appConfig, jwtConfig } from './config/app.config';
     ModulosPermisosModule,
     SolicitudEfectivoModule,
     ResponsableModule,
+    DivisionModule,
   ],
   controllers: [AppController],
   providers: [],
