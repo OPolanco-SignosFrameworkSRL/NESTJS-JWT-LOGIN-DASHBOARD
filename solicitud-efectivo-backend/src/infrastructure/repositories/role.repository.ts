@@ -31,12 +31,13 @@ export class RoleRepository implements IRoleRepository {
 
     // Nota: role_desc no existe en la entidad/tabla actual
 
-    if (filters?.valido !== undefined) {
-      queryBuilder.andWhere('role.rowActive = :valido', { valido: filters.valido });
-    }
 
     if (filters?.search) {
       queryBuilder.andWhere('role.roleName LIKE :search', { search: `%${filters.search}%` });
+    }
+
+    if (filters?.statusId !== undefined) {
+      queryBuilder.andWhere('role.statusId = :statusId', { statusId: filters.statusId });
     }
 
     queryBuilder.orderBy('role.id', 'DESC');
@@ -60,12 +61,13 @@ export class RoleRepository implements IRoleRepository {
 
     // Nota: role_desc no existe en la entidad/tabla actual
 
-    if (filters?.valido !== undefined) {
-      queryBuilder.andWhere('role.rowActive = :valido', { valido: filters.valido });
-    }
 
     if (filters?.search) {
       queryBuilder.andWhere('role.roleName LIKE :search', { search: `%${filters.search}%` });
+    }
+
+    if (filters?.statusId !== undefined) {
+      queryBuilder.andWhere('role.statusId = :statusId', { statusId: filters.statusId });
     }
 
     queryBuilder.orderBy('role.id', 'DESC');
@@ -227,9 +229,6 @@ export class RoleRepository implements IRoleRepository {
 
     // Nota: role_desc no existe en la entidad/tabla actual
 
-    if (filters?.valido !== undefined) {
-      queryBuilder.andWhere('role.rowActive = :valido', { valido: filters.valido });
-    }
 
     if (filters?.search) {
       queryBuilder.andWhere('role.roleName LIKE :search', { search: `%${filters.search}%` });

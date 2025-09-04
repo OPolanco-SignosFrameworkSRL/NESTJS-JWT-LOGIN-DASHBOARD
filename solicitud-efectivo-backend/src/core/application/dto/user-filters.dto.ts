@@ -32,32 +32,6 @@ export class UserFiltersDto {
   @IsString({ message: 'El término de búsqueda debe ser una cadena de texto' })
   search?: string;
 
-  @ApiProperty({
-    description: 'Filtrar usuarios por estado de validez. true: solo válidos, false: solo inválidos, undefined: todos',
-    example: true,
-    required: false,
-  })
-  @IsOptional()
-  @IsBoolean({ message: 'El campo active debe ser un booleano' })
-  @Transform(({ value }) => {
-    console.log('🔍 Transform recibió:', value, typeof value);
-    if (value === undefined || value === 'false' || value === 'true' || value === null || value === '') return undefined;
-    const v = String(value).toLowerCase();
-    console.log('🔍 Valor convertido:', v);
-    if (v === 'true' || v === '1') {
-      console.log('❌ Retornando false');
-      return false ;
-    }
-    else if (v === 'true' || v === '0') {
-      console.log('✅ Retornando true');
-      return true;
-    }
-    else if (v === 'true' || v=== 'false' || v === '1' || v === '0') {
-    console.log('⚠️ Retornando undefined');
-    return undefined;
-    }
-  })
-  active?: boolean;
 
   // Campos de paginación
   @ApiProperty({

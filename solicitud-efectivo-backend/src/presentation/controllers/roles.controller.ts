@@ -138,18 +138,18 @@ export class RolesController {
     example: 'administración'
   })
   @ApiQuery({ 
-    name: 'valido', 
-    required: false, 
-    type: Boolean,
-    description: 'Filtrar por estado (activo/inactivo)',
-    example: true
-  })
-  @ApiQuery({ 
     name: 'search', 
     required: false, 
     type: String,
     description: 'Búsqueda general por nombre o descripción',
     example: 'admin'
+  })
+  @ApiQuery({ 
+    name: 'statusId', 
+    required: false, 
+    type: Number,
+    description: 'Filtrar por StatusId específico',
+    example: 1
   })
   @ApiResponse({ 
     status: 200, 
@@ -193,11 +193,75 @@ export class RolesController {
   })
   async findActive(): Promise<any> {
     try {
-      const filters: RoleFiltersDto = { valido: true };
-      const result = await this.getRolesUseCase.execute(filters);
+      // Usar directamente el repositorio para filtrar por rowActive
+      const result = await this.getRolesUseCase.executeActive();
       return result;
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener los roles activos');
+    }
+  }
+
+  @Get('inactive')
+  @Roles(1, 4) // Admin, Supervisor
+  @ApiOperation({ 
+    summary: 'Obtener solo roles inactivos',
+    description: 'Retorna una lista de roles inactivos en el sistema. Admin y Supervisor pueden acceder.' 
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de roles inactivos obtenida exitosamente',
+    type: [RoleResponseDto] 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'No autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acceso denegado - se requieren permisos de administrador o supervisor' 
+  })
+  async findInactive(): Promise<any> {
+    try {
+      // Usar directamente el repositorio para filtrar por rowActive
+      const result = await this.getRolesUseCase.executeInactive();
+      return result;
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener los roles inactivos');
+    }
+  }
+
+  @Get('by-status/:statusId')
+  @Roles(1, 4) // Admin, Supervisor
+  @ApiOperation({ 
+    summary: 'Obtener roles por StatusId específico',
+    description: 'Retorna una lista de roles filtrados por un StatusId específico. Admin y Supervisor pueden acceder.' 
+  })
+  @ApiParam({ 
+    name: 'statusId', 
+    type: Number, 
+    description: 'ID del status para filtrar roles',
+    example: 1 
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Lista de roles filtrada por status obtenida exitosamente',
+    type: [RoleResponseDto] 
+  })
+  @ApiResponse({ 
+    status: 401, 
+    description: 'No autorizado' 
+  })
+  @ApiResponse({ 
+    status: 403, 
+    description: 'Acceso denegado - se requieren permisos de administrador o supervisor' 
+  })
+  async findByStatus(@Param('statusId', ParseIntPipe) statusId: number): Promise<any> {
+    try {
+      const filters: RoleFiltersDto = { statusId };
+      const result = await this.getRolesUseCase.execute(filters);
+      return result;
+    } catch (error) {
+      throw new InternalServerErrorException('Error al obtener los roles por status');
     }
   }
 

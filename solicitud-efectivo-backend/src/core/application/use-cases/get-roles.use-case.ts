@@ -23,7 +23,11 @@ export class GetRolesUseCase {
     return this.rolesService.getRolesPaginated(filters, page, limit);
   }
 
-  async executeActiveRoles(): Promise<Role[]> {
+  async executeActive(): Promise<Role[]> {
     return this.rolesService.getActiveRoles();
+  }
+
+  async executeInactive(): Promise<Role[]> {
+    return this.rolesService.getInactiveRoles();
   }
 }

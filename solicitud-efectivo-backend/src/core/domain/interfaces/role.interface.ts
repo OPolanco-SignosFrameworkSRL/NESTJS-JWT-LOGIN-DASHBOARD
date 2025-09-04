@@ -6,10 +6,10 @@ import { Role } from '../entities/role.entity';
 export interface IRoleFilters {
   role_name?: string;
   role_desc?: string;
-  valido?: boolean;
   search?: string; // Búsqueda general por nombre o descripción
   page?: number;
   limit?: number;
+  statusId?: number;
 }
 
 /**

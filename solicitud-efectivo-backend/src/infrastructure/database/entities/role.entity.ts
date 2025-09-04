@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Index, ManyToOne, JoinColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
+import { StatusEntity } from './status.entity';
 
 @Entity('approles')
 @Index(['roleName'], { unique: true })
@@ -45,6 +46,18 @@ export class RoleEntity {
   })
   @Column({ name: 'User_Del', nullable: true })
   userDel: number;
+
+  @ApiProperty({
+    description: 'ID del status asociado al rol',
+    example: 1,
+  })
+  @Column({ name: 'StatusId', nullable: true })
+  statusId?: number;
+
+  // Relación con Status
+  @ManyToOne(() => StatusEntity, { eager: false })
+  @JoinColumn({ name: 'StatusId' })
+  status?: StatusEntity;
 
   /**
    * Verifica si el rol está activo
