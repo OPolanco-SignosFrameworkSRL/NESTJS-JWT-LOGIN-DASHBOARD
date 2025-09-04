@@ -14,6 +14,8 @@ import { SolicitudEfectivoModule } from './presentation/modules/solicitud-efecti
 import { StatusModule } from './presentation/modules/status.module';
 import { ResponsableModule } from './presentation/modules/responsable.module';
 import { DivisionModule } from './presentation/modules/division.module';
+import { TipoPagoModule } from './presentation/modules/tipo-pago.module';
+import { SolicitudDesembolsoWebTiposModule } from './presentation/modules/solicitud-desembolso-web-tipos.module';
 import { AppController } from './app.controller';
 import { getDatabaseConfig } from './config/database.config';
 import { appConfig, jwtConfig } from './config/app.config';
@@ -44,6 +46,8 @@ import { appConfig, jwtConfig } from './config/app.config';
     StatusModule,
     ResponsableModule,
     DivisionModule,
+    TipoPagoModule,
+    SolicitudDesembolsoWebTiposModule,
   ],
   controllers: [AppController],
   providers: [],
