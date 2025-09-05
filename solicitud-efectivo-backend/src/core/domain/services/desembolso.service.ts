@@ -3,7 +3,6 @@ import { IDesembolsoService } from '../desembolso.service.interface';
 import { IDesembolsoRepository } from '../repositories/desembolso.repository.interface';
 import { CreateDesembolsoDto } from '../../application/dto/create-desembolso.dto';
 import { PaginationDto, PaginatedResponseDto } from '../../application/dto/pagination.dto';
-import { DesembolsoFiltersDto } from '../../application/dto/desembolso-filters.dto';
 
 @Injectable()
 export class DesembolsoService implements IDesembolsoService {
@@ -20,18 +19,31 @@ export class DesembolsoService implements IDesembolsoService {
     throw new Error('Use CreateDesembolsoUseCase instead');
   }
 
-  async findAll(filters?: DesembolsoFiltersDto): Promise<PaginatedResponseDto<any>> {
-    const { page = 1, limit = 10, ...otherFilters } = filters || {};
-    const skip = (page - 1) * limit;
+  async findAll(pagination?: PaginationDto): Promise<PaginatedResponseDto<any>> {
+    const desembolsos = await this.desembolsoRepository.findAll();
 
-    const [desembolsos, total] = await this.desembolsoRepository.findAllWithPagination(
-      { ...otherFilters, skip, take: limit }
-    );
-    
+    // Si no se proporciona paginación, devolver todos los resultados en formato paginado
+    if (!pagination || (!pagination.page && !pagination.limit)) {
+      return {
+        data: desembolsos,
+        total: desembolsos.length,
+        page: 1,
+        limit: desembolsos.length,
+        totalPages: 1,
+        hasNext: false,
+        hasPrev: false
+      };
+    }
+
+    // Aplicar paginación
+    const { page = 1, limit = 10 } = pagination;
+    const skip = (page - 1) * limit;
+    const paginatedDesembolsos = desembolsos.slice(skip, skip + limit);
+    const total = desembolsos.length;
     const totalPages = Math.ceil(total / limit);
 
     return {
-      data: desembolsos,
+      data: paginatedDesembolsos,
       total,
       page,
       limit,

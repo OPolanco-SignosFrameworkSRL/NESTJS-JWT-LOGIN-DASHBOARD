@@ -7,14 +7,16 @@ import {
   Body, 
   Param, 
   UseGuards, 
-  ParseIntPipe 
+  ParseIntPipe,
+  Query
 } from '@nestjs/common';
 import { 
   ApiTags, 
   ApiOperation, 
   ApiResponse, 
   ApiBearerAuth, 
-  ApiParam 
+  ApiParam,
+  ApiQuery
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
@@ -23,6 +25,7 @@ import { DivisionService } from '../../core/domain/services/division.service';
 import { CreateDivisionDto } from '../../core/application/dto/create-division.dto';
 import { UpdateDivisionDto } from '../../core/application/dto/update-division.dto';
 import { DivisionResponseDto } from '../../core/application/dto/division-response.dto';
+import { PaginationDto, PaginatedResponseDto } from '../../core/application/dto/pagination.dto';
 
 @ApiTags('Divisiones')
 @Controller('divisiones')
@@ -49,14 +52,16 @@ export class DivisionController {
 
   @Get()
   @Roles(1) // Admin
-  @ApiOperation({ summary: 'Obtener todas las divisiones' })
+  @ApiOperation({ summary: 'Obtener todas las divisiones con paginación opcional' })
+  @ApiQuery({ name: 'page', required: false, description: 'Número de página', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, description: 'Elementos por página', example: 10 })
   @ApiResponse({
     status: 200,
     description: 'Lista de divisiones obtenida exitosamente',
     type: [DivisionResponseDto]
   })
-  async findAll(): Promise<DivisionResponseDto[]> {
-    return await this.divisionService.findAll();
+  async findAll(@Query() pagination: PaginationDto): Promise<DivisionResponseDto[] | PaginatedResponseDto<DivisionResponseDto>> {
+    return await this.divisionService.findAll(pagination);
   }
 
   @Get('dependencia/:dependenciaId')

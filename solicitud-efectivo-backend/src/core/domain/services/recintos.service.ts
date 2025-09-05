@@ -3,6 +3,7 @@ import { IRecintosRepository } from '../repositories/recintos.repository.interfa
 import { CreateRecintosDto } from '../../application/dto/create-recintos.dto';
 import { UpdateRecintosDto } from '../../application/dto/update-recintos.dto';
 import { RecintosResponseDto } from '../../application/dto/recintos-response.dto';
+import { PaginationDto, PaginatedResponseDto } from '../../application/dto/pagination.dto';
 
 @Injectable()
 export class RecintosService {
@@ -11,9 +12,31 @@ export class RecintosService {
     private readonly recintosRepository: IRecintosRepository,
   ) {}
 
-  async findAll(): Promise<RecintosResponseDto[]> {
+  async findAll(pagination?: PaginationDto): Promise<RecintosResponseDto[] | PaginatedResponseDto<RecintosResponseDto>> {
     const recintos = await this.recintosRepository.findAll();
-    return recintos.map(recinto => this.mapToResponseDto(recinto));
+    const mappedRecintos = recintos.map(recinto => this.mapToResponseDto(recinto));
+
+    // Si no se proporciona paginación, devolver todos los resultados
+    if (!pagination || (!pagination.page && !pagination.limit)) {
+      return mappedRecintos;
+    }
+
+    // Aplicar paginación
+    const { page = 1, limit = 10 } = pagination;
+    const skip = (page - 1) * limit;
+    const paginatedRecintos = mappedRecintos.slice(skip, skip + limit);
+    const total = mappedRecintos.length;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: paginatedRecintos,
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1
+    };
   }
 
   async findById(id: number): Promise<RecintosResponseDto> {

@@ -3,6 +3,7 @@ import { IDivisionRepository } from '../repositories/division.repository.interfa
 import { CreateDivisionDto } from '../../application/dto/create-division.dto';
 import { UpdateDivisionDto } from '../../application/dto/update-division.dto';
 import { DivisionResponseDto } from '../../application/dto/division-response.dto';
+import { PaginationDto, PaginatedResponseDto } from '../../application/dto/pagination.dto';
 
 @Injectable()
 export class DivisionService {
@@ -28,9 +29,31 @@ export class DivisionService {
     return this.mapToResponseDto(division);
   }
 
-  async findAll(): Promise<DivisionResponseDto[]> {
+  async findAll(pagination?: PaginationDto): Promise<DivisionResponseDto[] | PaginatedResponseDto<DivisionResponseDto>> {
     const divisions = await this.divisionRepository.findAll();
-    return divisions.map(division => this.mapToResponseDto(division));
+    const mappedDivisions = divisions.map(division => this.mapToResponseDto(division));
+
+    // Si no se proporciona paginación, devolver todos los resultados
+    if (!pagination || (!pagination.page && !pagination.limit)) {
+      return mappedDivisions;
+    }
+
+    // Aplicar paginación
+    const { page = 1, limit = 10 } = pagination;
+    const skip = (page - 1) * limit;
+    const paginatedDivisions = mappedDivisions.slice(skip, skip + limit);
+    const total = mappedDivisions.length;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: paginatedDivisions,
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1
+    };
   }
 
   async findById(id: number): Promise<DivisionResponseDto> {
