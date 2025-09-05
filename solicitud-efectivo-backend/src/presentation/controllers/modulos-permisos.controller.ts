@@ -189,13 +189,8 @@ export class ModulosPermisosController {
   })
   async getPermisosByRol(@Param('idRol', ParseIntPipe) idRol: number) {
     const permisos = await this.modulosPermisosService.getPermisosByRol(idRol);
-
-    this.logger.log(`Permisos obtenidos para rol ${idRol}: ${permisos.length} módulos`);
-
-    return {
-      message: `Permisos obtenidos para rol ${idRol}`,
-      data: permisos,
-    };
+    
+    return permisos;
   }
 
   @Get()

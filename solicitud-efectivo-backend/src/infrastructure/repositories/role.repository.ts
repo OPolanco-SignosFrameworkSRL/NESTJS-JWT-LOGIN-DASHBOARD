@@ -135,15 +135,24 @@ export class RoleRepository implements IRoleRepository {
     });
     return entity ? this.mapToDomain(entity) : null;
   }
-
   async create(roleData: ICreateRoleData): Promise<Role> {
     const entity = this.roleRepository.create({
       roleName: roleData.role_name,
       rowActive: roleData.valido ?? true,
+      statusId: roleData.statusId || 1,
     });
+  
     const savedEntity = await this.roleRepository.save(entity);
-    return this.mapToDomain(savedEntity);
+  
+    const entityWithStatus = await this.roleRepository.findOne({
+      where: { id: savedEntity.id }, // ojo: aquí probablemente es id, no statusId
+      relations: ['status'],
+    });
+  
+    return this.mapToDomain(entityWithStatus || savedEntity);
   }
+  
+  
 
   async update(id: number, roleData: IUpdateRoleData): Promise<Role | null> {
     const updatePayload: Partial<RoleEntity> = {};
