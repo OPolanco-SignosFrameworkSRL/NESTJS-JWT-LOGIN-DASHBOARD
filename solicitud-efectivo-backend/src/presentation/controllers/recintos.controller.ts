@@ -1,5 +1,5 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, ParseIntPipe } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards, ParseIntPipe, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
@@ -7,6 +7,7 @@ import { RecintosService } from '../../core/domain/services/recintos.service';
 import { CreateRecintosDto } from '../../core/application/dto/create-recintos.dto';
 import { UpdateRecintosDto } from '../../core/application/dto/update-recintos.dto';
 import { RecintosResponseDto } from '../../core/application/dto/recintos-response.dto';
+import { PaginationDto, PaginatedResponseDto } from '../../core/application/dto/pagination.dto';
 
 @ApiTags('Recintos')
 @Controller('recintos')
@@ -19,14 +20,16 @@ export class RecintosController {
 
   @Get()
   @Roles(1) // Admin
-  @ApiOperation({ summary: 'Obtener todos los recintos' })
+  @ApiOperation({ summary: 'Obtener todos los recintos con paginación opcional' })
+  @ApiQuery({ name: 'page', required: false, description: 'Número de página', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, description: 'Elementos por página', example: 10 })
   @ApiResponse({
     status: 200,
     description: 'Lista de recintos obtenida exitosamente',
     type: [RecintosResponseDto]
   })
-  async findAll(): Promise<RecintosResponseDto[]> {
-    return await this.recintosService.findAll();
+  async findAll(@Query() pagination: PaginationDto): Promise<RecintosResponseDto[] | PaginatedResponseDto<RecintosResponseDto>> {
+    return await this.recintosService.findAll(pagination);
   }
 
   @Get(':id')

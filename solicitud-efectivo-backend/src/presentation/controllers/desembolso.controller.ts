@@ -1,11 +1,12 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request, Inject } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { Controller, Post, Get, Body, Param, UseGuards, Request, Inject, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
 import { CreateDesembolsoDto } from '../../core/application/dto/create-desembolso.dto';
 import { CreateDesembolsoUseCase } from '../../core/application/use-cases/create-desembolso.use-case';
 import { IDesembolsoService } from '../../core/domain/services/desembolso.service.interface';
+import { PaginationDto, PaginatedResponseDto } from '../../core/application/dto/pagination.dto';
 
 @ApiTags('Desembolsos')
 @Controller('desembolsos')
@@ -54,10 +55,12 @@ export class DesembolsoController {
 
   @Get()
   @Roles(1) // Admin
-  @ApiOperation({ summary: 'Obtener todos los desembolsos' })
+  @ApiOperation({ summary: 'Obtener todos los desembolsos con paginación opcional' })
+  @ApiQuery({ name: 'page', required: false, description: 'Número de página', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, description: 'Elementos por página', example: 10 })
   @ApiResponse({ status: 200, description: 'Lista de desembolsos obtenida exitosamente' })
-  async findAll() {
-    return await this.desembolsoService.findAll();
+  async findAll(@Query() pagination: PaginationDto) {
+    return await this.desembolsoService.findAll(pagination);
   }
 
   @Get(':id')
