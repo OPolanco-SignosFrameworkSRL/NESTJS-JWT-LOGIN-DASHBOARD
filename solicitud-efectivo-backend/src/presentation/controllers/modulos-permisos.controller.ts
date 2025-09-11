@@ -29,12 +29,15 @@ import {
 import { ModulosPermisosService } from '../../core/domain/services/modulos-permisos.service';
 import {
   CreateModuloPermisoDto, CreateModuloPermisoSimpleDto,
+  CreateModuloPermisoByRolDto,
   UpdateModuloPermisoDto,
   BulkCreateModuloPermisoDto,
   BulkUpdateModuloPermisoDto,
   ModuloPermisoResponseDto,
   GetPermisosByRolDto,
   PermisoByRolResponseDto,
+  AddModuleToRoleDto,
+  BulkAddModulesToRoleDto,
 } from '../../core/application/dto/modulo-permiso.dto';
 import { Roles } from '../decorators/roles.decorator';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
@@ -94,16 +97,19 @@ export class ModulosPermisosController {
       for (const item of data) {
         try {
           let creado;
-          if (item.Module_name) {
+          if ('Module_name' in item && item.Module_name) {
             // Nuevo formato con Module_name
             creado = await this.modulosPermisosService.createByRolAndModule(item, currentUser.id);
-          } else {
+          } else if ('idModulo' in item && item.idModulo) {
             // Formato original con idModulo
             creado = await this.modulosPermisosService.create(item, currentUser.id);
+          } else {
+            throw new BadRequestException('Debe proporcionar Module_name o idModulo');
           }
           resultados.push(creado);
         } catch (error) {
           this.logger.error(`Error creando permiso:`, error);
+          throw new BadRequestException(`Error creando permiso: ${error.message}`);
         }
       }
       this.logger.log(`${resultados.length} permisos de módulo creados por usuario ${currentUser.id}`);
@@ -116,12 +122,14 @@ export class ModulosPermisosController {
     // Si recibe un objeto, crear uno solo
     try {
       let created;
-      if (data.Module_name) {
+      if ('Module_name' in data && data.Module_name) {
         // Nuevo formato con Module_name
         created = await this.modulosPermisosService.createByRolAndModule(data, currentUser.id);
-      } else {
+      } else if ('idModulo' in data && data.idModulo) {
         // Formato original con idModulo
         created = await this.modulosPermisosService.create(data, currentUser.id);
+      } else {
+        throw new BadRequestException('Debe proporcionar Module_name o idModulo');
       }
       
       this.logger.log(`Permiso de módulo creado por usuario ${currentUser.id}`);
@@ -496,4 +504,149 @@ export class ModulosPermisosController {
 
     return result;
   } */
+
+ /*  @ Post('add-module-to-role')
+  @Roles(1)
+  @ApiOperation({
+    summary: 'Añadir uno o varios módulos a un rol (body)',
+    description:
+      'Crea (si no existe) el permiso del módulo y vincula el permiso al rol indicado. Acepta un objeto único {idRol,idModulo,...} o {idRol, modulos:[{idModulo}], ...}',
+  })
+  @ApiBody({
+    description: 'Body con idRol y uno o varios idModulo (modulos)',
+    schema: {
+      oneOf: [
+        { $ref: getSchemaPath(AddModuleToRoleDto) },
+        { $ref: getSchemaPath(BulkAddModulesToRoleDto) }
+      ],
+      examples: {
+        unico: {
+          summary: 'Un solo módulo',
+          value: { idRol: 7, idModulo: 8, ver: true, agregar: true, editar: false, eliminar: false }
+        },
+        multiple: {
+          summary: 'Varios módulos',
+          value: { idRol: 7, modulos: [{ idModulo: 9 }, { idModulo: 8 }], ver: true, agregar: true, editar: false, eliminar: false }
+        }
+      }
+    }
+  })
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Módulo(s) añadido(s) al rol exitosamente' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Datos inválidos o ya asignado' })
+  async addModuleToRole(
+    @Body() body: any,
+    @Request() req,
+  ) {
+    const currentUser = req.user || { id: 1 };
+
+    if (!body?.idRol) {
+      throw new BadRequestException('Debe enviar idRol en el body');
+    }
+
+    // Modo múltiple { idRol, modulos: [{idModulo}], flags }
+    if (Array.isArray(body?.modulos)) {
+      const resultados: any[] = [];
+      for (const item of body.modulos) {
+        if (!item?.idModulo) continue;
+        try {
+          const permiso = await this.modulosPermisosService.addModuleToRole(
+            body.idRol,
+            item.idModulo,
+            currentUser.id,
+            { ver: body.ver, agregar: body.agregar, editar: body.editar, eliminar: body.eliminar },
+          );
+          resultados.push(permiso);
+        } catch (error) {
+          this.logger.error(`Error vinculando módulo ${item.idModulo} al rol ${body.idRol}:`, error);
+        }
+      }
+      return { message: `Se procesaron ${resultados.length} módulos para el rol ${body.idRol}`, data: resultados };
+    }
+
+    // Modo único { idRol, idModulo, flags }
+    if (!body?.idModulo) {
+      throw new BadRequestException('Debe enviar idModulo o modulos:[{idModulo}]');
+    }
+
+    const permiso = await this.modulosPermisosService.addModuleToRole(
+      body.idRol,
+      body.idModulo,
+      currentUser.id,
+      { ver: body.ver, agregar: body.agregar, editar: body.editar, eliminar: body.eliminar },
+    );
+    return { message: 'Módulo añadido al rol', data: permiso };
+  } 
+ */
+  @Post('bulk-add-modules-to-role')
+  @Roles(1)
+  @ApiOperation({
+    summary: 'Añadir múltiples módulos a un rol (body)',
+    description: 'Recibe idRol, modulos: [{idModulo}], y flags ver/agregar/editar/eliminar para aplicar a todos',
+  })
+  @ApiBody({
+    description: 'Body con flags y arreglos idRol: [{id}], idModulo: [{idModulo}]',
+    schema: {
+      $ref: getSchemaPath(BulkAddModulesToRoleDto),
+      example: {
+        ver: false,
+        agregar: false,
+        editar: false,
+        eliminar: false,
+        idRol: [{ id: 3 }, { id: 8 }],
+        idModulo: [{ idModulo: 4 }, { idModulo: 6 }],
+      }
+    }
+  }) 
+  @ApiResponse({ status: HttpStatus.CREATED, description: 'Módulos añadidos al rol' })
+  async bulkAddModulesToRole(
+    @Body() body: BulkAddModulesToRoleDto,
+    @Request() req,
+  ) {
+    const currentUser = req.user || { id: 1 };
+    if (!Array.isArray(body?.idRol) || body.idRol.length === 0 || !Array.isArray(body?.idModulo) || body.idModulo.length === 0) {
+      throw new BadRequestException('Debe enviar idRol:[{id}] e idModulo:[{idModulo}]');
+    }
+
+    const resultados = [] as any[];
+    const rolesDestino = body.idRol.map((r: any) => r.id).filter((v: any) => !!v);
+
+    for (const idRol of rolesDestino) {
+      for (const item of body.idModulo) {
+        if (!item?.idModulo) continue;
+        
+        // Validar que los IDs sean números válidos
+        const rolId = Number(idRol);
+        const moduloId = Number(item.idModulo);
+        
+        if (!Number.isInteger(rolId) || rolId <= 0) {
+          this.logger.error(`ID de rol inválido: ${idRol} (tipo: ${typeof idRol})`);
+          resultados.push({ idRol, idModulo: item.idModulo, status: 'error', message: 'ID de rol inválido' });
+          continue;
+        }
+        
+        if (!Number.isInteger(moduloId) || moduloId <= 0) {
+          this.logger.error(`ID de módulo inválido: ${item.idModulo} (tipo: ${typeof item.idModulo})`);
+          resultados.push({ idRol, idModulo: item.idModulo, status: 'error', message: 'ID de módulo inválido' });
+          continue;
+        }
+        
+        try {
+          const permiso = await this.modulosPermisosService.addModuleToRole(
+            rolId,
+            moduloId,
+            currentUser.id,
+            { ver: body.ver, agregar: body.agregar, editar: body.editar, eliminar: body.eliminar },
+          );
+          resultados.push({ idRol, ...permiso });
+        } catch (error) {
+          this.logger.error(`Error vinculando módulo ${item.idModulo} al rol ${idRol}:`, error);
+        }
+      }
+    }
+
+    return {
+      message: `Se procesaron ${resultados.length} asignaciones rol-módulo`,
+      data: resultados,
+    };
+  }
 }

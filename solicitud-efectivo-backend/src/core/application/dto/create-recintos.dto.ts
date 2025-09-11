@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, MaxLength, IsOptional, IsBoolean } from 'class-validator';
+import { IsString, IsNotEmpty, MaxLength, IsOptional, IsNumber, IsIn } from 'class-validator';
 
 export class CreateRecintosDto {
   @ApiProperty({
@@ -20,11 +20,12 @@ export class CreateRecintosDto {
   ubicacion: string;
 
   @ApiProperty({
-    description: 'Estado del recinto',
-    example: true,
+    description: 'Estado del recinto (0=Inactivo, 1=Activo)',
+    example: 1,
     required: false,
   })
   @IsOptional()
-  @IsBoolean()
-  estado?: boolean;
+  @IsNumber()
+  @IsIn([0, 1])
+  estado?: number;
 }

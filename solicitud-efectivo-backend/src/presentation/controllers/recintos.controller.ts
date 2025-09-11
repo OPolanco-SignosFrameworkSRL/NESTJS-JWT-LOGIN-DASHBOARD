@@ -6,7 +6,7 @@ import { Roles } from '../decorators/roles.decorator';
 import { RecintosService } from '../../core/domain/services/recintos.service';
 import { CreateRecintosDto } from '../../core/application/dto/create-recintos.dto';
 import { UpdateRecintosDto } from '../../core/application/dto/update-recintos.dto';
-import { RecintosResponseDto } from '../../core/application/dto/recintos-response.dto';
+import { RecintosResponseDto, RecintosListResponseDto } from '../../core/application/dto/recintos-response.dto';
 import { PaginationDto, PaginatedResponseDto } from '../../core/application/dto/pagination.dto';
 
 @ApiTags('Recintos')
@@ -26,9 +26,9 @@ export class RecintosController {
   @ApiResponse({
     status: 200,
     description: 'Lista de recintos obtenida exitosamente',
-    type: [RecintosResponseDto]
+    type: RecintosListResponseDto
   })
-  async findAll(@Query() pagination: PaginationDto): Promise<RecintosResponseDto[] | PaginatedResponseDto<RecintosResponseDto>> {
+  async findAll(@Query() pagination: PaginationDto): Promise<RecintosListResponseDto> {
     return await this.recintosService.findAll(pagination);
   }
 

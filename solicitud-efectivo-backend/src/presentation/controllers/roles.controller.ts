@@ -172,7 +172,7 @@ export class RolesController {
     }
   }
 
-  @Get('active')
+ /*  @Get('active')
   @Roles(1, 4) // Admin, Supervisor
   @ApiOperation({ 
     summary: 'Obtener solo roles activos',
@@ -228,7 +228,7 @@ export class RolesController {
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener los roles inactivos');
     }
-  }
+  } */
 
   @Get('by-status/:statusId')
   @Roles(1, 4) // Admin, Supervisor
@@ -397,7 +397,7 @@ export class RolesController {
     }
   }
 
-  @Put(':id/restore')
+ /*  @Put(':id/restore')
   @Roles(1) // Admin
   @ApiOperation({ 
     summary: 'Restaurar un rol eliminado',
@@ -436,7 +436,7 @@ export class RolesController {
       throw new InternalServerErrorException('Error al restaurar el rol');
     }
   }
-
+ */
   // Mapear entity a response DTO
   private mapToResponseDto(role: any): RoleResponseDto {
     const status = role.statusInfo ? [{

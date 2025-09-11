@@ -28,7 +28,7 @@ export class RecintosRepository implements IRecintosRepository {
   async create(createDto: CreateRecintosDto): Promise<RecintosEntity> {
     const recinto = this.recintosRepository.create({
       ...createDto,
-      estado: createDto.estado ?? true, // Default to true if not provided
+      estado: createDto.estado ?? 1, // Default to 1 (active) if not provided
     });
     return await this.recintosRepository.save(recinto);
   }

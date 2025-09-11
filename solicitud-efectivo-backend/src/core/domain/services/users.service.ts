@@ -805,6 +805,49 @@ export class UsersService {
   }
 
   /**
+   * Obtener usuarios por status específico
+   * @param statusId - 1 para activos, 2 para inactivos
+   */
+  async findByStatus(statusId: number): Promise<IUserResponse[]> {
+    this.logger.log(`Obteniendo usuarios por status: ${statusId}`);
+    
+    // Mapear statusId a valores booleanos
+    // 1 = Activos (valido = true)
+    // 2 = Inactivos (valido = false)
+    let validoValue: boolean;
+    let statusDescription: string;
+    
+    switch (statusId) {
+      case 1:
+        validoValue = true;
+        statusDescription = 'Activos';
+        break;
+      case 2:
+        validoValue = false;
+        statusDescription = 'Inactivos';
+        break;
+      default:
+        throw new BadRequestException(`StatusId inválido: ${statusId}. Use 1 para activos o 2 para inactivos`);
+    }
+
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .where('user.valido = :valido', { valido: validoValue })
+      .orderBy('user.nombre', 'ASC');
+
+    const users = await queryBuilder.getMany();
+    
+    this.logger.log(`Encontrados ${users.length} usuarios ${statusDescription.toLowerCase()}`);
+
+    // Mapear usuarios a respuesta completa
+    const userResponses = await Promise.all(
+      users.map(user => this.mapToUserResponse(user, false))
+    );
+
+    return userResponses;
+  }
+
+  /**
    * Mapea la entidad User a IUserResponse con estructura completa
    */
   private async mapToUserResponse(

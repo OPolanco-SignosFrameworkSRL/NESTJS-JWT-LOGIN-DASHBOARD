@@ -110,7 +110,78 @@ export class UsersController {
     return await this.usersService.findAll(filters);
   }
 
-  @Get("active")
+  @Get("by-status/:statusId")
+  @Roles(1, 4) // Admin y Supervisor pueden acceder
+  @ApiOperation({ 
+    summary: "Obtener usuarios por StatusId específico",
+    description: "Retorna una lista de usuarios filtrados por un StatusId específico. Admin y Supervisor pueden acceder."
+  })
+  @ApiParam({ 
+    name: "statusId", 
+    type: Number,
+    description: "ID del status para filtrar usuarios",
+    example: 1
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: "Lista de usuarios filtrada por status obtenida exitosamente",
+    schema: {
+      type: "object",
+      properties: {
+        data: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              id: { type: "number", example: 1 },
+              cedula: { type: "string", example: "40245980129" },
+              nombre: { type: "string", example: "Administrador" },
+              apellido: { type: "string", example: "Sistema" },
+              user_email: { type: "string", example: "admin@sistema.com" },
+              telefono: { type: "string", example: "8091234567" },
+              celular: { type: "string", example: "8091234567" },
+              direccion: { type: "string", example: "Oficina Central" },
+              valido: { type: "boolean", example: true },
+              status: {
+                type: "object",
+                properties: {
+                  id: { type: "number", example: 1 },
+                  description: { type: "string", example: "Activo" }
+                }
+              }
+            }
+          }
+        },
+        statusCode: { type: "number", example: 200 },
+        message: { type: "string", example: "Lista de usuarios filtrada por status obtenida exitosamente" },
+        timestamp: { type: "string", example: "2025-09-09T14:30:00.000Z" }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 401,
+    description: "No autorizado"
+  })
+  @ApiResponse({
+    status: 403,
+    description: "Acceso denegado - se requieren permisos de administrador o supervisor"
+  })
+  @ApiResponse({
+    status: 400,
+    description: "StatusId inválido"
+  })
+  async findByStatus(@Param("statusId", ParseIntPipe) statusId: number) {
+    const users = await this.usersService.findByStatus(statusId);
+    
+    return {
+      data: users,
+      statusCode: HttpStatus.OK,
+      message: "Lista de usuarios filtrada por status obtenida exitosamente",
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  /* @Get("active")
   @Roles(1, 4) // Admin, Supervisor
   @ApiOperation({ 
     summary: 'Obtener solo usuarios activos',
@@ -123,9 +194,9 @@ export class UsersController {
   async findActive(@Query() pagination: PaginationDto) {
     // Filtrar directamente por usuarios activos sin el campo valido
     return await this.usersService.findActiveUsers(pagination);
-  }
+  } */
 
-  @Get("inactive")
+  /* @Get("inactive")
   @Roles(1, 4) // Admin, Supervisor
   @ApiOperation({ 
     summary: 'Obtener solo usuarios inactivos',
@@ -138,10 +209,10 @@ export class UsersController {
   async findInactive(@Query() pagination: PaginationDto) {
     // Filtrar directamente por usuarios inactivos sin el campo valido
     return await this.usersService.findInactiveUsers(pagination);
-  }
+  } */
 
   // Nuevo endpoint específico
-  @Get("only")
+ /*  @Get("only")
   @ApiOperation({ summary: "Obtener usuarios con datos básicos" })
   @ApiQuery({ name: "search", required: false, type: String })
   @ApiQuery({ name: "active", required: false, type: Boolean })
@@ -176,7 +247,7 @@ export class UsersController {
   })
   async findAllOnly(@Query() filters: UserFiltersDto) {
     return await this.usersService.findAllOnly(filters);
-  }
+  } */
 
   // ❌ ENDPOINT DESHABILITADO - Estadísticas de usuarios
   /* 
@@ -296,7 +367,7 @@ export class UsersController {
     return await this.usersService.findByCedula(cedula);
   }
 
-  @Get(":id/preview-update")
+ /*  @Get(":id/preview-update")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({
     summary: "Vista previa de datos antes de actualizar",
@@ -316,7 +387,7 @@ export class UsersController {
       instrucciones:
         "Envía los campos que quieres cambiar al endpoint PUT /users/:id",
     };
-  }
+  } */
 
   @Put(":id")
   @UseGuards(JwtAuthGuard, RolesGuard)

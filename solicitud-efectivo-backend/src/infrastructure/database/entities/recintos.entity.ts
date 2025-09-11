@@ -25,9 +25,9 @@ export class RecintosEntity {
   ubicacion: string;
 
   @ApiProperty({
-    description: 'Estado del recinto',
-    example: true,
+    description: 'Estado del recinto (0=Inactivo, 1=Activo)',
+    example: 1,
   })
-  @Column({ type: 'bit', default: 1 })
-  estado: boolean;
+  @Column({ type: 'bit', default: 1, transformer: { to: (value: number) => value, from: (value: Buffer) => value ? 1 : 0 } })
+  estado: number;
 }
