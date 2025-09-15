@@ -62,6 +62,14 @@ export class CreateSolicitudDto {
   tipoSolicitudId: number;
 
   @ApiProperty({
+    description: 'ID del tipo de solicitud',
+    example: 2,
+    enum: [2, 3, 4, 5, 6, 7, 9]
+  })
+  @IsNumber()
+  tipoPagoId: number;
+
+  @ApiProperty({
     description: 'ID de la división',
     example: 1,
     enum: [1, 2, 3, 4]

@@ -40,6 +40,7 @@ export class SolicitudEfectivoService {
         usuarioId: currentUser.sub,
         monto: createDto.monto,
         tipoSolicitudId: createDto.tipoSolicitudId,
+        tipoPagoId: createDto.tipoPagoId,
         divisionId: createDto.divisionId,
         fechaOrden: new Date(createDto.fechaOrden),
         numeroOrden: createDto.numeroOrden,
@@ -115,6 +116,10 @@ export class SolicitudEfectivoService {
     // Validación básica sin enums
     if (![2, 3, 4, 5, 6, 7, 9].includes(createDto.tipoSolicitudId)) {
       throw new BadRequestException('Tipo de solicitud inválido. Valores permitidos: 2, 3, 4, 5, 6, 7, 9');
+    }
+
+    if (![1, 2, 3, 4, 5, 6, 7, 9].includes(createDto.tipoPagoId)) {
+      throw new BadRequestException('Tipo de pago inválido. Valores permitidos: 1, 2, 3, 4, 5, 6, 7, 9');
     }
 
     if (![1, 2, 3, 4].includes(createDto.divisionId)) {

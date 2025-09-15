@@ -18,6 +18,9 @@ export class SolicitudEfectivoEntity {
   @Column({ name: 'tipo_solicitud_id' })
   tipoSolicitudId: number;
 
+  @Column({ name: 'tipo_pago_id' })
+  tipoPagoId: number;
+
   @Column({ name: 'division_id' })
   divisionId: number;
 
