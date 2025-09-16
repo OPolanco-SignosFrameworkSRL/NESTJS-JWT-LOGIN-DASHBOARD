@@ -3,6 +3,8 @@ import { IntegranteDesembolsoEntity } from './integrante-desembolso.entity';
 import { DesembolsoEntity } from './desembolso.entity';
 import { UserEntity } from './user.entity';
 import { SolicitudTipoEntity } from './solicitud-tipo.entity';
+import { DivisionEntity } from './division.entity';
+import { TipoPagoEntity } from './tipo-pago.entity';
 
 @Entity('solicitud_efectivo')
 export class SolicitudEfectivoEntity {
@@ -49,6 +51,14 @@ export class SolicitudEfectivoEntity {
   @ManyToOne(() => SolicitudTipoEntity)
   @JoinColumn({ name: 'tipo_solicitud_id' })
   tipoSolicitud: SolicitudTipoEntity;
+
+  @ManyToOne(() => DivisionEntity)
+  @JoinColumn({ name: 'division_id' })
+  division: DivisionEntity;
+
+  @ManyToOne(() => TipoPagoEntity)
+  @JoinColumn({ name: 'tipo_pago_id' })
+  tipoPago: TipoPagoEntity;
 
   @OneToMany(() => IntegranteDesembolsoEntity, integrante => integrante.solicitud)
   integrantes: IntegranteDesembolsoEntity[];
