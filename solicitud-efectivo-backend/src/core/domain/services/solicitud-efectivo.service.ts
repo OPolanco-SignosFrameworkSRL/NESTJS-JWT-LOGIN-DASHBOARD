@@ -7,6 +7,9 @@ import { UsersService } from './users.service';
 import { IUserPayload } from '../interfaces/user.interface';
 import { CreateSolicitudDto } from '../../application/dto/create-solicitud.dto';
 import { SolicitudEfectivoStatus, SolicitudEfectivoType, Division } from '../interfaces/solicitud-efectivo.interface';
+import { SolicitudTipoEntity } from '../../../infrastructure/database/entities/solicitud-tipo.entity';
+import { TipoPagoEntity } from '../../../infrastructure/database/entities/tipo-pago.entity';
+import { DivisionEntity } from '../../../infrastructure/database/entities/division.entity';
 
 @Injectable()
 export class SolicitudEfectivoService {
@@ -32,7 +35,7 @@ export class SolicitudEfectivoService {
     }
 
     // 💸 Validar reglas de negocio
-    this.validateBusinessRules(createDto);
+    await this.validateBusinessRules(createDto);
 
     try {
       // 🧪 Crear solicitud con estado inicial fijo "pendiente"
@@ -92,7 +95,7 @@ export class SolicitudEfectivoService {
   }
 
     // 💸 Validar reglas de negocio
-  private validateBusinessRules(createDto: CreateSolicitudDto) {
+  private async validateBusinessRules(createDto: CreateSolicitudDto): Promise<void> {
     if (createDto.monto <= 0) {
       throw new BadRequestException('El monto debe ser mayor a 0');
     }
@@ -113,17 +116,29 @@ export class SolicitudEfectivoService {
       throw new BadRequestException('Debe incluir al menos un integrante');
     }
 
-    // Validación básica sin enums
-    if (![2, 3, 4, 5, 6, 7, 9].includes(createDto.tipoSolicitudId)) {
-      throw new BadRequestException('Tipo de solicitud inválido. Valores permitidos: 2, 3, 4, 5, 6, 7, 9');
+    // Validar contra BD (sin hardcode)
+    const tipoSolicitudRepo = this.dataSource.getRepository(SolicitudTipoEntity);
+    const existeTipoSolicitud = await tipoSolicitudRepo.exist({
+      where: { id: createDto.tipoSolicitudId, produccionFlag: false },
+    });
+    if (!existeTipoSolicitud) {
+      throw new BadRequestException('Tipo de solicitud inválido');
     }
 
-    if (![1, 2, 3, 4, 5, 6, 7, 9].includes(createDto.tipoPagoId)) {
-      throw new BadRequestException('Tipo de pago inválido. Valores permitidos: 1, 2, 3, 4, 5, 6, 7, 9');
+    const tipoPagoRepo = this.dataSource.getRepository(TipoPagoEntity);
+    const existeTipoPago = await tipoPagoRepo.exist({
+      where: { pago_tipo: createDto.tipoPagoId },
+    });
+    if (!existeTipoPago) {
+      throw new BadRequestException('Tipo de pago inválido');
     }
 
-    if (![1, 2, 3, 4].includes(createDto.divisionId)) {
-      throw new BadRequestException('División inválida. Valores permitidos: 1, 2, 3, 4');
+    const divisionRepo = this.dataSource.getRepository(DivisionEntity);
+    const existeDivision = await divisionRepo.exist({
+      where: { id: createDto.divisionId, estado: true },
+    });
+    if (!existeDivision) {
+      throw new BadRequestException('División inválida');
     }
   }
 
@@ -176,7 +191,7 @@ export class SolicitudEfectivoService {
       throw new UnauthorizedException('No tienes permisos para actualizar esta solicitud');
     }
 
-    this.validateBusinessRules(updateDto);
+    await this.validateBusinessRules(updateDto);
 
     const updatedSolicitud = await this.solicitudRepository.save({
       ...solicitud,
