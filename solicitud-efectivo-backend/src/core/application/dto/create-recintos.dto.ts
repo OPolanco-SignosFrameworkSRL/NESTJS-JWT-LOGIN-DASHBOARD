@@ -20,12 +20,12 @@ export class CreateRecintosDto {
   ubicacion: string;
 
   @ApiProperty({
-    description: 'Estado del recinto (0=Inactivo, 1=Activo)',
+    description: 'Estado del recinto (1=Válido, 2=Inválido)',
     example: 1,
     required: false,
   })
   @IsOptional()
   @IsNumber()
-  @IsIn([0, 1])
+  @IsIn([1, 2])
   estado?: number;
 }

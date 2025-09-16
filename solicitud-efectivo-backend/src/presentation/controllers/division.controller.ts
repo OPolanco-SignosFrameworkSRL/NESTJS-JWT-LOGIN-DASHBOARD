@@ -112,16 +112,20 @@ export class DivisionController {
 
   @Delete(':id')
   @Roles(1) // Admin
-  @ApiOperation({ summary: 'Eliminar una división' })
+  @ApiOperation({ 
+    summary: 'Eliminar una división (soft delete)', 
+    description: 'Marca la división como inactiva (estado = false) en lugar de eliminarla permanentemente' 
+  })
   @ApiParam({ name: 'id', description: 'ID de la división', example: 1 })
   @ApiResponse({
     status: 200,
-    description: 'División eliminada exitosamente'
+    description: 'División marcada como eliminada exitosamente'
   })
   @ApiResponse({ status: 404, description: 'División no encontrada' })
+  @ApiResponse({ status: 409, description: 'La división ya está marcada como eliminada' })
   @ApiResponse({ status: 403, description: 'No tiene permisos para eliminar divisiones' })
   async delete(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
     await this.divisionService.delete(id);
-    return { message: 'División eliminada exitosamente' };
+    return { message: 'División marcada como eliminada exitosamente' };
   }
 }

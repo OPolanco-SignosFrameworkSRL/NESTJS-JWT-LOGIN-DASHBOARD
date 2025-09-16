@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsNumber, IsOptional, MaxLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsOptional, MaxLength, IsIn } from 'class-validator';
 
 export class CreateDivisionDto {
   @ApiProperty({
@@ -20,10 +20,12 @@ export class CreateDivisionDto {
   dependencia_id: number;
 
   @ApiProperty({
-    description: 'Estado de la división',
-    example: true,
+    description: 'Estado de la división (1=Activa, 2=Inactiva)',
+    example: 1,
     required: false,
   })
   @IsOptional()
-  estado?: boolean;
+  @IsNumber()
+  @IsIn([1, 2])
+  estado?: number;
 }

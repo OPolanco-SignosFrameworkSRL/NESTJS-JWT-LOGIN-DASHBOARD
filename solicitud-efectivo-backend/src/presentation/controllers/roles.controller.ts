@@ -14,6 +14,7 @@ import {
   BadRequestException,
   NotFoundException,
   InternalServerErrorException,
+  ConflictException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -390,10 +391,20 @@ export class RolesController {
       await this.deleteRoleUseCase.execute(id);
       return { message: 'Rol eliminado exitosamente' };
     } catch (error) {
+      console.error('Error detallado al eliminar rol:', error);
+      
       if (error.message.includes('no encontrado')) {
         throw new NotFoundException(error.message);
       }
-      throw new InternalServerErrorException('Error al eliminar el rol');
+      if (error.message.includes('crítico')) {
+        throw new ConflictException(error.message);
+      }
+      if (error.message.includes('ya está desactivado')) {
+        throw new ConflictException(error.message);
+      }
+      
+      // Mostrar el error específico para debug
+      throw new InternalServerErrorException(`Error al eliminar el rol: ${error.message}`);
     }
   }
 

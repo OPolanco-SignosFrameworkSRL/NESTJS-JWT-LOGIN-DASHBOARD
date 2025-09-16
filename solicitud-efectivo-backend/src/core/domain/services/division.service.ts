@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { IDivisionRepository } from '../repositories/division.repository.interface';
 import { CreateDivisionDto } from '../../application/dto/create-division.dto';
 import { UpdateDivisionDto } from '../../application/dto/update-division.dto';
@@ -95,6 +95,11 @@ export class DivisionService {
       throw new NotFoundException(`División con ID ${id} no encontrada`);
     }
 
+    // Verificar si ya está inactiva
+    if (!existingDivision.estado) {
+      throw new ConflictException(`La división "${existingDivision.nombre}" ya está marcada como eliminada`);
+    }
+
     await this.divisionRepository.delete(id);
   }
 
@@ -103,7 +108,7 @@ export class DivisionService {
       id: division.id,
       nombre: division.nombre,
       dependencia_id: division.dependenciaId,
-      estado: division.estado,
+      estado: division.estado ? 1 : 2, // true → 1 (activa), false → 2 (inactiva)
     };
   }
 }

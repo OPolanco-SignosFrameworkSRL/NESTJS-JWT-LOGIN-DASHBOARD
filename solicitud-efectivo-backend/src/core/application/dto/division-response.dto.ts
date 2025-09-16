@@ -20,8 +20,8 @@ export class DivisionResponseDto {
   dependencia_id: number;
 
   @ApiProperty({
-    description: 'Estado de la división',
-    example: true,
+    description: 'Estado de la división (1=Activa, 2=Inactiva)',
+    example: 1,
   })
-  estado: boolean;
+  estado: number;
 }

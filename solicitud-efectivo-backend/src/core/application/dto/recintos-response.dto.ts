@@ -20,7 +20,7 @@ export class RecintosResponseDto {
   ubicacion: string;
 
   @ApiProperty({
-    description: 'ID del status (0=Inactivo, 1=Activo)',
+    description: 'ID del status (1=Válido, 2=Inválido)',
     example: 1,
   })
   statusId: number;

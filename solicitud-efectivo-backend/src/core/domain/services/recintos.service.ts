@@ -81,6 +81,11 @@ export class RecintosService {
       throw new NotFoundException(`Recinto con ID ${id} no encontrado`);
     }
 
+    // Verificar si ya está inactivo
+    if (existingRecinto.estado === 2) {
+      throw new ConflictException(`El recinto "${existingRecinto.recinto}" ya está marcado como eliminado`);
+    }
+
     await this.recintosRepository.delete(id);
   }
 
@@ -89,8 +94,8 @@ export class RecintosService {
       id: recinto.id,
       recinto: recinto.recinto,
       ubicacion: recinto.ubicacion,
-      statusId: recinto.estado, // Mapear estado a statusId
-      valido: recinto.estado === 1, // Convertir estado numérico a boolean para valido
+      statusId: recinto.estado, // 1 o 2 directamente desde BD
+      valido: recinto.estado === 1, // true si 1 (válido), false si 2 (inválido)
     };
   }
 }

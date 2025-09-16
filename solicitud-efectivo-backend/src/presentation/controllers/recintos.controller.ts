@@ -79,15 +79,19 @@ export class RecintosController {
 
   @Delete(':id')
   @Roles(1) // Admin
-  @ApiOperation({ summary: 'Eliminar un recinto' })
+  @ApiOperation({ 
+    summary: 'Eliminar un recinto (soft delete)', 
+    description: 'Marca el recinto como inactivo (estado = 2) en lugar de eliminarlo permanentemente' 
+  })
   @ApiParam({ name: 'id', description: 'ID del recinto', example: 1 })
   @ApiResponse({
     status: 200,
-    description: 'Recinto eliminado exitosamente'
+    description: 'Recinto marcado como eliminado exitosamente'
   })
   @ApiResponse({ status: 404, description: 'Recinto no encontrado' })
+  @ApiResponse({ status: 409, description: 'El recinto ya está marcado como eliminado' })
   async delete(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
     await this.recintosService.delete(id);
-    return { message: 'Recinto eliminado exitosamente' };
+    return { message: 'Recinto marcado como eliminado exitosamente' };
   }
 }
