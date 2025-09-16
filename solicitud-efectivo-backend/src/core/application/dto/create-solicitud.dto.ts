@@ -56,15 +56,15 @@ export class CreateSolicitudDto {
   @ApiProperty({
     description: 'ID del tipo de solicitud',
     example: 2,
-    enum: [2, 3, 4, 5, 6, 7, 9]
+    // Los valores válidos provienen de la base de datos
   })
   @IsNumber()
   tipoSolicitudId: number;
 
   @ApiProperty({
-    description: 'ID del tipo de solicitud',
+    description: 'ID del tipo de pago',
     example: 2,
-    enum: [2, 3, 4, 5, 6, 7, 9]
+    // Los valores válidos provienen de la base de datos
   })
   @IsNumber()
   tipoPagoId: number;
@@ -72,7 +72,7 @@ export class CreateSolicitudDto {
   @ApiProperty({
     description: 'ID de la división',
     example: 1,
-    enum: [1, 2, 3, 4]
+    // Los valores válidos provienen de la base de datos
   })
   @IsNumber()
   divisionId: number;
