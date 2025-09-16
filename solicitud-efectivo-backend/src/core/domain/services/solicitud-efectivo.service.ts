@@ -10,6 +10,7 @@ import { SolicitudEfectivoStatus, SolicitudEfectivoType, Division } from '../int
 import { SolicitudTipoEntity } from '../../../infrastructure/database/entities/solicitud-tipo.entity';
 import { TipoPagoEntity } from '../../../infrastructure/database/entities/tipo-pago.entity';
 import { DivisionEntity } from '../../../infrastructure/database/entities/division.entity';
+import { PaginationDto } from '../../application/dto/pagination.dto';
 
 @Injectable()
 export class SolicitudEfectivoService {
@@ -142,7 +143,7 @@ export class SolicitudEfectivoService {
     }
   }
 
-  async findAll(currentUser: IUserPayload) {
+  async findAll(currentUser: IUserPayload, pagination?: PaginationDto) {
     const user = await this.usersService.findOne(currentUser.sub);
     const authorizedRoles = ['Admin', 'Administrator'];
     const isAdmin = authorizedRoles.includes(currentUser.role);
@@ -152,11 +153,28 @@ export class SolicitudEfectivoService {
       whereCondition = { usuarioId: currentUser.sub };
     }
 
-    return await this.solicitudRepository.find({
+    const page = pagination?.page ?? 1;
+    const limit = pagination?.limit ?? 10;
+    const skip = (page - 1) * limit;
+
+    const [data, total] = await this.solicitudRepository.findAndCount({
       where: whereCondition,
       relations: ['integrantes'],
-      order: { fechaOrden: 'DESC' }
+      order: { fechaOrden: 'DESC' },
+      skip,
+      take: limit,
     });
+
+    const totalPages = Math.ceil(total / limit) || 1;
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
+    };
   }
 
   async findOne(id: number, currentUser: IUserPayload) {
