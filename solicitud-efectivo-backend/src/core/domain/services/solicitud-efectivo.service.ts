@@ -166,8 +166,44 @@ export class SolicitudEfectivoService {
     });
 
     const totalPages = Math.ceil(total / limit) || 1;
+
+    const sanitizedData = data.map(item => ({
+      id: item.id,
+      usuarioId: item.usuarioId,
+      monto: item.monto,
+      tipoSolicitudId: Number(item.tipoSolicitudId),
+      tipoPagoId: Number(item.tipoPagoId),
+      divisionId: Number(item.divisionId),
+      fechaOrden: item.fechaOrden,
+      numeroOrden: item.numeroOrden,
+      nombreCliente: item.nombreCliente,
+      numeroTicket: item.numeroTicket,
+      concepto: item.concepto,
+      statusId: item.statusId,
+      integrantes: item.integrantes,
+      tipoSolicitud: item.tipoSolicitud
+        ? {
+            id: item.tipoSolicitud.id,
+            tipoDesc: item.tipoSolicitud.tipoDesc,
+          }
+        : null,
+      division: item.division
+        ? {
+            id: item.division.id,
+            nombre: item.division.nombre,
+            dependenciaId: item.division.dependenciaId,
+          }
+        : null,
+      tipoPago: item.tipoPago
+        ? {
+            pago_tipo: Number(item.tipoPago.pago_tipo),
+            tipo_desc: item.tipoPago.tipo_desc,
+          }
+        : null,
+    }));
+
     return {
-      data,
+      data: sanitizedData,
       total,
       page,
       limit,
