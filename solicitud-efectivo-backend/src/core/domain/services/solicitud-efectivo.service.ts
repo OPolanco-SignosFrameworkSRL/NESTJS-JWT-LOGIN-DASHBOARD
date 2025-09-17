@@ -211,7 +211,7 @@ export class SolicitudEfectivoService {
       status: item.status
         ? {
             id: item.status.id,
-            description: item.status.description,
+            descripcion: (item.status as any).descripcion,
           }
         : null,
     }));
