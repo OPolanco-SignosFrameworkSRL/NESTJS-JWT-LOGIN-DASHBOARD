@@ -25,7 +25,8 @@ import { DivisionService } from '../../core/domain/services/division.service';
 import { CreateDivisionDto } from '../../core/application/dto/create-division.dto';
 import { UpdateDivisionDto } from '../../core/application/dto/update-division.dto';
 import { DivisionResponseDto } from '../../core/application/dto/division-response.dto';
-import { PaginationDto, PaginatedResponseDto } from '../../core/application/dto/pagination.dto';
+import { PaginatedResponseDto } from '../../core/application/dto/pagination.dto';
+import { DivisionQueryDto } from '../../core/application/dto/division-query.dto';
 
 @ApiTags('Divisiones')
 @Controller('divisiones')
@@ -53,15 +54,15 @@ export class DivisionController {
   @Get()
   @Roles(1) // Admin
   @ApiOperation({ summary: 'Obtener todas las divisiones con paginación y filtro de estado' })
-  @ApiQuery({ name: 'page', required: false, description: 'Número de página', example: 1 })
-  @ApiQuery({ name: 'limit', required: false, description: 'Elementos por página', example: 10 })
+  @ApiQuery({ name: 'page', required: false, description: 'Número de página', example: 1, type: Number })
+  @ApiQuery({ name: 'limit', required: false, description: 'Elementos por página', example: 10, type: Number })
   @ApiQuery({ name: 'estado', required: false, description: 'Filtro de estado: a=activas, i=inactivas', example: 'a', enum: ['a','i'] })
   @ApiResponse({
     status: 200,
     description: 'Lista de divisiones obtenida exitosamente',
     type: [DivisionResponseDto]
   })
-  async findAll(@Query() query: PaginationDto & { estado?: 'a' | 'i' }): Promise<DivisionResponseDto[] | PaginatedResponseDto<DivisionResponseDto>> {
+  async findAll(@Query() query: DivisionQueryDto): Promise<DivisionResponseDto[] | PaginatedResponseDto<DivisionResponseDto>> {
     return await this.divisionService.findAll(query);
   }
 
