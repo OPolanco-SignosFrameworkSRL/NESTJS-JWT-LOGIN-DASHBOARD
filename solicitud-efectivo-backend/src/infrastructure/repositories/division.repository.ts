@@ -28,6 +28,13 @@ export class DivisionRepository implements IDivisionRepository {
     });
   }
 
+  async findAllByEstado(estadoActivo: boolean): Promise<any[]> {
+    return await this.divisionRepository.find({
+      where: { estado: estadoActivo as any },
+      order: { nombre: 'ASC' }
+    });
+  }
+
   async findById(id: number): Promise<any> {
     return await this.divisionRepository.findOne({
       where: { id }

@@ -52,16 +52,17 @@ export class DivisionController {
 
   @Get()
   @Roles(1) // Admin
-  @ApiOperation({ summary: 'Obtener todas las divisiones con paginación opcional' })
+  @ApiOperation({ summary: 'Obtener todas las divisiones con paginación y filtro de estado' })
   @ApiQuery({ name: 'page', required: false, description: 'Número de página', example: 1 })
   @ApiQuery({ name: 'limit', required: false, description: 'Elementos por página', example: 10 })
+  @ApiQuery({ name: 'estado', required: false, description: 'Filtro de estado: a=activas, i=inactivas', example: 'a', enum: ['a','i'] })
   @ApiResponse({
     status: 200,
     description: 'Lista de divisiones obtenida exitosamente',
     type: [DivisionResponseDto]
   })
-  async findAll(@Query() pagination: PaginationDto): Promise<DivisionResponseDto[] | PaginatedResponseDto<DivisionResponseDto>> {
-    return await this.divisionService.findAll(pagination);
+  async findAll(@Query() query: PaginationDto & { estado?: 'a' | 'i' }): Promise<DivisionResponseDto[] | PaginatedResponseDto<DivisionResponseDto>> {
+    return await this.divisionService.findAll(query);
   }
 
   @Get('dependencia/:dependenciaId')
