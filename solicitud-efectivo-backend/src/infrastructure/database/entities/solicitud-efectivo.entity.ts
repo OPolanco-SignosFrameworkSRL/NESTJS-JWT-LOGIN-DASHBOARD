@@ -5,6 +5,7 @@ import { UserEntity } from './user.entity';
 import { SolicitudTipoEntity } from './solicitud-tipo.entity';
 import { DivisionEntity } from './division.entity';
 import { TipoPagoEntity } from './tipo-pago.entity';
+import { StatusEntity } from './status.entity';
 
 @Entity('solicitud_efectivo')
 export class SolicitudEfectivoEntity {
@@ -59,6 +60,10 @@ export class SolicitudEfectivoEntity {
   @ManyToOne(() => TipoPagoEntity)
   @JoinColumn({ name: 'tipo_pago_id' })
   tipoPago: TipoPagoEntity;
+
+  @ManyToOne(() => StatusEntity)
+  @JoinColumn({ name: 'status_id' })
+  status: StatusEntity;
 
   @OneToMany(() => IntegranteDesembolsoEntity, integrante => integrante.solicitud)
   integrantes: IntegranteDesembolsoEntity[];
