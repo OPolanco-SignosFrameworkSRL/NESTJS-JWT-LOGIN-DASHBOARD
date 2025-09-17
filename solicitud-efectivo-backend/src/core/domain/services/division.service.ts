@@ -3,7 +3,8 @@ import { IDivisionRepository } from '../repositories/division.repository.interfa
 import { CreateDivisionDto } from '../../application/dto/create-division.dto';
 import { UpdateDivisionDto } from '../../application/dto/update-division.dto';
 import { DivisionResponseDto } from '../../application/dto/division-response.dto';
-import { PaginationDto, PaginatedResponseDto } from '../../application/dto/pagination.dto';
+import { PaginatedResponseDto } from '../../application/dto/pagination.dto';
+import { DivisionQueryDto } from '../../application/dto/division-query.dto';
 
 @Injectable()
 export class DivisionService {
@@ -29,7 +30,7 @@ export class DivisionService {
     return this.mapToResponseDto(division);
   }
 
-  async findAll(pagination?: PaginationDto & { estado?: 'a' | 'i' }): Promise<DivisionResponseDto[] | PaginatedResponseDto<DivisionResponseDto>> {
+  async findAll(pagination?: DivisionQueryDto): Promise<DivisionResponseDto[] | PaginatedResponseDto<DivisionResponseDto>> {
     let divisions: any[];
     if (pagination?.estado === 'a') {
       divisions = await this.divisionRepository.findAllByEstado(true);
