@@ -13,6 +13,11 @@ export interface IDivisionRepository {
   findAll(): Promise<any[]>;
 
   /**
+   * Obtiene todas las divisiones filtradas por estado (true=activas, false=inactivas)
+   */
+  findAllByEstado(estadoActivo: boolean): Promise<any[]>;
+
+  /**
    * Obtiene una división por ID
    */
   findById(id: number): Promise<any>;

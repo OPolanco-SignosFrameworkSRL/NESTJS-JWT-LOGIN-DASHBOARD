@@ -119,15 +119,20 @@ export class SolicitudEfectivoService {
 
     // Validar contra BD (sin hardcode)
     const tipoSolicitudRepo = this.dataSource.getRepository(SolicitudTipoEntity);
-    const existeTipoSolicitud = await tipoSolicitudRepo.exist({
-      where: { id: createDto.tipoSolicitudId, produccionFlag: false },
+    const tipoSolicitud = await tipoSolicitudRepo.findOne({
+      where: { id: createDto.tipoSolicitudId },
     });
-    if (!existeTipoSolicitud) {
+    if (!tipoSolicitud) {
+      throw new BadRequestException('Tipo de solicitud inválido');
+    }
+    // Rechazar si produccion_flag = 1 (true)
+    const produccionFlag = (tipoSolicitud as any).produccionFlag;
+    if (produccionFlag === true || Number(produccionFlag) === 1) {
       throw new BadRequestException('Tipo de solicitud inválido');
     }
 
     const tipoPagoRepo = this.dataSource.getRepository(TipoPagoEntity);
-    const existeTipoPago = await tipoPagoRepo.exist({
+    const existeTipoPago = await tipoPagoRepo.exists({
       where: { pago_tipo: createDto.tipoPagoId },
     });
     if (!existeTipoPago) {
@@ -135,10 +140,13 @@ export class SolicitudEfectivoService {
     }
 
     const divisionRepo = this.dataSource.getRepository(DivisionEntity);
-    const existeDivision = await divisionRepo.exist({
-      where: { id: createDto.divisionId, estado: true },
-    });
-    if (!existeDivision) {
+    const division = await divisionRepo.findOne({ where: { id: createDto.divisionId } });
+    if (!division) {
+      throw new BadRequestException('División inválida');
+    }
+    // Rechazar si estado = 0 (false)
+    const divisionEstado = (division as any).estado;
+    if (!(divisionEstado === true || Number(divisionEstado) === 1)) {
       throw new BadRequestException('División inválida');
     }
   }

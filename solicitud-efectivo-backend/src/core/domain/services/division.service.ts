@@ -29,8 +29,15 @@ export class DivisionService {
     return this.mapToResponseDto(division);
   }
 
-  async findAll(pagination?: PaginationDto): Promise<DivisionResponseDto[] | PaginatedResponseDto<DivisionResponseDto>> {
-    const divisions = await this.divisionRepository.findAll();
+  async findAll(pagination?: PaginationDto & { estado?: 'a' | 'i' }): Promise<DivisionResponseDto[] | PaginatedResponseDto<DivisionResponseDto>> {
+    let divisions: any[];
+    if (pagination?.estado === 'a') {
+      divisions = await this.divisionRepository.findAllByEstado(true);
+    } else if (pagination?.estado === 'i') {
+      divisions = await this.divisionRepository.findAllByEstado(false);
+    } else {
+      divisions = await this.divisionRepository.findAll();
+    }
     const mappedDivisions = divisions.map(division => this.mapToResponseDto(division));
 
     // Si no se proporciona paginación, devolver todos los resultados
