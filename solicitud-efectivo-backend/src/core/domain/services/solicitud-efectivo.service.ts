@@ -167,7 +167,7 @@ export class SolicitudEfectivoService {
 
     const [data, total] = await this.solicitudRepository.findAndCount({
       where: whereCondition,
-      relations: ['integrantes', 'tipoSolicitud', 'division', 'tipoPago'],
+      relations: ['integrantes', 'tipoSolicitud', 'division', 'tipoPago', 'status'],
       order: { fechaOrden: 'DESC' },
       skip,
       take: limit,
@@ -206,6 +206,12 @@ export class SolicitudEfectivoService {
         ? {
             pago_tipo: Number(item.tipoPago.pago_tipo),
             tipo_desc: item.tipoPago.tipo_desc,
+          }
+        : null,
+      status: item.status
+        ? {
+            id: item.status.id,
+            description: item.status.description,
           }
         : null,
     }));
