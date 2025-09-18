@@ -18,6 +18,7 @@ import { GaColaboradoresEntity } from '../infrastructure/database/entities/ga-co
 import { SolicitudTipoEntity } from '../infrastructure/database/entities/solicitud-tipo.entity';
 import { StatusEntity } from '../infrastructure/database/entities/status.entity';
 import { DivisionEntity } from '../infrastructure/database/entities/division.entity';
+import { SolicitudDesembolsoWebStatusEntity } from '../infrastructure/database/entities/solicitud-desembolso-web-status.entity';
 
 import { TipoPagoEntity } from '../infrastructure/database/entities/tipo-pago.entity';
 import { SolicitudDesembolsoWebTiposEntity } from '../infrastructure/database/entities/solicitud-desembolso-web-tipos.entity';
@@ -58,6 +59,7 @@ export const getDatabaseConfig = (
     GaColaboradoresEntity,
     SolicitudTipoEntity,
     StatusEntity,
+    SolicitudDesembolsoWebStatusEntity,
     DivisionEntity,
     TipoPagoEntity,
     SolicitudDesembolsoWebTiposEntity,
