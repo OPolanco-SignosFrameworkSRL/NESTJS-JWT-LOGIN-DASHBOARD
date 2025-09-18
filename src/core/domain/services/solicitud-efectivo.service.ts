@@ -11,6 +11,7 @@ import { SolicitudTipoEntity } from '../../../infrastructure/database/entities/s
 import { TipoPagoEntity } from '../../../infrastructure/database/entities/tipo-pago.entity';
 import { DivisionEntity } from '../../../infrastructure/database/entities/division.entity';
 import { PaginationDto } from '../../application/dto/pagination.dto';
+import { SolicitudEfectivoFiltersDto } from '../../application/dto/solicitud-efectivo-filters.dto';
 
 @Injectable()
 export class SolicitudEfectivoService {
@@ -151,7 +152,7 @@ export class SolicitudEfectivoService {
     }
   }
 
-  async findAll(currentUser: IUserPayload, pagination?: PaginationDto) {
+  async findAll(currentUser: IUserPayload, filters?: SolicitudEfectivoFiltersDto) {
     const user = await this.usersService.findOne(currentUser.sub);
     const authorizedRoles = ['Admin', 'Administrator'];
     const isAdmin = authorizedRoles.includes(currentUser.role);
@@ -161,18 +162,51 @@ export class SolicitudEfectivoService {
       whereCondition = { usuarioId: currentUser.sub };
     }
 
-    const page = pagination?.page ?? 1;
-    const limit = pagination?.limit ?? 10;
+    const page = filters?.page ?? 1;
+    const limit = filters?.limit ?? 10;
     const skip = (page - 1) * limit;
 
-    // Usar query manual para incluir la descripción del status desde la tabla solicitud_desembolso_web_status
-    let whereClause = '';
+    // Construir consulta con filtros
+    let whereConditions: string[] = [];
     let params: any[] = [];
     
+    // Filtro de autorización (admin vs usuario normal)
     if (!isAdmin) {
-      whereClause = 'WHERE se.usuario_id = @0';
+      whereConditions.push('se.usuario_id = @' + params.length);
       params.push(currentUser.sub);
     }
+
+    // Filtro por statusId
+    if (filters?.statusId !== undefined) {
+      whereConditions.push('se.status_id = @' + params.length);
+      params.push(filters.statusId);
+    }
+
+    // Filtro por monto mínimo
+    if (filters?.montoMin !== undefined) {
+      whereConditions.push('se.monto >= @' + params.length);
+      params.push(filters.montoMin);
+    }
+
+    // Filtro por monto máximo
+    if (filters?.montoMax !== undefined) {
+      whereConditions.push('se.monto <= @' + params.length);
+      params.push(filters.montoMax);
+    }
+
+    // Filtro de búsqueda
+    if (filters?.search) {
+      const searchTerm = `%${filters.search}%`;
+      whereConditions.push(`(
+        se.concepto LIKE @${params.length} OR 
+        se.nombre_cliente LIKE @${params.length + 1} OR 
+        CAST(se.numero_orden AS VARCHAR) LIKE @${params.length + 2} OR 
+        CAST(se.numero_ticket AS VARCHAR) LIKE @${params.length + 3}
+      )`);
+      params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+    }
+
+    const whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : '';
 
     const countQuery = `
       SELECT COUNT(*) as total 
