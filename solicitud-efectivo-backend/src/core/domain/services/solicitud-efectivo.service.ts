@@ -166,6 +166,14 @@ export class SolicitudEfectivoService {
     const limit = filters?.limit ?? 10;
     const skip = (page - 1) * limit;
 
+    const [data, total] = await this.solicitudRepository.findAndCount({
+      where: whereCondition,
+      relations: ['integrantes', 'tipoSolicitud', 'division', 'tipoPago', 'status', 'usuario'],
+      order: { fechaOrden: 'DESC' },
+      skip,
+      take: limit,
+    });
+
     // Construir consulta con filtros
     let whereConditions: string[] = [];
     let params: any[] = [];
@@ -277,6 +285,19 @@ export class SolicitudEfectivoService {
         ? {
             pago_tipo: Number(item.tipoPago.pago_tipo),
             tipo_desc: item.tipoPago.tipo_desc,
+          }
+        : null,
+      status: item.status
+        ? {
+            id: item.status.id,
+            descripcion: (item.status as any).descripcion,
+          }
+        : null,
+      usuario: item.usuario
+        ? {
+            id: item.usuario.id,
+            nombre: item.usuario.nombre,
+            apellido: item.usuario.apellido,
           }
         : null,
       status: {
