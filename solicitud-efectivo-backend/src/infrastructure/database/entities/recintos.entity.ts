@@ -25,9 +25,9 @@ export class RecintosEntity {
   ubicacion: string;
 
   @ApiProperty({
-    description: 'Estado del recinto',
-    example: true,
+    description: 'Estado del recinto (1=Válido, 2=Inválido)',
+    example: 1,
   })
-  @Column({ type: 'bit', default: 1 })
-  estado: boolean;
+  @Column({ type: 'tinyint', default: 1 })
+  estado: number;
 }

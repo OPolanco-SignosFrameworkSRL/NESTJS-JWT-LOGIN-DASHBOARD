@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { ModuloPermisoEntity } from './modulo-permiso.entity';
 
 @Entity('RolesPermisos')
 export class RolesPermisosEntity {
@@ -22,6 +23,11 @@ export class RolesPermisosEntity {
 
   @Column({ name: 'User_Del', type: 'int', nullable: true })
   UserDel?: number;
+
+  // Relación con ModuloPermiso
+  @ManyToOne(() => ModuloPermisoEntity)
+  @JoinColumn({ name: 'IdPermiso' })
+  moduloPermiso: ModuloPermisoEntity;
 
   // Getters para compatibilidad
   get id(): number {

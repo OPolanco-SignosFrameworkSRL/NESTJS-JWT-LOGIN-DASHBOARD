@@ -19,20 +19,28 @@ export class RoleRepository implements IRoleRepository {
     @InjectRepository(RoleEntity)
     private readonly roleRepository: Repository<RoleEntity>,
   ) {}
-  restore(id: number): Promise<boolean> {
-    throw new Error('Method not implemented.');
+  async restore(id: number): Promise<boolean> {
+    const updateResult = await this.roleRepository.update(id, { 
+      rowActive: true,
+      statusId: 1, // Cambiar status a activo (1)
+      userMod: null // Se podría pasar el userMod como parámetro si es necesario
+    });
+    return updateResult.affected > 0;
   }
-  hardDelete(id: number): Promise<boolean> {
-    throw new Error('Method not implemented.');
+
+  async hardDelete(id: number): Promise<boolean> {
+    const deleteResult = await this.roleRepository.delete(id);
+    return deleteResult.affected > 0;
   }
   existsByName(roleName: string, excludeId?: number): Promise<boolean> {
     throw new Error('Method not implemented.');
   }
-  findActiveRoles(): Promise<Role[]> {
-    throw new Error('Method not implemented.');
+  async findActiveRoles(): Promise<Role[]> {
+    return this.findActive();
   }
-  findInactiveRoles(): Promise<Role[]> {
-    throw new Error('Method not implemented.');
+
+  async findInactiveRoles(): Promise<Role[]> {
+    return this.findInactive();
   }
   searchByText(searchText: string): Promise<Role[]> {
     throw new Error('Method not implemented.');
@@ -135,15 +143,24 @@ export class RoleRepository implements IRoleRepository {
     });
     return entity ? this.mapToDomain(entity) : null;
   }
-
   async create(roleData: ICreateRoleData): Promise<Role> {
     const entity = this.roleRepository.create({
       roleName: roleData.role_name,
       rowActive: roleData.valido ?? true,
+      statusId: roleData.statusId || 1,
     });
+  
     const savedEntity = await this.roleRepository.save(entity);
-    return this.mapToDomain(savedEntity);
+  
+    const entityWithStatus = await this.roleRepository.findOne({
+      where: { id: savedEntity.id }, // ojo: aquí probablemente es id, no statusId
+      relations: ['status'],
+    });
+  
+    return this.mapToDomain(entityWithStatus || savedEntity);
   }
+  
+  
 
   async update(id: number, roleData: IUpdateRoleData): Promise<Role | null> {
     const updatePayload: Partial<RoleEntity> = {};
@@ -163,8 +180,12 @@ export class RoleRepository implements IRoleRepository {
     return this.findById(id);
   }
 
-  async delete(id: number): Promise<boolean> {
-    const updateResult = await this.roleRepository.update(id, { rowActive: false });
+  async delete(id: number, userDelId?: number): Promise<boolean> {
+    const updateResult = await this.roleRepository.update(id, { 
+      rowActive: false,
+      statusId: 2, // Cambiar status a inactivo (2)
+      userDel: userDelId || null // Registrar quién eliminó el rol
+    });
     return updateResult.affected > 0;
   }
 

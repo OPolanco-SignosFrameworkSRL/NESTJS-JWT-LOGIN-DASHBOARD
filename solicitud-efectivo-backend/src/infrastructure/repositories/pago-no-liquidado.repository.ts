@@ -31,8 +31,8 @@ export class PagoNoLiquidadoRepository {
     // Aplicar filtros
     this.applyFilters(queryBuilder, { search, division, estado });
 
-    // Ordenar por fecha de creación descendente
-    queryBuilder.orderBy('pago.fechaCreacion', 'DESC');
+    // Ordenar por ID descendente (más simple)
+    queryBuilder.orderBy('pago.id', 'DESC');
 
     // Calcular offset para paginación
     const offset = (page - 1) * pageSize;
@@ -64,7 +64,7 @@ export class PagoNoLiquidadoRepository {
   async findById(id: number): Promise<PagoNoLiquidadoEntity | null> {
     return this.repository.findOne({
       where: { id },
-      relations: ['responsable', 'division', 'adjuntos'],
+      relations: ['creadoPor', 'tipoPagoInfo'],
     });
   }
 
@@ -72,7 +72,16 @@ export class PagoNoLiquidadoRepository {
    * Crea un nuevo pago no liquidado
    */
   async create(pagoData: Partial<PagoNoLiquidadoEntity>): Promise<PagoNoLiquidadoEntity> {
-    const pago = this.repository.create(pagoData);
+    // Asegurar que los campos requeridos estén presentes
+    const dataToSave = {
+      ...pagoData,
+      fechaCreado: pagoData.fechaCreado || new Date(),
+      estatus: pagoData.estatus ?? 1, // 1 = activo por defecto
+    };
+    
+    console.log('Datos a guardar:', dataToSave); // Debug
+    
+    const pago = this.repository.create(dataToSave);
     return this.repository.save(pago);
   }
 
@@ -88,7 +97,7 @@ export class PagoNoLiquidadoRepository {
    * Elimina (soft delete) un pago no liquidado
    */
   async softDelete(id: number): Promise<boolean> {
-    const result = await this.repository.update(id, { estado: 'Cancelado' });
+    const result = await this.repository.update(id, { estatus: 0 });
     return result.affected > 0;
   }
 
@@ -113,13 +122,8 @@ export class PagoNoLiquidadoRepository {
   private createBaseQueryBuilder(): SelectQueryBuilder<PagoNoLiquidadoEntity> {
     return this.repository
       .createQueryBuilder('pago')
-      .leftJoinAndSelect('pago.responsable', 'responsable')
-      .leftJoinAndSelect('pago.division', 'division')
-      .leftJoin('pago.adjuntos', 'adjuntos', 'adjuntos.estado = :adjuntoEstado', { adjuntoEstado: 'Activo' })
-      .addSelect('COUNT(adjuntos.id)', 'cantidadAdjuntos')
-      .groupBy('pago.id')
-      .addGroupBy('responsable.id')
-      .addGroupBy('division.id');
+      .leftJoinAndSelect('pago.creadoPor', 'creador')
+      .leftJoinAndSelect('pago.tipoPagoInfo', 'tipoPago');
   }
 
   /**
@@ -131,9 +135,14 @@ export class PagoNoLiquidadoRepository {
   ): void {
     const { search, division, estado } = filters;
 
-    // Filtro por estado
+    // Filtro por estado (mapear texto a número)
     if (estado) {
-      queryBuilder.andWhere('pago.estado = :estado', { estado });
+      let estatusNumero = 1; // Activo por defecto
+      if (estado === 'Cancelado') estatusNumero = 0;
+      if (estado === 'Procesado') estatusNumero = 2;
+      if (estado === 'Liquidado') estatusNumero = 3;
+      
+      queryBuilder.andWhere('pago.estatus = :estatus', { estatus: estatusNumero });
     }
 
     // Filtro de búsqueda en número de desembolso y beneficiario
@@ -144,9 +153,9 @@ export class PagoNoLiquidadoRepository {
       );
     }
 
-    // Filtro por división
+    // Filtro por tipo de pago (usando division como proxy)
     if (division) {
-      queryBuilder.andWhere('division.nombre LIKE :division', { 
+      queryBuilder.andWhere('tipoPago.tipo_desc LIKE :division', { 
         division: `%${division}%` 
       });
     }
@@ -164,14 +173,14 @@ export class PagoNoLiquidadoRepository {
     const stats = await this.repository
       .createQueryBuilder('pago')
       .select([
-        'SUM(CASE WHEN pago.estado = :activo THEN 1 ELSE 0 END) as totalActivos',
-        'SUM(CASE WHEN pago.estado = :cancelado THEN 1 ELSE 0 END) as totalCancelados',
+        'SUM(CASE WHEN pago.estatus = :activo THEN 1 ELSE 0 END) as totalActivos',
+        'SUM(CASE WHEN pago.estatus = :cancelado THEN 1 ELSE 0 END) as totalCancelados',
         'COUNT(*) as totalGeneral',
-        'SUM(CASE WHEN pago.monto IS NOT NULL AND pago.estado = :activo THEN pago.monto ELSE 0 END) as montoTotal',
+        'SUM(CASE WHEN pago.desembolsoMonto IS NOT NULL AND pago.estatus = :activo THEN pago.desembolsoMonto ELSE 0 END) as montoTotal',
       ])
       .setParameters({ 
-        activo: 'Activo', 
-        cancelado: 'Cancelado' 
+        activo: 1, 
+        cancelado: 0 
       })
       .getRawOne();
 

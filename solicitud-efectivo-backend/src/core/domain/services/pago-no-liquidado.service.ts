@@ -53,7 +53,8 @@ export class PagoNoLiquidadoService {
   async create(pagoData: Partial<PagoNoLiquidadoEntity>, userId: number): Promise<PagoNoLiquidadoResponseDto> {
     const nuevoPago = await this.pagoNoLiquidadoRepository.create({
       ...pagoData,
-      usuarioCreacion: userId,
+      creadoPorId: userId,
+      fechaCreado: new Date(),
     });
 
     return this.transformToResponseDto(nuevoPago, userId);
@@ -76,7 +77,6 @@ export class PagoNoLiquidadoService {
 
     const pagoActualizado = await this.pagoNoLiquidadoRepository.update(id, {
       ...pagoData,
-      usuarioModificacion: userId,
     });
 
     return this.transformToResponseDto(pagoActualizado!, userId);
@@ -97,13 +97,12 @@ export class PagoNoLiquidadoService {
       throw new ForbiddenException('No tiene permisos para cancelar este pago');
     }
 
-    if (pago.estado === 'Cancelado') {
+    if (pago.estatus === 0) {
       throw new ForbiddenException('El pago ya está cancelado');
     }
 
     const pagoCancelado = await this.pagoNoLiquidadoRepository.update(id, {
-      estado: 'Cancelado',
-      usuarioModificacion: userId,
+      estatus: 0,
     });
 
     return this.transformToResponseDto(pagoCancelado!, userId);
@@ -124,13 +123,12 @@ export class PagoNoLiquidadoService {
       throw new ForbiddenException('No tiene permisos para reversar este pago');
     }
 
-    if (pago.estado === 'Activo') {
+    if (pago.estatus === 1) {
       throw new ForbiddenException('El pago ya está activo');
     }
 
     const pagoReversado = await this.pagoNoLiquidadoRepository.update(id, {
-      estado: 'Activo',
-      usuarioModificacion: userId,
+      estatus: 1,
     });
 
     return this.transformToResponseDto(pagoReversado!, userId);
@@ -152,24 +150,19 @@ export class PagoNoLiquidadoService {
    * Transforma una entidad a DTO de respuesta
    */
   private async transformToResponseDto(pago: PagoNoLiquidadoEntity, userId?: number): Promise<PagoNoLiquidadoResponseDto> {
-    // Obtener cantidad de adjuntos si no están cargados
+    // Por ahora, no hay adjuntos en la tabla principal
     let cantidadAdjuntos = 0;
-    if (pago.adjuntos && Array.isArray(pago.adjuntos)) {
-      cantidadAdjuntos = pago.adjuntos.filter(adj => adj.estado === 'Activo').length;
-    } else {
-      cantidadAdjuntos = await this.pagoNoLiquidadoRepository.countAdjuntos(pago.id);
-    }
 
     return {
       id: pago.id,
       numero_desembolso: pago.getNumeroDesembolsoCompleto(),
-      responsable: pago.responsable?.nombre || 'Sin asignar',
-      division: pago.division?.nombre || 'Sin división',
-      estado: pago.estado,
-      fecha_creacion: pago.fechaCreacion.toISOString(),
+      responsable: pago.creadoPor?.nombre || 'Sin asignar',
+      division: pago.tipoPagoInfo?.tipo_desc || 'Sin tipo',
+      estado: pago.getEstadoTexto(),
+      fecha_creacion: pago.fechaCreado.toISOString(),
       cantidad_adjuntos: cantidadAdjuntos,
-      monto: pago.monto,
-      observaciones: pago.observaciones,
+      monto: pago.desembolsoMonto,
+      observaciones: pago.notas,
       acciones: this.getAcciones(pago, userId),
     };
   }
@@ -192,7 +185,7 @@ export class PagoNoLiquidadoService {
     if (!userId) return false;
     
     // Solo se puede editar si está activo
-    if (pago.estado !== 'Activo') return false;
+    if (pago.estatus !== 1) return false;
     
     // Por ahora, permitir a todos los usuarios autenticados
     // Aquí puedes agregar lógica más específica basada en roles
@@ -206,7 +199,7 @@ export class PagoNoLiquidadoService {
     if (!userId) return false;
     
     // Solo se puede cancelar si está activo
-    if (pago.estado !== 'Activo') return false;
+    if (pago.estatus !== 1) return false;
     
     // Por ahora, permitir a todos los usuarios autenticados
     // Aquí puedes agregar lógica más específica basada en roles
@@ -220,7 +213,7 @@ export class PagoNoLiquidadoService {
     if (!userId) return false;
     
     // Solo se puede reversar si está cancelado
-    if (pago.estado !== 'Cancelado') return false;
+    if (pago.estatus !== 0) return false;
     
     // Por ahora, solo administradores pueden reversar
     // Aquí deberías verificar si el usuario tiene permisos de administrador

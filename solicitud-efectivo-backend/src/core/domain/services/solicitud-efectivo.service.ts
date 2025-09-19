@@ -11,6 +11,7 @@ import { SolicitudTipoEntity } from '../../../infrastructure/database/entities/s
 import { TipoPagoEntity } from '../../../infrastructure/database/entities/tipo-pago.entity';
 import { DivisionEntity } from '../../../infrastructure/database/entities/division.entity';
 import { PaginationDto } from '../../application/dto/pagination.dto';
+import { SolicitudEfectivoFiltersDto } from '../../application/dto/solicitud-efectivo-filters.dto';
 
 @Injectable()
 export class SolicitudEfectivoService {
@@ -151,7 +152,7 @@ export class SolicitudEfectivoService {
     }
   }
 
-  async findAll(currentUser: IUserPayload, pagination?: PaginationDto) {
+  async findAll(currentUser: IUserPayload, filters?: SolicitudEfectivoFiltersDto) {
     const user = await this.usersService.findOne(currentUser.sub);
     const authorizedRoles = ['Admin', 'Administrator'];
     const isAdmin = authorizedRoles.includes(currentUser.role);
@@ -161,8 +162,8 @@ export class SolicitudEfectivoService {
       whereCondition = { usuarioId: currentUser.sub };
     }
 
-    const page = pagination?.page ?? 1;
-    const limit = pagination?.limit ?? 10;
+    const page = filters?.page ?? 1;
+    const limit = filters?.limit ?? 10;
     const skip = (page - 1) * limit;
 
     const [data, total] = await this.solicitudRepository.findAndCount({
@@ -172,6 +173,84 @@ export class SolicitudEfectivoService {
       skip,
       take: limit,
     });
+
+    // Construir consulta con filtros
+    let whereConditions: string[] = [];
+    let params: any[] = [];
+    
+    // Filtro de autorización (admin vs usuario normal)
+    if (!isAdmin) {
+      whereConditions.push('se.usuario_id = @' + params.length);
+      params.push(currentUser.sub);
+    }
+
+    // Filtro por statusId
+    if (filters?.statusId !== undefined) {
+      whereConditions.push('se.status_id = @' + params.length);
+      params.push(filters.statusId);
+    }
+
+    // Filtro por monto mínimo
+    if (filters?.montoMin !== undefined) {
+      whereConditions.push('se.monto >= @' + params.length);
+      params.push(filters.montoMin);
+    }
+
+    // Filtro por monto máximo
+    if (filters?.montoMax !== undefined) {
+      whereConditions.push('se.monto <= @' + params.length);
+      params.push(filters.montoMax);
+    }
+
+    // Filtro de búsqueda
+    if (filters?.search) {
+      const searchTerm = `%${filters.search}%`;
+      whereConditions.push(`(
+        se.concepto LIKE @${params.length} OR 
+        se.nombre_cliente LIKE @${params.length + 1} OR 
+        CAST(se.numero_orden AS VARCHAR) LIKE @${params.length + 2} OR 
+        CAST(se.numero_ticket AS VARCHAR) LIKE @${params.length + 3}
+      )`);
+      params.push(searchTerm, searchTerm, searchTerm, searchTerm);
+    }
+
+    const whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : '';
+
+    const countQuery = `
+      SELECT COUNT(*) as total 
+      FROM solicitud_efectivo se 
+      ${whereClause}
+    `;
+    
+    const dataQuery = `
+      SELECT 
+        se.*,
+        swst.descripcion as status_descripcion
+      FROM solicitud_efectivo se 
+      LEFT JOIN solicitud_desembolso_web_status swst ON se.status_id = swst.id
+      ${whereClause}
+      ORDER BY se.fecha_orden DESC
+      OFFSET @${params.length} ROWS FETCH NEXT @${params.length + 1} ROWS ONLY
+    `;
+
+    const [countResult] = await this.dataSource.query(countQuery, params);
+    const total = countResult.total;
+    
+    const rawData = await this.dataSource.query(dataQuery, [...params, skip, limit]);
+    
+    // Ahora cargar las relaciones manualmente para cada item
+    const data = [];
+    for (const rawItem of rawData) {
+      const item = await this.solicitudRepository.findOne({
+        where: { id: rawItem.id },
+        relations: ['integrantes', 'tipoSolicitud', 'division', 'tipoPago'],
+      });
+      if (item) {
+        // Agregar la descripción del status
+        (item as any).statusDescripcion = rawItem.status_descripcion;
+        data.push(item);
+      }
+    }
 
     const totalPages = Math.ceil(total / limit) || 1;
 
@@ -221,6 +300,10 @@ export class SolicitudEfectivoService {
             apellido: item.usuario.apellido,
           }
         : null,
+      status: {
+        id: item.statusId,
+        descripcion: (item as any).statusDescripcion || 'Estado desconocido',
+      },
     }));
 
     return {

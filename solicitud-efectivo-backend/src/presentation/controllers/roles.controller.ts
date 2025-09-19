@@ -14,6 +14,7 @@ import {
   BadRequestException,
   NotFoundException,
   InternalServerErrorException,
+  ConflictException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -148,8 +149,8 @@ export class RolesController {
     name: 'statusId', 
     required: false, 
     type: Number,
-    description: 'Filtrar por StatusId específico',
-    example: 1
+    enum: [1, 2],
+    description: '1=Activos, 2=Inactivos' 
   })
   @ApiResponse({ 
     status: 200, 
@@ -172,7 +173,7 @@ export class RolesController {
     }
   }
 
-  @Get('active')
+ /*  @Get('active')
   @Roles(1, 4) // Admin, Supervisor
   @ApiOperation({ 
     summary: 'Obtener solo roles activos',
@@ -228,42 +229,8 @@ export class RolesController {
     } catch (error) {
       throw new InternalServerErrorException('Error al obtener los roles inactivos');
     }
-  }
+  } */
 
-  @Get('by-status/:statusId')
-  @Roles(1, 4) // Admin, Supervisor
-  @ApiOperation({ 
-    summary: 'Obtener roles por StatusId específico',
-    description: 'Retorna una lista de roles filtrados por un StatusId específico. Admin y Supervisor pueden acceder.' 
-  })
-  @ApiParam({ 
-    name: 'statusId', 
-    type: Number, 
-    description: 'ID del status para filtrar roles',
-    example: 1 
-  })
-  @ApiResponse({ 
-    status: 200, 
-    description: 'Lista de roles filtrada por status obtenida exitosamente',
-    type: [RoleResponseDto] 
-  })
-  @ApiResponse({ 
-    status: 401, 
-    description: 'No autorizado' 
-  })
-  @ApiResponse({ 
-    status: 403, 
-    description: 'Acceso denegado - se requieren permisos de administrador o supervisor' 
-  })
-  async findByStatus(@Param('statusId', ParseIntPipe) statusId: number): Promise<any> {
-    try {
-      const filters: RoleFiltersDto = { statusId };
-      const result = await this.getRolesUseCase.execute(filters);
-      return result;
-    } catch (error) {
-      throw new InternalServerErrorException('Error al obtener los roles por status');
-    }
-  }
 
   @Get(':id')
   @Roles(1, 4) // Admin, Supervisor
@@ -390,14 +357,24 @@ export class RolesController {
       await this.deleteRoleUseCase.execute(id);
       return { message: 'Rol eliminado exitosamente' };
     } catch (error) {
+      console.error('Error detallado al eliminar rol:', error);
+      
       if (error.message.includes('no encontrado')) {
         throw new NotFoundException(error.message);
       }
-      throw new InternalServerErrorException('Error al eliminar el rol');
+      if (error.message.includes('crítico')) {
+        throw new ConflictException(error.message);
+      }
+      if (error.message.includes('ya está desactivado')) {
+        throw new ConflictException(error.message);
+      }
+      
+      // Mostrar el error específico para debug
+      throw new InternalServerErrorException(`Error al eliminar el rol: ${error.message}`);
     }
   }
 
-  @Put(':id/restore')
+ /*  @Put(':id/restore')
   @Roles(1) // Admin
   @ApiOperation({ 
     summary: 'Restaurar un rol eliminado',
@@ -436,7 +413,7 @@ export class RolesController {
       throw new InternalServerErrorException('Error al restaurar el rol');
     }
   }
-
+ */
   // Mapear entity a response DTO
   private mapToResponseDto(role: any): RoleResponseDto {
     const status = role.statusInfo ? [{

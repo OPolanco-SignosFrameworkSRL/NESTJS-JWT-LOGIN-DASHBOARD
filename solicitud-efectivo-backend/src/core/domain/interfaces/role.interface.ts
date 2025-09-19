@@ -19,6 +19,7 @@ export interface ICreateRoleData {
   role_name: string;
   role_desc?: string;
   valido?: boolean;
+  statusId?: number;
 }
 
 /**

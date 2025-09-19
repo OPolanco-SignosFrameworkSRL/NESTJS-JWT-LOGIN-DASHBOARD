@@ -1,46 +1,34 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsEnum, IsString, IsBoolean, IsInt, Min, Max, IsNumber } from 'class-validator';
-import { Type, Transform } from 'class-transformer';
-import { UserRole } from '../../domain/interfaces/user.interface';
+import { IsOptional, IsNumber, Min, Max, IsInt } from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class UserFiltersDto {
+export class RecintosFiltersDto {
   @ApiProperty({
-    description: 'ID del rol del usuario (1=Admin, 2=Usuario, 3=Manager, 4=Supervisor)',
-    example: 1,
-    enum: [1, 2, 3, 4],
-    required: false,
-  })
-  @IsOptional()
-  @IsNumber({}, { message: 'El rol debe ser un número' })
-  role?: number;
-
-  @ApiProperty({
-    description: 'Filtrar por división',
-    example: 'TI',
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'La división debe ser una cadena de texto' })
-  division?: string;
-
-  @ApiProperty({
-    description: 'Buscar por término (nombre, apellido o cédula)',
-    example: 'Raul',
-    required: false,
-  })
-  @IsOptional()
-  @IsString({ message: 'El término de búsqueda debe ser una cadena de texto' })
-  search?: string;
-
-  @ApiProperty({
-    description: 'Filtrar por status de usuario (1=Activos, 2=Inactivos)',
+    description: 'Filtrar por status de recinto (1=Válidos, 2=Inválidos)',
     example: 1,
     enum: [1, 2],
     required: false,
   })
   @IsOptional()
   @IsNumber({}, { message: 'El statusId debe ser un número' })
+  @Type(() => Number)
   statusId?: number;
+
+  @ApiProperty({
+    description: 'Filtrar por nombre de recinto',
+    example: 'Sala de Conferencias',
+    required: false,
+  })
+  @IsOptional()
+  recinto?: string;
+
+  @ApiProperty({
+    description: 'Buscar por término (nombre de recinto o ubicación)',
+    example: 'Edificio Principal',
+    required: false,
+  })
+  @IsOptional()
+  search?: string;
 
   // Campos de paginación
   @ApiProperty({
@@ -70,4 +58,4 @@ export class UserFiltersDto {
   @Max(100, { message: 'El límite no puede ser mayor a 100' })
   @Type(() => Number)
   limit?: number = 10;
-} 
+}
