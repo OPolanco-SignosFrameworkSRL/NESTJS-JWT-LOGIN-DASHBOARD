@@ -10,10 +10,6 @@ export class SolicitudDesembolsoWebStatusEntity {
   @ApiProperty({ description: 'Descripción del status', example: 'Pendiente' })
   @Column({ name: 'descripcion', type: 'varchar', length: 255 })
   descripcion: string;
-
-  @ApiProperty({ description: 'Nombre corto del status', example: 'PEND', required: false })
-  @Column({ name: 'nombre', type: 'varchar', length: 255, nullable: true })
-  nombre?: string;
 }
 
 

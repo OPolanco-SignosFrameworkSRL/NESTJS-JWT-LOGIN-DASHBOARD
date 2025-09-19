@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "types": ["node"],
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
@@ -19,15 +18,8 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@/*": ["src/*"],
-      "@/common/*": ["src/common/*"],
-      "@/config/*": ["src/config/*"],
-      "@/entities/*": ["src/entities/*"],
-      "@/auth/*": ["src/auth/*"],
-      "@/users/*": ["src/users/*"]
+      "@/*": ["src/*"]
     }
-  },
-  "exclude": ["node_modules", "dist"],
-  "include": ["src/**/*.ts"]
+  }
 }
 
