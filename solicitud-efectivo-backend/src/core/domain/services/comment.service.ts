@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { DataSource } from 'typeorm';
 import { Comment } from '../entities/comment.entity';
 import { CommentServiceInterface } from '../comment.service.interface';
 import { CommentRepositoryInterface } from '../repositories/comment.repository.interface';
@@ -12,6 +13,7 @@ export class CommentService implements CommentServiceInterface {
     private readonly commentRepository: CommentRepositoryInterface,
     @Inject(CASH_REQUEST_REPOSITORY)
     private readonly cashRequestRepository: ICashRequestRepository,
+    private readonly dataSource: DataSource,
   ) {}
 
   /**
@@ -24,18 +26,18 @@ export class CommentService implements CommentServiceInterface {
     comment: string,
     userRole: string,
   ): Promise<Comment> {
-    // Verificar que el usuario puede comentar en esta solicitud
-    console.log('userId', userId);
-    console.log('requestId', requestId);
-    const canComment = await this.canUserCommentOnRequest(userId, requestId, userRole);
-    if (!canComment) {
-      throw new Error('No tienes permisos para comentar en esta solicitud');
-    }
-
-    // Verificar que la solicitud existe
-    const request = await this.cashRequestRepository.findById(requestId);
-    if (!request) {
+    // Verificar permisos y existencia directamente en solicitud_efectivo
+    const isAdmin = userRole === 'Admin' || userRole === 'Administrator';
+    const rows = await this.dataSource.query(
+      'SELECT usuario_id FROM solicitud_efectivo WHERE id = @0',
+      [requestId],
+    );
+    if (!rows || rows.length === 0) {
       throw new Error('La solicitud no existe');
+    }
+    const ownerUserId: number = rows[0].usuario_id;
+    if (!isAdmin && ownerUserId !== userId) {
+      throw new Error('No tienes permisos para comentar en esta solicitud');
     }
 
     // Crear o actualizar el comentario
@@ -55,9 +57,12 @@ export class CommentService implements CommentServiceInterface {
    * Obtiene el comentario de un usuario específico en una solicitud
    */
   async getUserCommentByRequest(userId: number, requestId: number): Promise<Comment | null> {
-    // Verificar que la solicitud existe
-    const request = await this.cashRequestRepository.findById(requestId);
-    if (!request) {
+    // Verificar que la solicitud existe en tabla real
+    const [existsNew] = await this.dataSource.query(
+      'SELECT COUNT(1) AS cnt FROM solicitud_efectivo WHERE id = @0',
+      [requestId],
+    );
+    if (!existsNew || existsNew.cnt === 0) {
       throw new Error('La solicitud no existe');
     }
 
@@ -68,9 +73,12 @@ export class CommentService implements CommentServiceInterface {
    * Obtiene todos los comentarios de una solicitud (para admins)
    */
   async getCommentsByRequest(requestId: number): Promise<Comment[]> {
-    // Verificar que la solicitud existe
-    const request = await this.cashRequestRepository.findById(requestId);
-    if (!request) {
+    // Verificar que la solicitud existe en tabla real
+    const [existsNew] = await this.dataSource.query(
+      'SELECT COUNT(1) AS cnt FROM solicitud_efectivo WHERE id = @0',
+      [requestId],
+    );
+    if (!existsNew || existsNew.cnt === 0) {
       throw new Error('La solicitud no existe');
     }
 
@@ -111,13 +119,15 @@ export class CommentService implements CommentServiceInterface {
       return true;
     }
 
-    // Los usuarios normales solo pueden comentar en sus propias solicitudes
-    const request = await this.cashRequestRepository.findById(requestId);
-    if (!request) {
+    // Validar contra la tabla real
+    const rows = await this.dataSource.query(
+      'SELECT usuario_id FROM solicitud_efectivo WHERE id = @0',
+      [requestId],
+    );
+    if (!rows || rows.length === 0) {
       return false;
     }
-
-    return request.solicitada_porid === userId;
+    return rows[0].usuario_id === userId;
   }
 
   /**

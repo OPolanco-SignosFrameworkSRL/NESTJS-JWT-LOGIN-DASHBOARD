@@ -62,13 +62,17 @@ export class CommentController {
       console.log('🔍 Debug - user.id:', user?.id);
       console.log('🔍 Debug - user.cedula:', user?.cedula);
       console.log('🔍 Debug - user.role:', user?.role);
+
+      // Derivar rol Admin desde id numérico o array rolesUsuario
+      const isAdmin = (user?.role === 1) || (Array.isArray(user?.rolesUsuario) && user.rolesUsuario.some((r: any) => r.id === 1));
+      const userRole = isAdmin ? 'Admin' : 'Usuario';
       
       const result = await this.createCommentUseCase.execute({
         requestId: createCommentDto.requestId,
         comment: createCommentDto.comment,
         userId: user.id,
         userCedula: user.cedula,
-        userRole: user.role,
+        userRole,
       });
 
       return {
@@ -131,6 +135,7 @@ export class CommentController {
   }
 
   @Get('request/:requestId')
+  @Roles(1)
   @ApiOperation({ summary: 'Obtener todos los comentarios de una solicitud (solo para admins)' })
   @ApiResponse({
     status: 200,
@@ -202,11 +207,14 @@ export class CommentController {
   async deleteComment(@Param('id', ParseIntPipe) id: number, @Request() req) {
     try {
       const user = req.user;
-      
+      // Derivar rol Admin desde id numérico o array rolesUsuario
+      const isAdmin = (user?.role === 1) || (Array.isArray(user?.rolesUsuario) && user.rolesUsuario.some((r: any) => r.id === 1));
+      const userRole = isAdmin ? 'Admin' : 'Usuario';
+
       const result = await this.deleteCommentUseCase.execute({
         id,
         userId: user.id,
-        userRole: user.role,
+        userRole,
       });
 
       return {

@@ -18,6 +18,7 @@ import {
   import { SolicitudOnlyResponseDto } from "@/core/application/dto/solicitud-only-response.dto";
   import { PaginationDto } from "@/core/application/dto/pagination.dto";
   import { SolicitudEfectivoFiltersDto } from "@/core/application/dto/solicitud-efectivo-filters.dto";
+  import { CommentContextDto } from "@/core/application/dto/comment-context.dto";
   import { JwtAuthGuard } from "../guards/jwt-auth.guard";
   import { RolesGuard } from "../guards/roles.guard";
   import { Roles } from "../decorators/roles.decorator";
@@ -111,6 +112,13 @@ export class SolicitudEfectivoController {
     @ApiResponse({ status: 200, description: 'Solicitud obtenida' })
     findOne(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
         return this.solicitudService.findOne(id, req.user);
+    }
+
+    @Get(':id/comment-context')
+    @ApiOperation({ summary: 'Obtener contexto para comentario (resumen de la solicitud)' })
+    @ApiResponse({ status: 200, description: 'Contexto obtenido', type: CommentContextDto })
+    getCommentContext(@Param('id', ParseIntPipe) id: number, @Req() req: any) {
+        return this.solicitudService.getCommentContext(id, req.user);
     }
 
     @Put(':id')

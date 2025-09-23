@@ -166,13 +166,6 @@ export class SolicitudEfectivoService {
     const limit = filters?.limit ?? 10;
     const skip = (page - 1) * limit;
 
-    const [data, total] = await this.solicitudRepository.findAndCount({
-      where: whereCondition,
-      relations: ['integrantes', 'tipoSolicitud', 'division', 'tipoPago', 'status', 'usuario'],
-      order: { fechaOrden: 'DESC' },
-      skip,
-      take: limit,
-    });
 
     // Construir consulta con filtros
     let whereConditions: string[] = [];
@@ -243,7 +236,7 @@ export class SolicitudEfectivoService {
     for (const rawItem of rawData) {
       const item = await this.solicitudRepository.findOne({
         where: { id: rawItem.id },
-        relations: ['integrantes', 'tipoSolicitud', 'division', 'tipoPago'],
+        relations: ['integrantes', 'tipoSolicitud', 'division', 'tipoPago', 'status', 'usuario'],
       });
       if (item) {
         // Agregar la descripción del status
@@ -300,10 +293,6 @@ export class SolicitudEfectivoService {
             apellido: item.usuario.apellido,
           }
         : null,
-      status: {
-        id: item.statusId,
-        descripcion: (item as any).statusDescripcion || 'Estado desconocido',
-      },
     }));
 
     return {
@@ -336,6 +325,60 @@ export class SolicitudEfectivoService {
     }
 
     return solicitud;
+  }
+
+  /**
+   * Obtiene un contexto resumido para UI de comentario: número solicitud, solicitante, monto y estado
+   */
+  async getCommentContext(id: number, currentUser: IUserPayload) {
+    const solicitud = await this.solicitudRepository.findOne({
+      where: { id },
+      relations: ['usuario', 'status'],
+    });
+
+    if (!solicitud) {
+      throw new NotFoundException('Solicitud no encontrada');
+    }
+
+    const authorizedRoles = ['Admin', 'Administrator'];
+    const isAdmin = authorizedRoles.includes(currentUser.role);
+    if (!isAdmin && solicitud.usuarioId !== currentUser.sub) {
+      throw new UnauthorizedException('No tienes permisos para ver esta solicitud');
+    }
+
+    const year = new Date().getFullYear();
+    const correlativo = (solicitud.numeroOrden ?? solicitud.id).toString().padStart(5, '0');
+    const numeroSolicitud = `${year}-${correlativo}`;
+
+    const solicitante = `${solicitud.usuario?.nombre ?? ''} ${solicitud.usuario?.apellido ?? ''}`.trim().toUpperCase();
+    const monto = Number(solicitud.monto ?? 0);
+    const montoFormato = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(monto);
+
+    // Intentar obtener descripcion del status por relación; si falta, intentar con consulta directa
+    let statusDescripcion: string | null = (solicitud.status as any)?.descripcion ?? null;
+    if (!statusDescripcion && solicitud.statusId) {
+      try {
+        const result = await this.dataSource.query(
+          'SELECT descripcion FROM solicitud_desembolso_web_status WHERE id = @0',
+          [solicitud.statusId],
+        );
+        statusDescripcion = result?.[0]?.descripcion ?? null;
+      } catch (e) {
+        this.logger.warn(`No se pudo cargar la descripción de status por consulta directa: ${e.message}`);
+      }
+    }
+
+    return {
+      id: solicitud.id,
+      numeroSolicitud,
+      solicitante,
+      monto,
+      montoFormato,
+      status: {
+        id: solicitud.statusId,
+        descripcion: statusDescripcion,
+      },
+    };
   }
 
   async update(id: number, updateDto: any, currentUser: IUserPayload) {
