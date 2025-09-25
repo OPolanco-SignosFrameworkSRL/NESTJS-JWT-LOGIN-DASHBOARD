@@ -10,10 +10,19 @@ export class RequestStatusRepository {
     private readonly repo: Repository<SolicitudDesembolsoWebStatusEntity>,
   ) {}
 
-  async findAndCount(page: number, limit: number, descripcion?: string) {
+  async findAndCount(page?: number, limit?: number, descripcion?: string) {
     const where = descripcion
       ? { descripcion: ILike(`%${descripcion}%`) }
       : {};
+
+    // Si no hay paginación solicitada, traer todos los registros filtrados
+    if (page === undefined || limit === undefined) {
+      const [data, total] = await this.repo.findAndCount({
+        where,
+        order: { id: 'ASC' },
+      });
+      return { data, total };
+    }
 
     const [data, total] = await this.repo.findAndCount({
       where,
