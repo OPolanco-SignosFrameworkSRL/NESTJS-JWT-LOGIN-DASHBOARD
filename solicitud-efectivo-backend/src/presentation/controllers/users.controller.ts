@@ -88,6 +88,13 @@ export class UsersController {
   })
   @ApiQuery({ name: "division", required: false, type: String })
   @ApiQuery({ name: "search", required: false, type: String })
+  @ApiQuery({ 
+    name: "statusId", 
+    required: false, 
+    type: Number, 
+    enum: [1, 2],
+    description: "1=Activos, 2=Inactivos" 
+  })
   @ApiQuery({ name: "page", required: false, type: Number, example: 1 })
   @ApiQuery({ name: "limit", required: false, type: Number, example: 10 })
   @ApiResponse({
@@ -110,7 +117,8 @@ export class UsersController {
     return await this.usersService.findAll(filters);
   }
 
-  @Get("active")
+
+  /* @Get("active")
   @Roles(1, 4) // Admin, Supervisor
   @ApiOperation({ 
     summary: 'Obtener solo usuarios activos',
@@ -123,9 +131,9 @@ export class UsersController {
   async findActive(@Query() pagination: PaginationDto) {
     // Filtrar directamente por usuarios activos sin el campo valido
     return await this.usersService.findActiveUsers(pagination);
-  }
+  } */
 
-  @Get("inactive")
+  /* @Get("inactive")
   @Roles(1, 4) // Admin, Supervisor
   @ApiOperation({ 
     summary: 'Obtener solo usuarios inactivos',
@@ -138,10 +146,10 @@ export class UsersController {
   async findInactive(@Query() pagination: PaginationDto) {
     // Filtrar directamente por usuarios inactivos sin el campo valido
     return await this.usersService.findInactiveUsers(pagination);
-  }
+  } */
 
   // Nuevo endpoint específico
-  @Get("only")
+ /*  @Get("only")
   @ApiOperation({ summary: "Obtener usuarios con datos básicos" })
   @ApiQuery({ name: "search", required: false, type: String })
   @ApiQuery({ name: "active", required: false, type: Boolean })
@@ -176,7 +184,7 @@ export class UsersController {
   })
   async findAllOnly(@Query() filters: UserFiltersDto) {
     return await this.usersService.findAllOnly(filters);
-  }
+  } */
 
   // ❌ ENDPOINT DESHABILITADO - Estadísticas de usuarios
   /* 
@@ -296,7 +304,7 @@ export class UsersController {
     return await this.usersService.findByCedula(cedula);
   }
 
-  @Get(":id/preview-update")
+ /*  @Get(":id/preview-update")
   @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({
     summary: "Vista previa de datos antes de actualizar",
@@ -316,7 +324,7 @@ export class UsersController {
       instrucciones:
         "Envía los campos que quieres cambiar al endpoint PUT /users/:id",
     };
-  }
+  } */
 
   @Put(":id")
   @UseGuards(JwtAuthGuard, RolesGuard)

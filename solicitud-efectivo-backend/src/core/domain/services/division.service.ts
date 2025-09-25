@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { IDivisionRepository } from '../repositories/division.repository.interface';
 import { CreateDivisionDto } from '../../application/dto/create-division.dto';
 import { UpdateDivisionDto } from '../../application/dto/update-division.dto';
@@ -32,14 +32,27 @@ export class DivisionService {
 
   async findAll(pagination?: DivisionQueryDto): Promise<DivisionResponseDto[] | PaginatedResponseDto<DivisionResponseDto>> {
     let divisions: any[];
-    if (pagination?.estado === 'a') {
+    if (pagination?.statusId === 1) {
       divisions = await this.divisionRepository.findAllByEstado(true);
-    } else if (pagination?.estado === 'i') {
+    } else if (pagination?.statusId === 2) {
       divisions = await this.divisionRepository.findAllByEstado(false);
     } else {
       divisions = await this.divisionRepository.findAll();
+    } 
+    let mappedDivisions = divisions.map(division => this.mapToResponseDto(division));
+
+    // Aplicar filtros de búsqueda
+    if (pagination?.division) {
+      mappedDivisions = mappedDivisions.filter(division => 
+        division.nombre.toLowerCase().includes(pagination.division!.toLowerCase())
+      );
     }
-    const mappedDivisions = divisions.map(division => this.mapToResponseDto(division));
+
+    if (pagination?.search) {
+      mappedDivisions = mappedDivisions.filter(division => 
+        division.nombre.toLowerCase().includes(pagination.search!.toLowerCase())
+      );
+    }
 
     // Si no se proporciona paginación, devolver todos los resultados
     if (!pagination || (!pagination.page && !pagination.limit)) {
@@ -103,6 +116,11 @@ export class DivisionService {
       throw new NotFoundException(`División con ID ${id} no encontrada`);
     }
 
+    // Verificar si ya está inactiva
+    if (!existingDivision.estado) {
+      throw new ConflictException(`La división "${existingDivision.nombre}" ya está marcada como eliminada`);
+    }
+
     await this.divisionRepository.delete(id);
   }
 
@@ -111,7 +129,7 @@ export class DivisionService {
       id: division.id,
       nombre: division.nombre,
       dependencia_id: division.dependenciaId,
-      estado: division.estado,
+      estado: division.estado ? 1 : 2, // true → 1 (activa), false → 2 (inactiva)
     };
   }
 }

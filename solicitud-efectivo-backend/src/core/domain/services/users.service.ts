@@ -765,10 +765,14 @@ export class UsersService {
   ): SelectQueryBuilder<UserEntity> {
     const queryBuilder = this.userRepository.createQueryBuilder("user");
 
-    // Filtro por validez del usuario
-    // COMPORTAMIENTO POR DEFECTO: traer TODOS los usuarios (activos e inactivos)
-    // Solo filtrar si se especifica explícitamente el parámetro active
-    if (filters?.active !== undefined) {
+    // Filtro por statusId (prioridad sobre active)
+    if (filters?.statusId !== undefined) {
+      const validoValue = filters.statusId === 1; // 1 = activo (true), 2 = inactivo (false)
+      queryBuilder.where("user.valido = :valido", { valido: validoValue });
+      this.logger.log(`Aplicando filtro de statusId: ${filters.statusId} (valido: ${validoValue})`);
+    } 
+    // Filtro por validez del usuario (fallback si no hay statusId)
+    else if (filters?.active !== undefined) {
       queryBuilder.where("user.valido = :valido", {
         valido: filters.active ? true : false, // Convertir explícitamente a booleano
       });
@@ -803,6 +807,7 @@ export class UsersService {
 
     return queryBuilder.orderBy("user.nombre", "DESC");
   }
+
 
   /**
    * Mapea la entidad User a IUserResponse con estructura completa

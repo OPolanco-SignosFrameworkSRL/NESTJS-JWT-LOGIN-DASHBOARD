@@ -25,7 +25,6 @@ import { SolicitudDesembolsoWebTiposEntity } from '../infrastructure/database/en
 import { GaDependenciasEntity } from '../infrastructure/database/entities/ga-dependencias.entity';
 
 import { PagoNoLiquidadoEntity } from '../infrastructure/database/entities/pago-no-liquidado.entity';
-import { PagoNoLiquidadoAdjuntoEntity } from '../infrastructure/database/entities/pago-no-liquidado-adjunto.entity';
 
 
 import { RecintosEntity } from '../infrastructure/database/entities/recintos.entity';
@@ -65,7 +64,6 @@ export const getDatabaseConfig = (
     SolicitudDesembolsoWebTiposEntity,
     GaDependenciasEntity,
     PagoNoLiquidadoEntity,
-    PagoNoLiquidadoAdjuntoEntity,
     RecintosEntity,
 
   ],

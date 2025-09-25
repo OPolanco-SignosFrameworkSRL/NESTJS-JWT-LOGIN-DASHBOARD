@@ -9,7 +9,9 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    logger: process.env.NODE_ENV === 'production' ? ['error', 'warn'] : false, // Silenciar logs en desarrollo
+  });
   const configService = app.get(ConfigService);
 
   // Configurar prefijo global /api para todos los endpoints
@@ -56,11 +58,11 @@ async function bootstrap() {
 
   await app.listen(port);
 
-  logger.log(`🚀 Aplicación ejecutándose en: http://localhost:${port}`);
-  logger.log(
-    `📚 Documentación disponible en: http://localhost:${port}/${swaggerConfig.path}`,
-  );
-  logger.log(`🔧 Entorno: ${environment}`);
+  // Limpiar la consola y mostrar solo la información esencial
+  console.clear();
+  console.log(`\n🚀 Servidor ejecutándose en: http://localhost:${port}\n`);
+  console.log(`📚 Documentación disponible en: http://localhost:${port}/${swaggerConfig.path}\n`);
+  console.log(`🔧 Entorno: ${environment}\n`);
 }
 
 bootstrap().catch(error => {

@@ -12,4 +12,10 @@ export class TipoPagoResponseDto {
     example: 'Efectivo',
   })
   tipo_desc: string;
+
+  @ApiProperty({ description: 'Estado (1=Activo, 2=Inactivo)', example: 1 })
+  estado: number;
+
+  
+
 }

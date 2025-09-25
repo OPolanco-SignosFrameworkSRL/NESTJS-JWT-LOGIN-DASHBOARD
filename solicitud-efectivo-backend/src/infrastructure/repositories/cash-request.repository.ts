@@ -109,9 +109,16 @@ export class CashRequestRepository implements ICashRequestRepository {
    * Encuentra una solicitud por ID
    */
   async findById(id: number): Promise<CashRequest | null> {
-    const cashRequest = await this.cashRequestReadRepository.findOne({ where: { id } });
-    if (!cashRequest) return null;
-    return this.mapToDomain(cashRequest);
+    // Intentar primero en la vista de lectura
+    const cashRequestRead = await this.cashRequestReadRepository.findOne({ where: { id } });
+    if (cashRequestRead) {
+      return this.mapToDomain(cashRequestRead);
+    }
+
+    // Fallback: intentar en la tabla base (algunas solicitudes podrían no estar en la vista)
+    const cashRequestWrite = await this.cashRequestWriteRepository.findOne({ where: { id } as any });
+    if (!cashRequestWrite) return null;
+    return this.mapToDomain(cashRequestWrite as any);
   }
 
   async findAllWithPagination(filters?: ICashRequestFilters & { skip?: number; take?: number }): Promise<[CashRequest[], number]> {

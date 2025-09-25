@@ -16,4 +16,8 @@ export class TipoPagoEntity {
   })
   @Column({ type: 'varchar', length: 45 })
   tipo_desc: string;
+
+  @ApiProperty({ description: 'Estado (1=Activo, 2=Inactivo)', example: 1 })
+  @Column({ type: 'int', default: 1 })
+  estado: number;
 }

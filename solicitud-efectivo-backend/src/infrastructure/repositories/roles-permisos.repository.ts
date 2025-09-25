@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { RolesPermisosEntity } from '../database/entities/roles-permisos.entity';
+import { ModuloPermisoEntity } from '../database/entities/modulo-permiso.entity';
 
 @Injectable()
 export class RolesPermisosRepository {
@@ -26,5 +27,17 @@ export class RolesPermisosRepository {
     return repository.findOne({
       where: { IdRol: idRol, IdPermiso: idPermiso, RowActive: true }
     });
+  }
+
+  // Busca si ya existe una relación activo entre un rol y CUALQUIER permiso del mismo módulo
+  async findByRolAndModulo(idRol: number, idModulo: number): Promise<RolesPermisosEntity | null> {
+    const rpRepo = this.dataSource.getRepository(RolesPermisosEntity);
+    return rpRepo
+      .createQueryBuilder('rp')
+      .innerJoin(ModuloPermisoEntity, 'mp', 'rp.IdPermiso = mp.Id AND mp.RowActive = 1')
+      .where('rp.IdRol = :idRol', { idRol })
+      .andWhere('rp.RowActive = 1')
+      .andWhere('mp.IdModulo = :idModulo', { idModulo })
+      .getOne();
   }
 }

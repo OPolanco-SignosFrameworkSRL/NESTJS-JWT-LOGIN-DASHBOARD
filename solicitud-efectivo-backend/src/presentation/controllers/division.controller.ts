@@ -56,7 +56,28 @@ export class DivisionController {
   @ApiOperation({ summary: 'Obtener todas las divisiones con paginación y filtro de estado' })
   @ApiQuery({ name: 'page', required: false, description: 'Número de página', example: 1, type: Number })
   @ApiQuery({ name: 'limit', required: false, description: 'Elementos por página', example: 10, type: Number })
-  @ApiQuery({ name: 'estado', required: false, description: 'Filtro de estado: a=activas, i=inactivas', example: 'a', enum: ['a','i'] })
+ // @ApiQuery({ name: 'estado', required: false, description: 'Filtro de estado: a=activas, i=inactivas', example: 'a', enum: ['a','i'] })
+  @ApiQuery({ 
+    name: 'statusId', 
+    required: false, 
+    type: Number,
+    enum: [1, 2],
+    description: '1=Activas, 2=Inactivas' 
+  })
+  @ApiQuery({ 
+    name: 'division', 
+    required: false, 
+    type: String,
+    description: 'Filtrar por nombre de división',
+    example: 'TI'
+  })
+  @ApiQuery({ 
+    name: 'search', 
+    required: false, 
+    type: String,
+    description: 'Buscar por término (nombre de división)',
+    example: 'Administración'
+  })
   @ApiResponse({
     status: 200,
     description: 'Lista de divisiones obtenida exitosamente',
@@ -114,16 +135,20 @@ export class DivisionController {
 
   @Delete(':id')
   @Roles(1) // Admin
-  @ApiOperation({ summary: 'Eliminar una división' })
+  @ApiOperation({ 
+    summary: 'Eliminar una división (soft delete)', 
+    description: 'Marca la división como inactiva (estado = false) en lugar de eliminarla permanentemente' 
+  })
   @ApiParam({ name: 'id', description: 'ID de la división', example: 1 })
   @ApiResponse({
     status: 200,
-    description: 'División eliminada exitosamente'
+    description: 'División marcada como eliminada exitosamente'
   })
   @ApiResponse({ status: 404, description: 'División no encontrada' })
+  @ApiResponse({ status: 409, description: 'La división ya está marcada como eliminada' })
   @ApiResponse({ status: 403, description: 'No tiene permisos para eliminar divisiones' })
   async delete(@Param('id', ParseIntPipe) id: number): Promise<{ message: string }> {
     await this.divisionService.delete(id);
-    return { message: 'División eliminada exitosamente' };
+    return { message: 'División marcada como eliminada exitosamente' };
   }
 }

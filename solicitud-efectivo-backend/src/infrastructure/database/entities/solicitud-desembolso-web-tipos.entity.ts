@@ -30,4 +30,6 @@ export class SolicitudDesembolsoWebTiposEntity {
   })
   @Column({ type: 'int' })
   produccion_flag: number;
+
+  // Campo 'estado' eliminado para compatibilidad con BD actual (sin columna)
 }

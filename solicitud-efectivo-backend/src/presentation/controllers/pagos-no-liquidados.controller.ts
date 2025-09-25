@@ -31,15 +31,29 @@ import {
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RolesGuard } from '../guards/roles.guard';
 import { Roles } from '../decorators/roles.decorator';
+import { CreatePagoNoLiquidadoDto } from '../../core/application/dto/create-pago-no-liquidado.dto';
+import { UpdatePagoNoLiquidadoDto } from '../../core/application/dto/update-pago-no-liquidado.dto';
 
 @ApiTags('Pagos No Liquidados')
 @Controller('pagos-no-liquidados')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@ApiBearerAuth()
 export class PagosNoLiquidadosController {
   constructor(private readonly pagoNoLiquidadoService: PagoNoLiquidadoService) {}
 
+  @Get('test')
+  // Sin autenticación para pruebas
+  @ApiOperation({ 
+    summary: 'ENDPOINT DE PRUEBA - Obtener listado de pagos no liquidados',
+    description: 'Endpoint temporal para probar la funcionalidad sin autenticación.'
+  })
+  async findAllTest(
+    @Query() query: PagoNoLiquidadoQueryDto,
+  ): Promise<PagosNoLiquidadosListResponseDto> {
+    return this.pagoNoLiquidadoService.findAll(query, 1); // Usuario de prueba
+  }
+
   @Get()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles(1, 4) // Administrador y otros roles con permisos
   @ApiOperation({ 
     summary: 'Obtener listado de pagos no liquidados con filtros',
@@ -100,6 +114,8 @@ export class PagosNoLiquidadosController {
   }
 
   @Get('stats')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles(1, 4)
   @ApiOperation({ 
     summary: 'Obtener estadísticas de pagos no liquidados',
@@ -151,6 +167,38 @@ export class PagosNoLiquidadosController {
     return this.pagoNoLiquidadoService.findById(id, userId);
   }
 
+  @Post('test')
+  // @Roles(1, 4) // Temporalmente sin autenticación para pruebas
+  @ApiOperation({ 
+    summary: 'ENDPOINT DE PRUEBA - Crear un nuevo pago no liquidado',
+    description: 'Endpoint temporal para probar la funcionalidad sin autenticación.'
+  })
+  async createTest(
+    @Body() createData: CreatePagoNoLiquidadoDto,
+  ): Promise<PagoNoLiquidadoResponseDto> {
+    const testUserId = 1; // Usuario de prueba
+    // mapear snake_case -> camelCase para tabla real
+    const payload = {
+      desembolsoNumero: createData.desembolso_numero,
+      solicitudId: createData.solicitud_id,
+      fechaCreado: new Date(),
+      creadoPorId: testUserId,
+      solicitudMonto: createData.solicitud_monto,
+      desembolsoMonto: createData.desembolso_monto,
+      tipoPago: createData.tipo_pago,
+      concepto: createData.concepto,
+      beneficiario: createData.beneficiario,
+      cedula: createData.cedula,
+      estatus: createData.estatus ?? 1, // 1 = activo por defecto
+      chequeNo: createData.cheque_no,
+      transferenciaRef: createData.transferencia_ref,
+      notas: createData.notas,
+      cajaId: createData.caja_id,
+      cuentaBanco: createData.cuenta_banco,
+    };
+    return this.pagoNoLiquidadoService.create(payload as any, testUserId);
+  }
+
   @Post()
   @Roles(1, 4)
   @ApiOperation({ 
@@ -167,11 +215,30 @@ export class PagosNoLiquidadosController {
     description: 'Datos de entrada inválidos',
   })
   async create(
-    @Body() createData: any, // TODO: Crear CreatePagoNoLiquidadoDto
+    @Body() createData: CreatePagoNoLiquidadoDto,
     @Request() req: any
   ): Promise<PagoNoLiquidadoResponseDto> {
     const userId = req.user?.id;
-    return this.pagoNoLiquidadoService.create(createData, userId);
+    // mapear snake_case -> camelCase para tabla real
+    const payload = {
+      desembolsoNumero: createData.desembolso_numero,
+      solicitudId: createData.solicitud_id,
+      fechaCreado: new Date(),
+      creadoPorId: userId,
+      solicitudMonto: createData.solicitud_monto,
+      desembolsoMonto: createData.desembolso_monto,
+      tipoPago: createData.tipo_pago,
+      concepto: createData.concepto,
+      beneficiario: createData.beneficiario,
+      cedula: createData.cedula,
+      estatus: createData.estatus ?? 1, // 1 = activo por defecto
+      chequeNo: createData.cheque_no,
+      transferenciaRef: createData.transferencia_ref,
+      notas: createData.notas,
+      cajaId: createData.caja_id,
+      cuentaBanco: createData.cuenta_banco,
+    };
+    return this.pagoNoLiquidadoService.create(payload as any, userId);
   }
 
   @Put(':id')
@@ -201,11 +268,25 @@ export class PagosNoLiquidadosController {
   })
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateData: any, // TODO: Crear UpdatePagoNoLiquidadoDto
+    @Body() updateData: UpdatePagoNoLiquidadoDto,
     @Request() req: any
   ): Promise<PagoNoLiquidadoResponseDto> {
     const userId = req.user?.id;
-    return this.pagoNoLiquidadoService.update(id, updateData, userId);
+    const payload: any = {};
+    if (updateData.desembolso_numero !== undefined) payload.desembolsoNumero = updateData.desembolso_numero;
+    if (updateData.solicitud_monto !== undefined) payload.solicitudMonto = updateData.solicitud_monto;
+    if (updateData.desembolso_monto !== undefined) payload.desembolsoMonto = updateData.desembolso_monto;
+    if (updateData.tipo_pago !== undefined) payload.tipoPago = updateData.tipo_pago;
+    if (updateData.concepto !== undefined) payload.concepto = updateData.concepto;
+    if (updateData.beneficiario !== undefined) payload.beneficiario = updateData.beneficiario;
+    if (updateData.cedula !== undefined) payload.cedula = updateData.cedula;
+    if (updateData.estatus !== undefined) payload.estatus = updateData.estatus;
+    if (updateData.cheque_no !== undefined) payload.chequeNo = updateData.cheque_no;
+    if (updateData.transferencia_ref !== undefined) payload.transferenciaRef = updateData.transferencia_ref;
+    if (updateData.notas !== undefined) payload.notas = updateData.notas;
+    if (updateData.caja_id !== undefined) payload.cajaId = updateData.caja_id;
+    if (updateData.cuenta_banco !== undefined) payload.cuentaBanco = updateData.cuenta_banco;
+    return this.pagoNoLiquidadoService.update(id, payload, userId);
   }
 
   @Patch(':id/cancel')

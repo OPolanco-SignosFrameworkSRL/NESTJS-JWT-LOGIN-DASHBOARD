@@ -96,6 +96,7 @@ export interface IUserFilters {
   division?: string;
   search?: string;
   active?: boolean;
+  statusId?: number; // 1=Activos, 2=Inactivos
   page?: number;
   limit?: number;
   offset?: number;

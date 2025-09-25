@@ -17,7 +17,7 @@ export class DivisionRepository implements IDivisionRepository {
     const division = this.divisionRepository.create({
       nombre: createDivisionDto.nombre,
       dependenciaId: createDivisionDto.dependencia_id,
-      estado: createDivisionDto.estado ?? true, // Default a true si no se especifica
+      estado: createDivisionDto.estado !== undefined ? createDivisionDto.estado === 1 : true, // 1 → true, 2 → false, default → true
     });
     return await this.divisionRepository.save(division);
   }
@@ -51,7 +51,7 @@ export class DivisionRepository implements IDivisionRepository {
       updateData.dependenciaId = updateDivisionDto.dependencia_id;
     }
     if (updateDivisionDto.estado !== undefined) {
-      updateData.estado = updateDivisionDto.estado;
+      updateData.estado = updateDivisionDto.estado === 1; // 1 → true, 2 → false
     }
 
     await this.divisionRepository.update(id, updateData);
@@ -59,7 +59,11 @@ export class DivisionRepository implements IDivisionRepository {
   }
 
   async delete(id: number): Promise<void> {
-    await this.divisionRepository.delete(id);
+    // Soft delete: cambiar estado a false en lugar de eliminar
+    const updateResult = await this.divisionRepository.update(id, { estado: false });
+    if (updateResult.affected === 0) {
+      throw new Error(`No se pudo marcar como eliminada la división con ID ${id}`);
+    }
   }
 
   async findByName(nombre: string): Promise<any[]> {

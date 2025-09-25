@@ -26,30 +26,35 @@ export class ModulosPermisosService {
    */
   async findAll(filters?: IModuloPermisoFilters): Promise<PaginatedResponseDto<IModuloPermisoResponse>> {
     try {
-      const { page = 1, limit = 10 } = filters || {};
-      const skip = (page - 1) * limit;
+      // Normalizar page y limit desde query (pueden llegar como string)
+      const rawPage: any = filters?.page;
+      const rawLimit: any = filters?.limit;
+      const pageNum = Number.isFinite(Number(rawPage)) && Number(rawPage) > 0 ? Number(rawPage) : 1;
+      const limitNum = Number.isFinite(Number(rawLimit)) && Number(rawLimit) > 0 ? Number(rawLimit) : undefined;
 
-      // Obtener total de registros
-      const total = await this.moduloPermisoRepository.count();
-
-      // Obtener permisos con filtros
+      // Obtener permisos con filtros (y usar su longitud para el total real)
       const permisos = await this.moduloPermisoRepository.findAll(filters);
+      const total = permisos.length;
 
-      // Aplicar paginación manual
-      const paginatedPermisos = permisos.slice(skip, skip + limit);
-
-      const totalPages = Math.ceil(total / limit);
+      // Paginación manual segura
+      let paginatedPermisos = permisos;
+      let totalPages = 1;
+      if (limitNum !== undefined) {
+        const skip = (pageNum - 1) * limitNum;
+        paginatedPermisos = permisos.slice(skip, skip + limitNum);
+        totalPages = Math.max(1, Math.ceil(total / limitNum));
+      }
 
       const mappedPermisos = paginatedPermisos.map(permiso => this.mapToModuloPermisoResponse(permiso));
 
       return {
         data: mappedPermisos,
         total,
-        page,
-        limit,
+        page: pageNum,
+        limit: limitNum ?? total,
         totalPages,
-        hasNext: page < totalPages,
-        hasPrev: page > 1
+        hasNext: limitNum ? pageNum < totalPages : false,
+        hasPrev: limitNum ? pageNum > 1 : false,
       };
     } catch (error) {
       this.logger.error('Error obteniendo permisos de módulos:', error);
@@ -93,19 +98,32 @@ export class ModulosPermisosService {
    */
   async create(createData: IModuloPermisoCreateData, userId: number): Promise<IModuloPermisoResponse> {
     try {
+      this.logger.log(`Creando permiso para módulo ${createData.idModulo} (usuario: ${userId})`);
+      
+      // Validar parámetros
+      if (!createData.idModulo || !Number.isInteger(Number(createData.idModulo)) || Number(createData.idModulo) <= 0) {
+        throw new BadRequestException(`ID de módulo inválido: ${createData.idModulo} (tipo: ${typeof createData.idModulo})`);
+      }
+      if (!userId || !Number.isInteger(Number(userId)) || Number(userId) <= 0) {
+        throw new BadRequestException(`ID de usuario inválido: ${userId} (tipo: ${typeof userId})`);
+      }
+
+      const idModulo = Number(createData.idModulo);
+      const userIdNum = Number(userId);
+
       // Verificar si ya existe un permiso para este módulo
-      const existingPermiso = await this.moduloPermisoRepository.findByModulo(createData.idModulo);
+      const existingPermiso = await this.moduloPermisoRepository.findByModulo(idModulo);
       if (existingPermiso) {
-        throw new BadRequestException(`Ya existe un permiso para el módulo con ID ${createData.idModulo}`);
+        throw new BadRequestException(`Ya existe un permiso para el módulo con ID ${idModulo}`);
       }
 
       const permiso = await this.moduloPermisoRepository.create({
-        IdModulo: createData.idModulo,
-        Ver: createData.ver,
-        Agregar: createData.agregar,
-        Editar: createData.editar,
-        Eliminar: createData.eliminar,
-        UserAdd: userId
+        IdModulo: idModulo,
+        Ver: createData.ver ?? false,
+        Agregar: createData.agregar ?? false,
+        Editar: createData.editar ?? false,
+        Eliminar: createData.eliminar ?? false,
+        UserAdd: userIdNum
       });
 
       this.logger.log(`Permiso de módulo creado exitosamente: ${permiso.Id}`);
@@ -235,7 +253,7 @@ export class ModulosPermisosService {
           mp.Editar,
           mp.Eliminar
         FROM RolesPermisos rp
-        LEFT JOIN ModulosPermisos mp ON rp.IdPermiso = mp.IdModulo
+        LEFT JOIN ModulosPermisos mp ON rp.IdPermiso = mp.Id
         LEFT JOIN Modulos m ON mp.IdModulo = m.Id
         WHERE rp.IdRol = @0 AND rp.RowActive = 1
         ORDER BY m.Id
@@ -263,43 +281,59 @@ export class ModulosPermisosService {
    */
   async createByRolAndModule(createData: { idRol: number, Module_name: string, ver: boolean, agregar: boolean, editar: boolean, eliminar: boolean }, userId: number): Promise<IModuloPermisoResponse> {
     try {
+      this.logger.log(`Creando permiso por rol ${createData.idRol} y módulo "${createData.Module_name}" (usuario: ${userId})`);
+      
+      // Validar parámetros
+      if (!createData.idRol || !Number.isInteger(Number(createData.idRol)) || Number(createData.idRol) <= 0) {
+        throw new BadRequestException(`ID de rol inválido: ${createData.idRol} (tipo: ${typeof createData.idRol})`);
+      }
+      if (!createData.Module_name || typeof createData.Module_name !== 'string' || createData.Module_name.trim().length === 0) {
+        throw new BadRequestException(`Nombre de módulo inválido: ${createData.Module_name}`);
+      }
+      if (!userId || !Number.isInteger(Number(userId)) || Number(userId) <= 0) {
+        throw new BadRequestException(`ID de usuario inválido: ${userId} (tipo: ${typeof userId})`);
+      }
+
+      const idRol = Number(createData.idRol);
+      const userIdNum = Number(userId);
+
       // 1. Encontrar o crear el módulo
-      const modulo = await this.moduloRepository.findOrCreate(createData.Module_name, userId);
+      const modulo = await this.moduloRepository.findOrCreate(createData.Module_name.trim(), userIdNum);
       
       // 2. Verificar si ya existe un permiso para este módulo
       let permiso = await this.moduloPermisoRepository.findByModulo(modulo.Id);
       
-      // 3. Verificar si ya existe la relación rol-módulo
-      const existingRolPermiso = await this.rolesPermisosRepository.findByRolAndPermiso(createData.idRol, modulo.Id);
-      if (existingRolPermiso) {
-        throw new BadRequestException(`Ya existe un permiso para el rol ${createData.idRol} y módulo "${createData.Module_name}"`);
-      }
-      
       if (!permiso) {
-        // 4. Crear el permiso si no existe
+        // 3. Crear el permiso si no existe
         permiso = await this.moduloPermisoRepository.create({
           IdModulo: modulo.Id,
           Ver: createData.ver,
           Agregar: createData.agregar,
           Editar: createData.editar,
           Eliminar: createData.eliminar,
-          UserAdd: userId
+          UserAdd: userIdNum
         });
       } else {
-        // 4b. Actualizar el permiso existente con los nuevos valores
+        // 3b. Actualizar el permiso existente con los nuevos valores
         permiso = await this.moduloPermisoRepository.update(permiso.Id, {
           Ver: createData.ver,
           Agregar: createData.agregar,
           Editar: createData.editar,
           Eliminar: createData.eliminar,
-          UserMod: userId
+          UserMod: userIdNum
         });
       }
 
-      // 5. Crear la relación en RolesPermisos
-      await this.rolesPermisosRepository.create(createData.idRol, modulo.Id, userId);
+      // 4. Verificar si ya existe la relación rol-permiso
+      const existingRolPermiso = await this.rolesPermisosRepository.findByRolAndPermiso(idRol, permiso.Id);
+      if (existingRolPermiso) {
+        throw new BadRequestException(`Ya existe un permiso para el rol ${idRol} y módulo "${createData.Module_name}"`);
+      }
 
-      this.logger.log(`Permiso de módulo creado exitosamente: ${permiso.Id} para módulo "${createData.Module_name}" y rol ${createData.idRol}`);
+      // 5. Crear la relación en RolesPermisos (usando el ID del permiso, no del módulo)
+      await this.rolesPermisosRepository.create(idRol, permiso.Id, userIdNum);
+
+      this.logger.log(`Permiso de módulo creado exitosamente: ${permiso.Id} para módulo "${createData.Module_name}" y rol ${idRol}`);
       return this.mapToModuloPermisoResponse(permiso);
     } catch (error) {
       this.logger.error('Error creando permiso de módulo por rol:', error);
@@ -343,5 +377,87 @@ export class ModulosPermisosService {
     }
     
     return resultados;
+  }
+
+  /**
+   * Añade (o asegura) un permiso de módulo para un rol, a partir de idRol e idModulo
+   * - Crea el registro en ModulosPermisos si no existe (con permisos básicos)
+   * - Crea la relación en RolesPermisos si no existe
+   */
+  async addModuleToRole(
+    idRol: number,
+    idModulo: number,
+    userId: number,
+    options?: { ver?: boolean; agregar?: boolean; editar?: boolean; eliminar?: boolean },
+  ): Promise<IModuloPermisoResponse> {
+    try {
+      this.logger.log(`Añadiendo módulo ${idModulo} al rol ${idRol} (usuario: ${userId})`);
+      
+      // Validar parámetros
+      if (!Number.isInteger(idRol) || idRol <= 0) {
+        throw new BadRequestException(`ID de rol inválido: ${idRol}`);
+      }
+      if (!Number.isInteger(idModulo) || idModulo <= 0) {
+        throw new BadRequestException(`ID de módulo inválido: ${idModulo}`);
+      }
+      if (!Number.isInteger(userId) || userId <= 0) {
+        throw new BadRequestException(`ID de usuario inválido: ${userId}`);
+      }
+
+      // 1) Encontrar o crear el permiso para el módulo
+      let permiso = await this.moduloPermisoRepository.findByModulo(idModulo);
+
+      if (!permiso) {
+        this.logger.log(`Creando nuevo permiso para módulo ${idModulo}`);
+        permiso = await this.moduloPermisoRepository.create({
+          IdModulo: idModulo,
+          Ver: options?.ver ?? true,
+          Agregar: options?.agregar ?? false,
+          Editar: options?.editar ?? false,
+          Eliminar: options?.eliminar ?? false,
+          UserAdd: userId,
+        });
+      }
+
+      // 2) Actualizar flags si se proporcionaron opciones
+      if (options && (
+        options.ver !== undefined ||
+        options.agregar !== undefined ||
+        options.editar !== undefined ||
+        options.eliminar !== undefined
+      )) {
+        this.logger.log(`Actualizando permisos para módulo ${idModulo}`);
+        const updateFields: any = { UserMod: userId };
+        if (options.ver !== undefined) updateFields.Ver = options.ver;
+        if (options.agregar !== undefined) updateFields.Agregar = options.agregar;
+        if (options.editar !== undefined) updateFields.Editar = options.editar;
+        if (options.eliminar !== undefined) updateFields.Eliminar = options.eliminar;
+
+        const updated = await this.moduloPermisoRepository.update(permiso.Id, updateFields);
+        if (updated) {
+          permiso = updated as any;
+        }
+      }
+
+      // 3) Verificar si ya existe la relación rol-permiso
+      const existing = await this.rolesPermisosRepository.findByRolAndPermiso(idRol, permiso.Id);
+      
+      if (existing) {
+        this.logger.log(`Relación ya existe entre rol ${idRol} y permiso ${permiso.Id}, devolviendo permiso actualizado`);
+        return this.mapToModuloPermisoResponse(permiso);
+      }
+
+      // 4) Crear la relación rol-permiso
+      this.logger.log(`Creando relación entre rol ${idRol} y permiso ${permiso.Id}`);
+      await this.rolesPermisosRepository.create(idRol, permiso.Id, userId);
+
+      return this.mapToModuloPermisoResponse(permiso);
+    } catch (error) {
+      this.logger.error(
+        `Error añadiendo módulo ${idModulo} al rol ${idRol}:`,
+        error,
+      );
+      throw error;
+    }
   }
 }

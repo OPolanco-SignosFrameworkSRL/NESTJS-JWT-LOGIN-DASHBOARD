@@ -107,7 +107,7 @@ export class RolesService {
   /**
    * Desactiva un rol (soft delete)
    */
-  async deactivateRole(id: number): Promise<boolean> {
+  async deactivateRole(id: number, userDelId?: number): Promise<boolean> {
     if (id <= 0) {
       throw new Error('El ID del rol debe ser un número positivo');
     }
@@ -118,7 +118,7 @@ export class RolesService {
     }
 
     if (!role.isActive()) {
-      throw new Error('El rol ya está desactivado');
+      throw new Error(`El rol "${role.role_name}" ya está desactivado. No se requiere acción adicional.`);
     }
 
     // Verificar si el rol es crítico para el sistema
@@ -126,14 +126,14 @@ export class RolesService {
       throw new Error('No se puede desactivar un rol crítico del sistema');
     }
 
-    return this.roleRepository.delete(id);
+    return this.roleRepository.delete(id, userDelId);
   }
 
   /**
    * Reactiva un rol
    */
   async activateRole(id: number): Promise<boolean> {
-    if (id <= 0) {
+    if (id <= 0) {70
       throw new Error('El ID del rol debe ser un número positivo');
     }
 

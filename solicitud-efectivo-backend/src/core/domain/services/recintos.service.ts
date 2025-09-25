@@ -2,7 +2,7 @@ import { Injectable, Inject, NotFoundException, ConflictException } from '@nestj
 import { IRecintosRepository } from '../repositories/recintos.repository.interface';
 import { CreateRecintosDto } from '../../application/dto/create-recintos.dto';
 import { UpdateRecintosDto } from '../../application/dto/update-recintos.dto';
-import { RecintosResponseDto } from '../../application/dto/recintos-response.dto';
+import { RecintosResponseDto, RecintosListResponseDto } from '../../application/dto/recintos-response.dto';
 import { PaginationDto, PaginatedResponseDto } from '../../application/dto/pagination.dto';
 
 @Injectable()
@@ -12,22 +12,36 @@ export class RecintosService {
     private readonly recintosRepository: IRecintosRepository,
   ) {}
 
-  async findAll(pagination?: PaginationDto): Promise<RecintosResponseDto[] | PaginatedResponseDto<RecintosResponseDto>> {
+  async findAll(filters?: any): Promise<RecintosListResponseDto> {
     const recintos = await this.recintosRepository.findAll();
-    const mappedRecintos = recintos.map(recinto => this.mapToResponseDto(recinto));
+    let mappedRecintos = recintos.map(recinto => this.mapToResponseDto(recinto));
 
-    // Si no se proporciona paginación, devolver todos los resultados
-    if (!pagination || (!pagination.page && !pagination.limit)) {
-      return mappedRecintos;
+    // Aplicar filtros
+    if (filters?.statusId !== undefined) {
+      mappedRecintos = mappedRecintos.filter(recinto => recinto.statusId === filters.statusId);
     }
 
-    // Aplicar paginación
-    const { page = 1, limit = 10 } = pagination;
+    if (filters?.recinto) {
+      mappedRecintos = mappedRecintos.filter(recinto => 
+        recinto.recinto.toLowerCase().includes(filters.recinto!.toLowerCase())
+      );
+    }
+
+    if (filters?.search) {
+      mappedRecintos = mappedRecintos.filter(recinto => 
+        recinto.recinto.toLowerCase().includes(filters.search!.toLowerCase()) ||
+        recinto.ubicacion.toLowerCase().includes(filters.search!.toLowerCase())
+      );
+    }
+
+    // Aplicar paginación si se proporciona
+    const { page = 1, limit = 10 } = filters || {};
     const skip = (page - 1) * limit;
     const paginatedRecintos = mappedRecintos.slice(skip, skip + limit);
     const total = mappedRecintos.length;
     const totalPages = Math.ceil(total / limit);
 
+    // Devolver siempre la estructura completa que espera el frontend
     return {
       data: paginatedRecintos,
       total,
@@ -35,7 +49,10 @@ export class RecintosService {
       limit,
       totalPages,
       hasNext: page < totalPages,
-      hasPrev: page > 1
+      hasPrev: page > 1,
+      statusCode: 200,
+      message: 'Lista de recintos obtenida exitosamente',
+      timestamp: new Date().toISOString(),
     };
   }
 
@@ -82,6 +99,11 @@ export class RecintosService {
       throw new NotFoundException(`Recinto con ID ${id} no encontrado`);
     }
 
+    // Verificar si ya está inactivo
+    if (existingRecinto.estado === 2) {
+      throw new ConflictException(`El recinto "${existingRecinto.recinto}" ya está marcado como eliminado`);
+    }
+
     await this.recintosRepository.delete(id);
   }
 
@@ -90,7 +112,8 @@ export class RecintosService {
       id: recinto.id,
       recinto: recinto.recinto,
       ubicacion: recinto.ubicacion,
-      estado: recinto.estado,
+      statusId: recinto.estado, // 1 o 2 directamente desde BD
+      valido: recinto.estado === 1, // true si 1 (válido), false si 2 (inválido)
     };
   }
 }

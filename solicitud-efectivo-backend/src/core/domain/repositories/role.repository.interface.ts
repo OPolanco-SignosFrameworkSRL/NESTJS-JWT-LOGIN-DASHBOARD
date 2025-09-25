@@ -39,7 +39,7 @@ export interface IRoleRepository {
   /**
    * Elimina un rol (soft delete)
    */
-  delete(id: number): Promise<boolean>;
+  delete(id: number, userDelId?: number): Promise<boolean>;
 
   /**
    * Restaura un rol eliminado

@@ -10,10 +10,12 @@ export class DeleteRoleUseCase {
   constructor(private readonly rolesService: RolesService) {}
 
   async execute(id: number): Promise<boolean> {
+    // Soft delete: solo desactivar el rol
     return this.rolesService.deactivateRole(id);
   }
 
   async executeHardDelete(id: number): Promise<boolean> {
+    // Hard delete: eliminar permanentemente
     return this.rolesService.deleteRolePermanently(id);
   }
 

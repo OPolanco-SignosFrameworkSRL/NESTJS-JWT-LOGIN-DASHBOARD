@@ -146,6 +146,82 @@ export class BulkUpdateModuloPermisoDto {
   permisos: UpdateModuloPermisoByRolDto[];
 }
 
+export class AddModuleToRoleDto {
+  @ApiProperty({ description: 'ID del rol', example: 1 })
+  @IsNumber()
+  idRol: number;
+
+  @ApiProperty({ description: 'ID del módulo', example: 3 })
+  @IsNumber()
+  idModulo: number;
+
+  @ApiProperty({ description: 'Permiso de ver', required: false, example: true })
+  @IsOptional()
+  @IsBoolean()
+  ver?: boolean;
+
+  @ApiProperty({ description: 'Permiso de agregar', required: false, example: false })
+  @IsOptional()
+  @IsBoolean()
+  agregar?: boolean;
+
+  @ApiProperty({ description: 'Permiso de editar', required: false, example: false })
+  @IsOptional()
+  @IsBoolean()
+  editar?: boolean;
+
+  @ApiProperty({ description: 'Permiso de eliminar', required: false, example: false })
+  @IsOptional()
+  @IsBoolean()
+  eliminar?: boolean;
+}
+
+export class ModuleIdDto {
+  @ApiProperty({ description: 'ID del módulo', example: 8 })
+  @IsNumber()
+  idModulo: number;
+}
+
+export class RoleIdDto {
+  @ApiProperty({ description: 'ID del rol', example: 7 })
+  @IsNumber()
+  id: number;
+}
+
+export class BulkAddModulesToRoleDto {
+  @ApiProperty({ description: 'Lista de roles destino', type: [RoleIdDto], name: 'idRol' })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => RoleIdDto)
+  idRol: RoleIdDto[];
+
+  @ApiProperty({ description: 'Lista de módulos a asignar', type: [ModuleIdDto], name: 'idModulo' })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ModuleIdDto)
+  idModulo: ModuleIdDto[];
+
+  @ApiProperty({ description: 'Permiso de ver', required: false, example: true })
+  @IsOptional()
+  @IsBoolean()
+  ver?: boolean;
+
+  @ApiProperty({ description: 'Permiso de agregar', required: false, example: true })
+  @IsOptional()
+  @IsBoolean()
+  agregar?: boolean;
+
+  @ApiProperty({ description: 'Permiso de editar', required: false, example: false })
+  @IsOptional()
+  @IsBoolean()
+  editar?: boolean;
+
+  @ApiProperty({ description: 'Permiso de eliminar', required: false, example: false })
+  @IsOptional()
+  @IsBoolean()
+  eliminar?: boolean;
+}
+
 export class GetPermisosByRolDto {
   @ApiProperty({ description: 'ID del rol', example: 1 })
   @IsNumber()

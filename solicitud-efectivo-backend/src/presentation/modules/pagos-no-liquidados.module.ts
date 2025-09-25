@@ -4,17 +4,15 @@ import { PagosNoLiquidadosController } from '../controllers/pagos-no-liquidados.
 import { PagoNoLiquidadoService } from '../../core/domain/services/pago-no-liquidado.service';
 import { PagoNoLiquidadoRepository } from '../../infrastructure/repositories/pago-no-liquidado.repository';
 import { PagoNoLiquidadoEntity } from '../../infrastructure/database/entities/pago-no-liquidado.entity';
-import { PagoNoLiquidadoAdjuntoEntity } from '../../infrastructure/database/entities/pago-no-liquidado-adjunto.entity';
-import { DivisionEntity } from '../../infrastructure/database/entities/division.entity';
-import { GaColaboradoresEntity } from '../../infrastructure/database/entities/ga-colaboradores.entity';
+import { UserEntity } from '../../infrastructure/database/entities/user.entity';
+import { TipoPagoEntity } from '../../infrastructure/database/entities/tipo-pago.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       PagoNoLiquidadoEntity,
-      PagoNoLiquidadoAdjuntoEntity,
-      DivisionEntity,
-      GaColaboradoresEntity,
+      UserEntity,
+      TipoPagoEntity,
     ]),
   ],
   controllers: [PagosNoLiquidadosController],
