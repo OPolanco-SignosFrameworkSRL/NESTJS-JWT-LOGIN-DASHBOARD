@@ -32,6 +32,13 @@ export interface IUserPayload {
   sub: number;       // ID del usuario (JWT standard)
   fullname: string;
   rolesUsuario: Array<{ id: number; roleName: string }>; // Array de roles del usuario
+  rolesPermisos?: Array<{
+    modulo: string;
+    ver?: boolean;
+    agregar?: boolean;
+    editar?: boolean;
+    eliminar?: boolean;
+  }>;
   email: string;
   valido: boolean;   // true = activo, false = inactivo
 }
@@ -44,6 +51,13 @@ export interface ILoginResponse {
     fullname: string;
     apellido: string;
     rolesUsuario: Array<{ id: number; roleName: string }>; // Array de roles del usuario
+    rolesPermisos?: Array<{
+      modulo: string;
+      ver?: boolean;
+      agregar?: boolean;
+      editar?: boolean;
+      eliminar?: boolean;
+    }>;
     user_email: string;
     //division: string;
     //cargo: string;

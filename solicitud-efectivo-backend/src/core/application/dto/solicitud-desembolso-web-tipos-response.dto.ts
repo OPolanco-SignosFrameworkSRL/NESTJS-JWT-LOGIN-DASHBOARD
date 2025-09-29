@@ -13,15 +13,21 @@ export class SolicitudDesembolsoWebTiposResponseDto {
   })
   tipo_desc: string;
 
-  @ApiProperty({
+  /* @ApiProperty({
     description: 'Icono del tipo de solicitud desembolso web',
     example: 'cash-icon',
   })
   tipo_icon: string;
-
+ */
   @ApiProperty({
     description: 'Flag de producción',
+    example: true,
+  })
+  produccion_flag: boolean;
+
+  @ApiProperty({
+    description: 'Estado del registro (1=Activo, 2=Inactivo, etc.)',
     example: 1,
   })
-  produccion_flag: number;
+  estado: number;
 }

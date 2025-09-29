@@ -39,7 +39,7 @@ export interface ICashRequestResponse {
   estatus_desc?: string;
   estatus_icon?: string;
   solicitud_tipo_desc?: string;
-  produccion: number;
+  produccion: boolean;
   tipo_pago_desc?: string;
   verificadopor_nombre?: string;
 }

@@ -128,7 +128,7 @@ export class SolicitudEfectivoService {
     }
     // Rechazar si produccion_flag = 1 (true)
     const produccionFlag = (tipoSolicitud as any).produccionFlag;
-    if (produccionFlag === true || Number(produccionFlag) === 1) {
+    if (produccionFlag === true || Boolean(produccionFlag) === true) {
       throw new BadRequestException('Tipo de solicitud inválido');
     }
 

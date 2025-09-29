@@ -16,6 +16,7 @@ import { UsuarioRolEntity } from '../../infrastructure/database/entities/usuario
 
 // Casos de uso y servicios
 import { ApplicationModule } from '../../core/application/application.module';
+import { ModulosPermisosModule } from './modulos-permisos.module';
 
 /**
  * Módulo de Autenticación
@@ -25,6 +26,7 @@ import { ApplicationModule } from '../../core/application/application.module';
   imports: [
     // Módulo de aplicación (casos de uso)
     ApplicationModule,
+    ModulosPermisosModule,
     
     // Módulos de NestJS
     PassportModule,

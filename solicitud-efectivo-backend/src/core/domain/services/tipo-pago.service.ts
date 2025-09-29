@@ -13,8 +13,12 @@ export class TipoPagoService {
   ) {}
 
   async findAll(pagination?: PaginationDto & TipoPagoFiltersDto): Promise<TipoPagoResponseDto[] | PaginatedResponseDto<TipoPagoResponseDto>> {
+    const statusIdRaw = (pagination as any)?.statusId;
+    const statusId = statusIdRaw !== undefined ? parseInt(String(statusIdRaw), 10) : undefined;
+    const search = (pagination as any)?.search as string | undefined;
+
     if (!pagination || (!pagination.page && !pagination.limit)) {
-      const tiposPago = await this.tipoPagoRepository.findAll();
+      const tiposPago = await this.tipoPagoRepository.findAll(statusId, search);
       return tiposPago.map(tipoPago => this.mapToResponseDto(tipoPago));
     }
 
@@ -26,9 +30,7 @@ export class TipoPagoService {
     if (!Number.isFinite(limit) || limit < 1) limit = 10;
     const skip = (page - 1) * limit;
 
-    const statusIdRaw = (pagination as any).statusId;
-    const statusId = statusIdRaw !== undefined ? parseInt(String(statusIdRaw), 10) : undefined;
-    const search = (pagination as any).search as string | undefined;
+    // statusId y search ya calculados arriba
 
     const [rows, total] = await this.tipoPagoRepository.findAllPaginated(skip, limit, statusId, search);
     const data = rows.map(r => this.mapToResponseDto(r));

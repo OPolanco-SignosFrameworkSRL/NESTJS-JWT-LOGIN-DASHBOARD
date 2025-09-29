@@ -11,11 +11,11 @@ export class SolicitudTipoEntity {
   @Column({ name: 'tipo_desc', type: 'varchar', length: 255 })
   tipoDesc: string;
 
-  @ApiProperty({ description: 'Icono del tipo', example: '/AppExt/icons/grid.png' })
+  /* @ApiProperty({ description: 'Icono del tipo', example: '/AppExt/icons/grid.png' })
   @Column({ name: 'tipo_icon', type: 'varchar', length: 255 })
-  tipoIcon: string;
+  tipoIcon: string; */
 
-  @ApiProperty({ description: 'Flag de producción', example: 1 })
+  @ApiProperty({ description: 'Flag de producción', example: true })
   @Column({ name: 'produccion_flag', type: 'bit' })
   produccionFlag: boolean;
 }

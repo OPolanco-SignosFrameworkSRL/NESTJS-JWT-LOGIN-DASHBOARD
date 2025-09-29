@@ -8,7 +8,10 @@ export class TipoSolicitudFiltersDto {
   @IsString()
   search?: string;
 
-  // Filtro statusId removido (no existe columna 'estado' en BD)
+  @ApiPropertyOptional({ description: 'Estado: 1=Activo, 2=Inactivo', enum: [1, 2], default: 1})
+  @IsOptional()
+  @IsIn([1, 2])
+  statusId?: number;
 
   @ApiPropertyOptional({ example: 1, minimum: 1, default: 1 })
   @IsOptional()

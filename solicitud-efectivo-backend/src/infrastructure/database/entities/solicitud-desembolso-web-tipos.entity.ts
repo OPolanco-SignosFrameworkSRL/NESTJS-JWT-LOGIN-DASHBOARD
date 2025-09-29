@@ -17,19 +17,24 @@ export class SolicitudDesembolsoWebTiposEntity {
   @Column({ type: 'varchar', length: 255 })
   tipo_desc: string;
 
-  @ApiProperty({
+  /* @ApiProperty({
     description: 'Icono del tipo de solicitud desembolso web',
     example: 'cash-icon',
   })
   @Column({ type: 'varchar', length: 500 })
   tipo_icon: string;
-
+ */
   @ApiProperty({
     description: 'Flag de producción',
+    example: true,
+  })
+  @Column({ type: 'int' })
+  produccion_flag: boolean;
+
+  @ApiProperty({
+    description: 'Estado del registro (1=Activo, 2=Inactivo, etc.)',
     example: 1,
   })
   @Column({ type: 'int' })
-  produccion_flag: number;
-
-  // Campo 'estado' eliminado para compatibilidad con BD actual (sin columna)
+  estado: number;
 }

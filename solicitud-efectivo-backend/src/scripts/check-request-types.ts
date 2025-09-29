@@ -22,14 +22,14 @@ async function checkRequestTypes() {
     });
     
     // Verificar cuáles tienen produccion_flag = 0
-    const nonProductionTypes = requestTypes.filter(type => type.produccion_flag === 0);
+    const nonProductionTypes = requestTypes.filter(type => type.produccion_flag === false);
     console.log('\n✅ Tipos que aparecerán en la vista (produccion = 0):');
     nonProductionTypes.forEach(type => {
       console.log(`  - ID ${type.id}: ${type.tipo_desc}`);
     });
     
     // Verificar cuáles tienen produccion_flag = 1
-    const productionTypes = requestTypes.filter(type => type.produccion_flag === 1);
+    const productionTypes = requestTypes.filter(type => type.produccion_flag === true);
     console.log('\n❌ Tipos que NO aparecerán en la vista (produccion = 1):');
     productionTypes.forEach(type => {
       console.log(`  - ID ${type.id}: ${type.tipo_desc}`);

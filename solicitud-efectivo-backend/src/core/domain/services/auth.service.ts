@@ -14,6 +14,7 @@ import {
 } from '../user.interface';
 import { CryptoService } from '../../../infrastructure/services/crypto.service';
 import { ConfigService } from '@nestjs/config';
+import { ModulosPermisosService } from './modulos-permisos.service';
 
 @Injectable()
 export class AuthService {
@@ -31,6 +32,7 @@ export class AuthService {
     @InjectRepository(UsuarioRolEntity)
     private readonly usuarioRolRepository: Repository<UsuarioRolEntity>,
     private readonly dataSource: DataSource,
+    private readonly modulosPermisosService: ModulosPermisosService,
   ) {}
 
   /**
@@ -252,12 +254,43 @@ export class AuthService {
       roleName: ur.roleEntity.roleName
     }));
 
+    // Construir permisos por USUARIO: unir permisos de todos sus roles y combinar por módulo
+    let rolesPermisos: Array<{ modulo: string; ver?: boolean; agregar?: boolean; editar?: boolean; eliminar?: boolean }> = [];
+    try {
+      if (rolesUsuario.length > 0) {
+        const permisosAcumulados: Record<string, { modulo: string; ver?: boolean; agregar?: boolean; editar?: boolean; eliminar?: boolean }> = {};
+        for (const r of rolesUsuario) {
+          const permisosPorRol = await this.modulosPermisosService.getPermisosByRol(r.id);
+          for (const p of permisosPorRol) {
+            const moduloKey = String(p.modulo);
+            if (!permisosAcumulados[moduloKey]) {
+              permisosAcumulados[moduloKey] = {
+                modulo: moduloKey,
+                ver: Boolean(p.ver),
+                agregar: Boolean(p.agregar),
+                editar: Boolean(p.editar),
+                eliminar: Boolean(p.eliminar),
+              };
+            } else {
+              // OR lógico de flags entre roles del mismo usuario
+              permisosAcumulados[moduloKey].ver = Boolean(permisosAcumulados[moduloKey].ver || p.ver);
+              permisosAcumulados[moduloKey].agregar = Boolean(permisosAcumulados[moduloKey].agregar || p.agregar);
+              permisosAcumulados[moduloKey].editar = Boolean(permisosAcumulados[moduloKey].editar || p.editar);
+              permisosAcumulados[moduloKey].eliminar = Boolean(permisosAcumulados[moduloKey].eliminar || p.eliminar);
+            }
+          }
+        }
+        rolesPermisos = Object.values(permisosAcumulados).filter(p => p.ver || p.agregar || p.editar || p.eliminar);
+      }
+    } catch {}
+
     const payload: IUserPayload = {
       id: user.id,
       cedula: user.cedula,
       sub: user.id,
       fullname: user.fullname,
       rolesUsuario: rolesUsuario,
+      rolesPermisos,
       email: user.user_email,
       valido: Boolean(user.valido),
     };
@@ -275,6 +308,7 @@ export class AuthService {
         fullname: user.fullname,
         apellido: user.apellido,
         rolesUsuario: rolesUsuario,
+        rolesPermisos,
         user_email: user.user_email,
         valido: Boolean(user.valido),
       },

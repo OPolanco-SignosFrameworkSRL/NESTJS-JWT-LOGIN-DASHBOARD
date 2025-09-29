@@ -11,10 +11,15 @@ export class TipoPagoRepository implements ITipoPagoRepository {
     private readonly tipoPagoRepository: Repository<TipoPagoEntity>,
   ) {}
 
-  async findAll(): Promise<any[]> {
-    return await this.tipoPagoRepository.find({
-      order: { tipo_desc: 'ASC' }
-    });
+  async findAll(statusId?: number, search?: string): Promise<any[]> {
+    const qb = this.tipoPagoRepository.createQueryBuilder('tp');
+    if (statusId === 1) qb.andWhere('tp.estado = :estado', { estado: 1 });
+    if (statusId === 2) qb.andWhere('tp.estado = :estado', { estado: 2 });
+    if (search && search.trim() !== '') {
+      qb.andWhere('LOWER(tp.tipo_desc) LIKE LOWER(:q)', { q: `%${search.trim()}%` });
+    }
+    qb.orderBy('tp.tipo_desc', 'ASC');
+    return await qb.getMany();
   }
 
   async findAllPaginated(skip: number, take: number, statusId?: number, search?: string): Promise<[any[], number]> {

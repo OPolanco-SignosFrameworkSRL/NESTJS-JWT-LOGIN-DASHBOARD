@@ -22,7 +22,7 @@ export class SolicitudDesembolsoWebTiposController {
   @Roles(1) // Admin
   @ApiOperation({ summary: 'Obtener tipos de solicitud con filtros y paginación' })
   @ApiQuery({ name: 'search', required: false, type: String, description: 'Buscar por descripción' })
-  // Filtro statusId removido: no hay columna 'estado' en BD actual
+  @ApiQuery({ name: 'statusId', required: false, type: Number, description: 'Estado: 1=Activo, 2=Inactivo' })
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiResponse({ status: 200, description: 'Lista de tipos de solicitud', type: [SolicitudDesembolsoWebTiposResponseDto] })
